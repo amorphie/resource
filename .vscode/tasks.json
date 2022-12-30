@@ -1,0 +1,36 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build-amorphie-resource",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/amorphie.resource/amorphie.resource.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "appId": "amorphie-resource",
+            "appPort": 4401,
+            "httpPort": 44010,
+            "grpcPort": 44011,
+            "label": "dapr-debug-amorphie-resource",
+            "type": "daprd",
+            "dependsOn": "build-amorphie-resource",
+            "componentsPath": "dapr/components",
+            "config": "dapr/config.yaml",
+            "metricsPort": 44012
+         
+        },
+        {
+            "appId": "amorphie-resource",
+            "label": "daprd-down-amorphie-resource",
+            "type": "daprd-down"
+        }
+       
+    ]
+}
