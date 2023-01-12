@@ -25,9 +25,22 @@ public class ResourceDBContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Resource>()
-            .HasKey(r => r.Name);
-       
-        modelBuilder.Entity<Resource>().HasData(new { Name = "account-list-get", DisplayName="Get Account List", Url = "http://localhost:44000/cb.accounts" });
-}
+            .HasKey(r => r.Id);
+
+        modelBuilder.Entity<Resource>().HasData(
+            new
+            {
+                Id = "aa",
+                Name = "account-list-get",
+                DisplayName = "Get Account List",
+                Url = "http://localhost:44000/cb.accounts",
+                Description = "Get Account List Resource",
+                Enabled = 1,
+                CreatedDate = DateTime.Now,
+                UpdatedDate = (DateTime?)null,
+                CreatedUser = "User1",
+                UpdatedUser = (string?)null
+            });
+    }
 
 }

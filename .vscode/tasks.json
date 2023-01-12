@@ -2,6 +2,59 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "(EF) Install Entity Framework Cli",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "tool",
+                "install",
+                "dotnet-ef",
+                "-g"
+            ]
+        },
+        {
+            "label": "(EF) Updata Entity Framework Cli",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "tool",
+                "update",
+                "dotnet-ef",
+                "-g"
+            ]
+        },
+        {
+            "label": "(EF) Apply Project Database Migrations",
+            "dependsOn": "update-ef",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "ef",
+                "database",
+                "update",
+                "--project",
+                "${workspaceFolder}/amorphie.resource.data/amorphie.resource.data.csproj"
+            ],
+            "runOptions": {
+                "runOn": "folderOpen"
+            }
+        },
+        {
+            "label": "Setup Enviroment",
+            "type": "shell",
+            "command": "docker-compose up -d"
+        },
+        {
+            "label": "(Mock) Start Mock Services from Docker",
+            "type": "shell",
+            "command": "docker run --restart=always --name amorphie-resource-mocks -d -v ${workspaceFolder}/mocks.json:/data  -p 3000:3000 mockoon/cli:latest -d data -p 3000"
+        },
+        {
+            "label": "(Mock) Remove Mock Services from Docker",
+            "type": "shell",
+            "command": "docker rm -f amorphie-resource-mocks"
+        },
+        {
             "label": "build-amorphie-resource",
             "command": "dotnet",
             "type": "process",
@@ -11,7 +64,11 @@
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
-            "problemMatcher": "$msCompile"
+            "problemMatcher": "$msCompile",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         },
         {
             "appId": "amorphie-resource",
@@ -24,13 +81,11 @@
             "componentsPath": "dapr/components",
             "config": "dapr/config.yaml",
             "metricsPort": 44012
-         
         },
         {
             "appId": "amorphie-resource",
             "label": "daprd-down-amorphie-resource",
             "type": "daprd-down"
         }
-       
     ]
 }
