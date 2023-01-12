@@ -14,7 +14,7 @@ namespace amorphie.resource.data.Migrations
                 name: "Resources",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "text", nullable: false),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
                     DisplayName = table.Column<string>(type: "text", nullable: true),
                     Url = table.Column<string>(type: "text", nullable: true),
@@ -33,7 +33,7 @@ namespace amorphie.resource.data.Migrations
             migrationBuilder.InsertData(
                 table: "Resources",
                 columns: new[] {"Id", "Name", "DisplayName", "Url", "Description", "Enabled", "CreatedDate", "UpdatedDate", "CreatedUser","UpdatedUser" },
-                values: new object[] {"aa", "account-list-get", "Get Account List", "http://localhost:44000/cb.accounts", "Get Account List Resource", 1, DateTime.Now, (DateTime?)null, "User1", (string)null });
+                values: new object[] {Guid.NewGuid(), "account-list-get", "Get Account List", "http://localhost:44000/cb.accounts", "Get Account List Resource", 1, DateTime.Now, (DateTime?)null, "User1", (string)null });
         }
 
         /// <inheritdoc />

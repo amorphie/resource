@@ -30,7 +30,7 @@ public class ResourceDBContext : DbContext
         modelBuilder.Entity<Resource>().HasData(
             new
             {
-                Id = "aa",
+                Id = Guid.NewGuid(),
                 Name = "account-list-get",
                 DisplayName = "Get Account List",
                 Url = "http://localhost:44000/cb.accounts",

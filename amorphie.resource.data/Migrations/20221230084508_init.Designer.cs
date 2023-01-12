@@ -25,8 +25,9 @@ namespace amorphie.resource.data.Migrations
 
             modelBuilder.Entity("Resource", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("text");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Name")
                         .HasColumnType("text");
@@ -62,7 +63,7 @@ namespace amorphie.resource.data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "aa",
+                            Id = Guid.NewGuid(),
                             Name = "account-list-get",
                             DisplayName = "Get Account List",
                             Url = "http://localhost:44000/cb.accounts",
