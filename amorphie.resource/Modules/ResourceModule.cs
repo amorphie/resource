@@ -61,7 +61,7 @@ public static class ResourceModule
             (
                 new Resource
                 {
-                    Id = "aa",
+                    Id = Guid.NewGuid(),
                     Name = data.name,
                     DisplayName = data.displayName,
                     Url = data.url,
