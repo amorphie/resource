@@ -1,10 +1,7 @@
-public record GetResourceResponse
+public record GetRoleResponse
     (
-        Guid id, 
+        Guid id,
         string name,
-        string displayName,
-        string url,
-        string description,
         DateTime? createdDate,
         DateTime? updatedDate,
         int enabled,
@@ -12,12 +9,9 @@ public record GetResourceResponse
         string updatedUser
      );
 
-public record SaveResourceRequest
+public record SaveRoleRequest
     (
         string name,
-        string displayName,
-        string url,
-        string description,
         DateTime? createdDate,
         DateTime? updatedDate,
         int enabled,
