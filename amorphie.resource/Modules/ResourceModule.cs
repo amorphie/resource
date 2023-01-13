@@ -64,6 +64,7 @@ public static class ResourceModule
                     Id = Guid.NewGuid(),
                     Name = data.name,
                     DisplayName = data.displayName,
+                    Type = data.type,
                     Url = data.url,
                     Description = data.description,
                     Enabled = 1,
@@ -82,6 +83,7 @@ public static class ResourceModule
 
             // Apply update to only changed fields.
 
+            ModuleHelper.PreUpdate(data.type, existingRecord.Type, ref hasChanges);
             ModuleHelper.PreUpdate(data.url, existingRecord.Url, ref hasChanges);
             ModuleHelper.PreUpdate(data.displayName, existingRecord.DisplayName, ref hasChanges);
             ModuleHelper.PreUpdate(data.description, existingRecord.Description, ref hasChanges);
@@ -122,14 +124,14 @@ public static class ResourceModule
       [FromServices] ResourceDBContext context
       )
     {
-        var resource = context!.Resources!
+        var resources = context!.Resources!
             .Where(t => t.Name!.Contains(resourceName));
 
-        if (resource.ToList().Count == 0)
+        if (resources.ToList().Count == 0)
             return Results.NotFound();
 
         return Results.Ok(
-            resource.ToArray()
+            resources.ToArray()
         );
     }
 
