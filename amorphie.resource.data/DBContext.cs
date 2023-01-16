@@ -21,6 +21,8 @@ public class ResourceDBContext : DbContext
 {
     public DbSet<Resource>? Resources { get; set; }
     public DbSet<Role>? Roles { get; set; }
+    public DbSet<RoleGroup>? RoleGroups { get; set; }
+    public DbSet<RoleGroupRole>? RoleGroupRoles { get; set; }
     public ResourceDBContext(DbContextOptions options) : base(options) { AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true); }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -28,8 +30,17 @@ public class ResourceDBContext : DbContext
         modelBuilder.Entity<Resource>()
             .HasKey(r => r.Id);
 
-         modelBuilder.Entity<Role>()
-            .HasKey(r => r.Id);    
+        modelBuilder.Entity<Role>()
+           .HasKey(r => r.Id);
+
+        modelBuilder.Entity<RoleGroup>()
+            .HasKey(r => r.Id);
+
+        modelBuilder.Entity<RoleGroupRole>()
+       .HasKey(r => r.Id);
+
+        var RoleId = Guid.NewGuid();
+        var RoleGroupId = Guid.NewGuid();
 
         modelBuilder.Entity<Resource>().HasData(
             new
@@ -47,17 +58,39 @@ public class ResourceDBContext : DbContext
                 UpdatedUser = (string?)null
             });
 
-            modelBuilder.Entity<Role>().HasData(
-            new
-            {
-                Id = Guid.NewGuid(),
-                Name = "Admin",
-                Enabled = 1,
-                CreatedDate = DateTime.Now,
-                UpdatedDate = (DateTime?)null,
-                CreatedUser = "User1",
-                UpdatedUser = (string?)null
-            });
+        modelBuilder.Entity<Role>().HasData(
+        new
+        {
+            Id = RoleId,
+            Name = "Admin",
+            Enabled = 1,
+            CreatedDate = DateTime.Now,
+            UpdatedDate = (DateTime?)null,
+            CreatedUser = "User1",
+            UpdatedUser = (string?)null
+        });
+
+        modelBuilder.Entity<RoleGroup>().HasData(
+        new
+        {
+            Id = RoleGroupId,
+            Name = "Bireysel",
+            Enabled = 1,
+            CreatedDate = DateTime.Now,
+            UpdatedDate = (DateTime?)null,
+            CreatedUser = "User1",
+            UpdatedUser = (string?)null
+        });
+
+        modelBuilder.Entity<RoleGroupRole>().HasData(
+        new
+        {
+            Id = Guid.NewGuid(),
+            RoleId = RoleId,
+            RoleGroupId = RoleGroupId,
+            CreatedDate = DateTime.Now,
+            CreatedUser = "User1"
+        });
     }
 
 }

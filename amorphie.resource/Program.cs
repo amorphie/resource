@@ -24,6 +24,8 @@ app.UseSwaggerUI();
 
 app.MapResourceEndpoints();
 app.MapRoleEndpoints();
+app.MapRoleGroupEndpoints();
+app.MapRoleGroupRoleEndpoints();
 
 try
 {
