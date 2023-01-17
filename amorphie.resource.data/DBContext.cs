@@ -23,6 +23,8 @@ public class ResourceDBContext : DbContext
     public DbSet<Role>? Roles { get; set; }
     public DbSet<RoleGroup>? RoleGroups { get; set; }
     public DbSet<RoleGroupRole>? RoleGroupRoles { get; set; }
+    public DbSet<ResourceRole>? ResourceRoles { get; set; }
+    public DbSet<Privilege>? Privileges { get; set; }
     public ResourceDBContext(DbContextOptions options) : base(options) { AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true); }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -39,13 +41,20 @@ public class ResourceDBContext : DbContext
         modelBuilder.Entity<RoleGroupRole>()
        .HasKey(r => r.Id);
 
+        modelBuilder.Entity<ResourceRole>()
+       .HasKey(r => r.Id);
+
+        modelBuilder.Entity<Privilege>()
+        .HasKey(r => r.Id);
+
+        var ResourceId = Guid.NewGuid();
         var RoleId = Guid.NewGuid();
         var RoleGroupId = Guid.NewGuid();
 
         modelBuilder.Entity<Resource>().HasData(
             new
             {
-                Id = Guid.NewGuid(),
+                Id = ResourceId,
                 Name = "account-list-get",
                 DisplayName = "Get Account List",
                 Type = "Get",
@@ -86,10 +95,32 @@ public class ResourceDBContext : DbContext
         new
         {
             Id = Guid.NewGuid(),
-            RoleId = RoleId,
             RoleGroupId = RoleGroupId,
+            RoleId = RoleId,
             CreatedDate = DateTime.Now,
             CreatedUser = "User1"
+        });
+
+        modelBuilder.Entity<ResourceRole>().HasData(
+        new
+        {
+            Id = Guid.NewGuid(),
+            ResourceId = ResourceId,
+            RoleId = RoleId,
+            CreatedDate = DateTime.Now,
+            CreatedUser = "User1"
+        });
+
+        modelBuilder.Entity<Privilege>().HasData(
+        new
+        {
+            Id = RoleId,
+            Name = "Admin",
+            Enabled = 1,
+            CreatedDate = DateTime.Now,
+            UpdatedDate = (DateTime?)null,
+            CreatedUser = "User1",
+            UpdatedUser = (string?)null
         });
     }
 
