@@ -1,64 +1,64 @@
 using Microsoft.AspNetCore.Mvc;
-public static class RoleModule
+public static class PrivilegeModule
 {
-    public static void MapRoleEndpoints(this WebApplication app)
+    public static void MapPrivilegeEndpoints(this WebApplication app)
     {
-        //searchRole
-        app.MapGet("/role", searchRole)
+        //searchPrivilege
+        app.MapGet("/privilege", searchPrivilege)
             .WithOpenApi(operation =>
                 {
-                    operation.Summary = "Returns queried roles.";
-                    operation.Parameters[0].Description = "Full or partial name of role name to be queried.";
+                    operation.Summary = "Returns queried privileges.";
+                    operation.Parameters[0].Description = "Full or partial name of privilege name to be queried.";
                     return operation;
                 })
-            .Produces<GetRoleResponse[]>(StatusCodes.Status200OK)
+            .Produces<GetPrivilegeResponse[]>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status204NoContent);
 
-        //getRole
-        app.MapGet("/role/{roleName}", getRole)
+        //getPrivilege
+        app.MapGet("/privilege/{privilegeName}", getPrivilege)
             .WithOpenApi(operation =>
             {
-                operation.Summary = "Returns requested role.";
-                operation.Parameters[0].Description = "Name of the requested role.";
+                operation.Summary = "Returns requested privilege.";
+                operation.Parameters[0].Description = "Name of the requested privilege.";
                 return operation;
             })
-            .Produces<GetRoleResponse>(StatusCodes.Status200OK)
+            .Produces<GetPrivilegeResponse>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound);
 
-        //saveRole
-        app.MapPost("/role", saveRole)
-       .WithTopic("pubsub", "SaveRole")
+        //savePrivilege
+        app.MapPost("/privilege", savePrivilege)
+       .WithTopic("pubsub", "SavePrivilege")
                 .WithOpenApi(operation =>
                 {
-                    operation.Summary = "Saves or updates requested role.";
+                    operation.Summary = "Saves or updates requested privilege.";
                     return operation;
                 })
-                .Produces<GetRoleResponse>(StatusCodes.Status200OK)
+                .Produces<GetPrivilegeResponse>(StatusCodes.Status200OK)
                 .Produces(StatusCodes.Status201Created);
 
-        //deleteRole
-        app.MapDelete("/role/{roleName}", deleteRole)
+        //deletePrivilege
+        app.MapDelete("/privilege/{privilegeName}", deletePrivilege)
                 .WithOpenApi(operation =>
                 {
-                    operation.Summary = "Deletes existing role.";
+                    operation.Summary = "Deletes existing privilege.";
                     return operation;
                 })
                 .Produces(StatusCodes.Status404NotFound)
                 .Produces(StatusCodes.Status204NoContent);
     }
 
-    static IResult saveRole(
-        [FromBody] SaveRoleRequest data,
+    static IResult savePrivilege(
+        [FromBody] SavePrivilegeRequest data,
         [FromServices] ResourceDBContext context
         )
     {
-        var existingRecord = context?.Roles?.FirstOrDefault(t => t.Name == data.name);
+        var existingRecord = context?.Privileges?.FirstOrDefault(t => t.Name == data.name);
 
         if (existingRecord == null)
         {
-            context!.Roles!.Add
+            context!.Privileges!.Add
             (
-                new Role
+                new Privilege
                 {
                     Id = Guid.NewGuid(),
                     Name = data.name,
@@ -70,7 +70,7 @@ public static class RoleModule
                 }
             );
             context.SaveChanges();
-            return Results.Created($"/role/{data.name}", data);
+            return Results.Created($"/privilege/{data.name}", data);
         }
         else
         {
@@ -93,11 +93,11 @@ public static class RoleModule
         }
     }
 
-    static IResult deleteRole(
-     [FromRoute(Name = "roleName")] string roleName,
+    static IResult deletePrivilege(
+     [FromRoute(Name = "privilegeName")] string privilegeName,
      [FromServices] ResourceDBContext context)
     {
-        var existingRecord = context?.Roles?.FirstOrDefault(t => t.Name == roleName);
+        var existingRecord = context?.Privileges?.FirstOrDefault(t => t.Name == privilegeName);
 
         if (existingRecord == null)
         {
@@ -111,35 +111,34 @@ public static class RoleModule
         }
     }
 
-
-    static IResult searchRole(
-    [FromQuery(Name = "roleName")] string roleName,
+    static IResult searchPrivilege(
+    [FromQuery(Name = "privilegeName")] string privilegeName,
     [FromServices] ResourceDBContext context
     )
     {
-        var roles = context!.Roles!
-            .Where(t => t.Name!.Contains(roleName));
+        var privileges = context!.Privileges!
+            .Where(t => t.Name!.Contains(privilegeName));
 
-        if (roles.ToList().Count == 0)
+        if (privileges.ToList().Count == 0)
             return Results.NotFound();
 
         return Results.Ok(
-            roles.ToArray()
+            privileges.ToArray()
         );
     }
 
-    static IResult getRole(
-    [FromRoute(Name = "roleName")] string roleName,
+    static IResult getPrivilege(
+    [FromRoute(Name = "privilegeName")] string privilegeName,
     [FromServices] ResourceDBContext context
     )
     {
-        var role = context!.Roles!
-            .FirstOrDefault(t => t.Name == roleName);
+        var privilege = context!.Privileges!
+            .FirstOrDefault(t => t.Name == privilegeName);
 
-        if (role == null)
+        if (privilege == null)
             return Results.NotFound();
 
-        return Results.Ok(role);
+        return Results.Ok(privilege);
     }
 
 }

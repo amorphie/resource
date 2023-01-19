@@ -6,11 +6,28 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace amorphie.resource.data.Migrations
 {
     /// <inheritdoc />
-    public partial class v4 : Migration
+    public partial class v6 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "Privileges",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: true),
+                    Enabled = table.Column<int>(type: "integer", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    UpdatedDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    CreatedUser = table.Column<string>(type: "text", nullable: true),
+                    UpdatedUser = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Privileges", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Resources",
                 columns: table => new
@@ -67,6 +84,33 @@ namespace amorphie.resource.data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ResourceRoles",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    ResourceId = table.Column<Guid>(type: "uuid", nullable: false),
+                    RoleId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    CreatedUser = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ResourceRoles", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ResourceRoles_Resources_ResourceId",
+                        column: x => x.ResourceId,
+                        principalTable: "Resources",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ResourceRoles_Roles_RoleId",
+                        column: x => x.RoleId,
+                        principalTable: "Roles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "RoleGroupRoles",
                 columns: table => new
                 {
@@ -94,24 +138,44 @@ namespace amorphie.resource.data.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "Privileges",
+                columns: new[] { "Id", "CreatedDate", "CreatedUser", "Enabled", "Name", "UpdatedDate", "UpdatedUser" },
+                values: new object[] { new Guid("80ae9a58-ede7-4087-9af4-51718cc46378"), new DateTime(2023, 1, 17, 14, 38, 3, 502, DateTimeKind.Local).AddTicks(376), "User1", 1, "Admin", null, null });
+
+            migrationBuilder.InsertData(
                 table: "Resources",
                 columns: new[] { "Id", "CreatedDate", "CreatedUser", "Description", "DisplayName", "Enabled", "Name", "Type", "UpdatedDate", "UpdatedUser", "Url" },
-                values: new object[] { new Guid("3ba9b5db-5164-4540-96e2-dcd5be938b66"), new DateTime(2023, 1, 13, 22, 56, 42, 171, DateTimeKind.Local).AddTicks(9225), "User1", "Get Account List Resource", "Get Account List", 1, "account-list-get", "Get", null, null, "http://localhost:44000/cb.accounts" });
+                values: new object[] { new Guid("c9976603-f118-4bc0-bdc9-e7999ee1e1bd"), new DateTime(2023, 1, 17, 14, 38, 3, 502, DateTimeKind.Local).AddTicks(298), "User1", "Get Account List Resource", "Get Account List", 1, "account-list-get", "Get", null, null, "http://localhost:44000/cb.accounts" });
 
             migrationBuilder.InsertData(
                 table: "RoleGroups",
                 columns: new[] { "Id", "CreatedDate", "CreatedUser", "Enabled", "Name", "UpdatedDate", "UpdatedUser" },
-                values: new object[] { new Guid("db110c95-0ff1-4250-b227-800e6b5c1797"), new DateTime(2023, 1, 13, 22, 56, 42, 171, DateTimeKind.Local).AddTicks(9284), "User1", 1, "Bireysel", null, null });
+                values: new object[] { new Guid("52506503-d73a-4d0a-b091-12ec6e7fa3c4"), new DateTime(2023, 1, 17, 14, 38, 3, 502, DateTimeKind.Local).AddTicks(345), "User1", 1, "Bireysel", null, null });
 
             migrationBuilder.InsertData(
                 table: "Roles",
                 columns: new[] { "Id", "CreatedDate", "CreatedUser", "Enabled", "Name", "UpdatedDate", "UpdatedUser" },
-                values: new object[] { new Guid("8c9f6943-0899-405f-b9b5-59da5ffba330"), new DateTime(2023, 1, 13, 22, 56, 42, 171, DateTimeKind.Local).AddTicks(9254), "User1", 1, "Admin", null, null });
+                values: new object[] { new Guid("80ae9a58-ede7-4087-9af4-51718cc46378"), new DateTime(2023, 1, 17, 14, 38, 3, 502, DateTimeKind.Local).AddTicks(336), "User1", 1, "Admin", null, null });
+
+            migrationBuilder.InsertData(
+                table: "ResourceRoles",
+                columns: new[] { "Id", "CreatedDate", "CreatedUser", "ResourceId", "RoleId" },
+                values: new object[] { new Guid("2b3f5958-8d17-4df3-b282-73fab2abc72e"), new DateTime(2023, 1, 17, 14, 38, 3, 502, DateTimeKind.Local).AddTicks(366), "User1", new Guid("c9976603-f118-4bc0-bdc9-e7999ee1e1bd"), new Guid("80ae9a58-ede7-4087-9af4-51718cc46378") });
 
             migrationBuilder.InsertData(
                 table: "RoleGroupRoles",
                 columns: new[] { "Id", "CreatedDate", "CreatedUser", "RoleGroupId", "RoleId" },
-                values: new object[] { new Guid("52f515bb-1988-4749-aa31-c84934cfa419"), new DateTime(2023, 1, 13, 22, 56, 42, 171, DateTimeKind.Local).AddTicks(9293), "User1", new Guid("db110c95-0ff1-4250-b227-800e6b5c1797"), new Guid("8c9f6943-0899-405f-b9b5-59da5ffba330") });
+                values: new object[] { new Guid("416aa449-8098-4ea3-a10d-12a5898ea9a2"), new DateTime(2023, 1, 17, 14, 38, 3, 502, DateTimeKind.Local).AddTicks(355), "User1", new Guid("52506503-d73a-4d0a-b091-12ec6e7fa3c4"), new Guid("80ae9a58-ede7-4087-9af4-51718cc46378") });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ResourceRoles_ResourceId",
+                table: "ResourceRoles",
+                column: "ResourceId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ResourceRoles_RoleId",
+                table: "ResourceRoles",
+                column: "RoleId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_RoleGroupRoles_RoleGroupId",
@@ -128,10 +192,16 @@ namespace amorphie.resource.data.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Resources");
+                name: "Privileges");
+
+            migrationBuilder.DropTable(
+                name: "ResourceRoles");
 
             migrationBuilder.DropTable(
                 name: "RoleGroupRoles");
+
+            migrationBuilder.DropTable(
+                name: "Resources");
 
             migrationBuilder.DropTable(
                 name: "RoleGroups");

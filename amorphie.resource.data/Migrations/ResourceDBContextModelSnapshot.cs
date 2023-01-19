@@ -21,6 +21,45 @@ namespace amorphie.resource.data.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Privilege", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("CreatedDate")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("CreatedUser")
+                        .HasColumnType("text");
+
+                    b.Property<int>("Enabled")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("UpdatedUser")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Privileges");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("80ae9a58-ede7-4087-9af4-51718cc46378"),
+                            CreatedDate = new DateTime(2023, 1, 17, 14, 38, 3, 502, DateTimeKind.Local).AddTicks(376),
+                            CreatedUser = "User1",
+                            Enabled = 1,
+                            Name = "Admin"
+                        });
+                });
+
             modelBuilder.Entity("Resource", b =>
                 {
                     b.Property<Guid>("Id")
@@ -64,8 +103,8 @@ namespace amorphie.resource.data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("3ba9b5db-5164-4540-96e2-dcd5be938b66"),
-                            CreatedDate = new DateTime(2023, 1, 13, 22, 56, 42, 171, DateTimeKind.Local).AddTicks(9225),
+                            Id = new Guid("c9976603-f118-4bc0-bdc9-e7999ee1e1bd"),
+                            CreatedDate = new DateTime(2023, 1, 17, 14, 38, 3, 502, DateTimeKind.Local).AddTicks(298),
                             CreatedUser = "User1",
                             Description = "Get Account List Resource",
                             DisplayName = "Get Account List",
@@ -73,6 +112,43 @@ namespace amorphie.resource.data.Migrations
                             Name = "account-list-get",
                             Type = "Get",
                             Url = "http://localhost:44000/cb.accounts"
+                        });
+                });
+
+            modelBuilder.Entity("ResourceRole", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("CreatedDate")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("CreatedUser")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("ResourceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ResourceId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("ResourceRoles");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("2b3f5958-8d17-4df3-b282-73fab2abc72e"),
+                            CreatedDate = new DateTime(2023, 1, 17, 14, 38, 3, 502, DateTimeKind.Local).AddTicks(366),
+                            CreatedUser = "User1",
+                            ResourceId = new Guid("c9976603-f118-4bc0-bdc9-e7999ee1e1bd"),
+                            RoleId = new Guid("80ae9a58-ede7-4087-9af4-51718cc46378")
                         });
                 });
 
@@ -107,8 +183,8 @@ namespace amorphie.resource.data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("8c9f6943-0899-405f-b9b5-59da5ffba330"),
-                            CreatedDate = new DateTime(2023, 1, 13, 22, 56, 42, 171, DateTimeKind.Local).AddTicks(9254),
+                            Id = new Guid("80ae9a58-ede7-4087-9af4-51718cc46378"),
+                            CreatedDate = new DateTime(2023, 1, 17, 14, 38, 3, 502, DateTimeKind.Local).AddTicks(336),
                             CreatedUser = "User1",
                             Enabled = 1,
                             Name = "Admin"
@@ -146,8 +222,8 @@ namespace amorphie.resource.data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("db110c95-0ff1-4250-b227-800e6b5c1797"),
-                            CreatedDate = new DateTime(2023, 1, 13, 22, 56, 42, 171, DateTimeKind.Local).AddTicks(9284),
+                            Id = new Guid("52506503-d73a-4d0a-b091-12ec6e7fa3c4"),
+                            CreatedDate = new DateTime(2023, 1, 17, 14, 38, 3, 502, DateTimeKind.Local).AddTicks(345),
                             CreatedUser = "User1",
                             Enabled = 1,
                             Name = "Bireysel"
@@ -183,12 +259,31 @@ namespace amorphie.resource.data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("52f515bb-1988-4749-aa31-c84934cfa419"),
-                            CreatedDate = new DateTime(2023, 1, 13, 22, 56, 42, 171, DateTimeKind.Local).AddTicks(9293),
+                            Id = new Guid("416aa449-8098-4ea3-a10d-12a5898ea9a2"),
+                            CreatedDate = new DateTime(2023, 1, 17, 14, 38, 3, 502, DateTimeKind.Local).AddTicks(355),
                             CreatedUser = "User1",
-                            RoleGroupId = new Guid("db110c95-0ff1-4250-b227-800e6b5c1797"),
-                            RoleId = new Guid("8c9f6943-0899-405f-b9b5-59da5ffba330")
+                            RoleGroupId = new Guid("52506503-d73a-4d0a-b091-12ec6e7fa3c4"),
+                            RoleId = new Guid("80ae9a58-ede7-4087-9af4-51718cc46378")
                         });
+                });
+
+            modelBuilder.Entity("ResourceRole", b =>
+                {
+                    b.HasOne("Resource", "Resource")
+                        .WithMany()
+                        .HasForeignKey("ResourceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Role", "Role")
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Resource");
+
+                    b.Navigation("Role");
                 });
 
             modelBuilder.Entity("RoleGroupRole", b =>

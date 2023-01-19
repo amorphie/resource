@@ -26,6 +26,7 @@ app.MapResourceEndpoints();
 app.MapRoleEndpoints();
 app.MapRoleGroupEndpoints();
 app.MapRoleGroupRoleEndpoints();
+app.MapResourceRoleEndpoints();
 
 try
 {
