@@ -25,6 +25,8 @@ public class ResourceDBContext : DbContext
     public DbSet<RoleGroupRole>? RoleGroupRoles { get; set; }
     public DbSet<ResourceRole>? ResourceRoles { get; set; }
     public DbSet<Privilege>? Privileges { get; set; }
+    public DbSet<RolePrivilege>? RolePrivileges { get; set; }
+     public DbSet<ResourceRateLimit>? ResourceRateLimits { get; set; }
     public ResourceDBContext(DbContextOptions options) : base(options) { AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true); }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -47,9 +49,16 @@ public class ResourceDBContext : DbContext
         modelBuilder.Entity<Privilege>()
         .HasKey(r => r.Id);
 
+        modelBuilder.Entity<RolePrivilege>()
+        .HasKey(r => r.Id);
+
+        modelBuilder.Entity<ResourceRateLimit>()
+        .HasKey(r => r.Id);
+
         var ResourceId = Guid.NewGuid();
         var RoleId = Guid.NewGuid();
         var RoleGroupId = Guid.NewGuid();
+        var PrivilegeId = Guid.NewGuid();
 
         modelBuilder.Entity<Resource>().HasData(
             new
@@ -114,14 +123,38 @@ public class ResourceDBContext : DbContext
         modelBuilder.Entity<Privilege>().HasData(
         new
         {
-            Id = RoleId,
-            Name = "Admin",
+            Id = PrivilegeId,
+            Name = "Write",
             Enabled = 1,
             CreatedDate = DateTime.Now,
             UpdatedDate = (DateTime?)null,
             CreatedUser = "User1",
             UpdatedUser = (string?)null
         });
-    }
 
+        modelBuilder.Entity<RolePrivilege>().HasData(
+        new
+        {
+            Id = Guid.NewGuid(),
+            RoleId = RoleId,
+            PrivilegeId = PrivilegeId,
+            CreatedDate = DateTime.Now,
+            CreatedUser = "User1"
+        });
+
+        modelBuilder.Entity<ResourceRateLimit>().HasData(
+        new
+        {
+            Id = Guid.NewGuid(),
+            ResourceId = ResourceId,
+            RoleId = RoleId,
+            Period = 60,
+            Limit = 10,
+            Enabled = 1,
+            CreatedDate = DateTime.Now,
+            CreatedUser = "User1",
+            UpdatedDate = (DateTime?)null,
+            UpdatedUser = (string?)null
+        });
+    }
 }

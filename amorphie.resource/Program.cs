@@ -27,6 +27,9 @@ app.MapRoleEndpoints();
 app.MapRoleGroupEndpoints();
 app.MapRoleGroupRoleEndpoints();
 app.MapResourceRoleEndpoints();
+app.MapPrivilegeEndpoints();
+app.MapRolePrivilegeEndpoints();
+app.MapResourceRateLimitEndpoints();
 
 try
 {
