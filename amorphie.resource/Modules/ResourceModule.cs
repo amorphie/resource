@@ -1,26 +1,16 @@
+using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
 
 public static class ResourceModule
 {
     public static void MapResourceEndpoints(this WebApplication app)
     {
-        //searchResource
-        app.MapGet("/resource", searchResource)
-            .WithOpenApi(operation =>
-                {
-                    operation.Summary = "Returns queried resources.";
-                    operation.Parameters[0].Description = "Full or partial name of resource name to be queried.";
-                    return operation;
-                })
-            .Produces<GetResourceResponse[]>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status204NoContent);
-
         //getResource
-        app.MapGet("/resource/{resourceName}", getResource)
+        app.MapGet("/resource/{resourceId}", getResource)
             .WithOpenApi(operation =>
             {
                 operation.Summary = "Returns requested resource.";
-                operation.Parameters[0].Description = "Name of the requested resource.";
+                operation.Parameters[0].Description = "Id of the requested resource.";
                 return operation;
             })
             .Produces<GetResourceResponse>(StatusCodes.Status200OK)
@@ -31,14 +21,14 @@ public static class ResourceModule
        .WithTopic("pubsub", "SaveResource")
                 .WithOpenApi(operation =>
                 {
-                    operation.Summary = "Saves or updates requested tag.";
+                    operation.Summary = "Saves or updates requested resource.";
                     return operation;
                 })
                 .Produces<GetResourceResponse>(StatusCodes.Status200OK)
                 .Produces(StatusCodes.Status201Created);
 
         //deleteResource
-        app.MapDelete("/resource/{resourceName}", deleteResource)
+        app.MapDelete("/resource/{resourceId}", deleteResource)
                 .WithOpenApi(operation =>
                 {
                     operation.Summary = "Deletes existing resource.";
@@ -53,7 +43,7 @@ public static class ResourceModule
         [FromServices] ResourceDBContext context
         )
     {
-        var existingRecord = context?.Resources?.FirstOrDefault(t => t.Name == data.name);
+        var existingRecord = context?.Resources?.FirstOrDefault(t => t.Id == data.id);
 
         if (existingRecord == null)
         {
@@ -61,21 +51,22 @@ public static class ResourceModule
             (
                 new Resource
                 {
-                    Id = Guid.NewGuid(),
-                    Name = data.name,
+                    Id = data.id,
                     DisplayName = data.displayName,
                     Type = data.type,
                     Url = data.url,
                     Description = data.description,
-                    Enabled = 1,
-                    CreatedDate = data.createdDate,
-                    UpdatedDate = data.updatedDate,
-                    CreatedUser = data.createdUser,
-                    UpdatedUser = data.updatedUser
+                    Status = data.status,
+                    CreatedAt = data.createdAt,
+                    ModifiedAt = data.modifiedAt,
+                    CreatedBy = data.createdBy,
+                    ModifiedBy = data.modifiedBy,
+                    CreatedByBehalfOf = data.createdByBehalfOf,
+                    ModifiedByBehalfOf = data.modifiedByBehalfOf
                 }
             );
             context.SaveChanges();
-            return Results.Created($"/resource/{data.name}", data);
+            return Results.Created($"/resource/{data.id}", data);
         }
         else
         {
@@ -83,11 +74,10 @@ public static class ResourceModule
 
             // Apply update to only changed fields.
 
-            ModuleHelper.PreUpdate(data.type, existingRecord.Type, ref hasChanges);
-            ModuleHelper.PreUpdate(data.url, existingRecord.Url, ref hasChanges);
             ModuleHelper.PreUpdate(data.displayName, existingRecord.DisplayName, ref hasChanges);
+            ModuleHelper.PreUpdate(data.url, existingRecord.Url, ref hasChanges);
             ModuleHelper.PreUpdate(data.description, existingRecord.Description, ref hasChanges);
-            ModuleHelper.PreUpdate(data.enabled.ToString(), existingRecord.Enabled.ToString(), ref hasChanges);
+            ModuleHelper.PreUpdate(data.status, existingRecord.Status, ref hasChanges);
 
             if (hasChanges)
             {
@@ -102,10 +92,10 @@ public static class ResourceModule
     }
 
     static IResult deleteResource(
-     [FromRoute(Name = "resourceName")] string resourceName,
+     [FromRoute(Name = "resourceId")] Guid resourceId,
      [FromServices] ResourceDBContext context)
     {
-        var existingRecord = context?.Resources?.FirstOrDefault(t => t.Name == resourceName);
+        var existingRecord = context?.Resources?.FirstOrDefault(t => t.Id == resourceId);
 
         if (existingRecord == null)
         {
@@ -119,33 +109,33 @@ public static class ResourceModule
         }
     }
 
-    static IResult searchResource(
-      [FromQuery(Name = "resourceName")] string resourceName,
-      [FromServices] ResourceDBContext context
-      )
-    {
-        var resources = context!.Resources!
-            .Where(t => t.Name!.Contains(resourceName));
-
-        if (resources.ToList().Count == 0)
-            return Results.NotFound();
-
-        return Results.Ok(
-            resources.ToArray()
-        );
-    }
-
     static IResult getResource(
-    [FromRoute(Name = "resourceName")] string resourceName,
+    [FromRoute(Name = "resourceId")] Guid resourceId,
     [FromServices] ResourceDBContext context
     )
     {
         var resource = context!.Resources!
-            .FirstOrDefault(t => t.Name == resourceName);
+            .FirstOrDefault(t => t.Id == resourceId);
 
         if (resource == null)
             return Results.NotFound();
 
+        var resourceLanguages = context!.ResourceLanguages!
+        .Where(t => t.RowId == resourceId && t.LanguageCode == "tr");
+
+        foreach (ResourceLanguage resourceLanguage in resourceLanguages)
+        {
+            Type type = resource.GetType();
+
+            PropertyInfo? prop = type.GetProperty(resourceLanguage.FieldName!);
+
+            if (prop != null)
+            {
+                prop.SetValue(resource, resourceLanguage.Text, null);
+            }
+        }
+
         return Results.Ok(resource);
     }
+
 }

@@ -3,23 +3,13 @@ public static class PrivilegeModule
 {
     public static void MapPrivilegeEndpoints(this WebApplication app)
     {
-        //searchPrivilege
-        app.MapGet("/privilege", searchPrivilege)
-            .WithOpenApi(operation =>
-                {
-                    operation.Summary = "Returns queried privileges.";
-                    operation.Parameters[0].Description = "Full or partial name of privilege name to be queried.";
-                    return operation;
-                })
-            .Produces<GetPrivilegeResponse[]>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status204NoContent);
 
         //getPrivilege
-        app.MapGet("/privilege/{privilegeName}", getPrivilege)
+        app.MapGet("/privilege/{privilegeId}", getPrivilege)
             .WithOpenApi(operation =>
             {
                 operation.Summary = "Returns requested privilege.";
-                operation.Parameters[0].Description = "Name of the requested privilege.";
+                operation.Parameters[0].Description = "Id of the requested privilege.";
                 return operation;
             })
             .Produces<GetPrivilegeResponse>(StatusCodes.Status200OK)
@@ -37,7 +27,7 @@ public static class PrivilegeModule
                 .Produces(StatusCodes.Status201Created);
 
         //deletePrivilege
-        app.MapDelete("/privilege/{privilegeName}", deletePrivilege)
+        app.MapDelete("/privilege/{privilegeId}", deletePrivilege)
                 .WithOpenApi(operation =>
                 {
                     operation.Summary = "Deletes existing privilege.";
@@ -52,7 +42,7 @@ public static class PrivilegeModule
         [FromServices] ResourceDBContext context
         )
     {
-        var existingRecord = context?.Privileges?.FirstOrDefault(t => t.Name == data.name);
+        var existingRecord = context?.Privileges?.FirstOrDefault(t => t.Id == data.id);
 
         if (existingRecord == null)
         {
@@ -60,17 +50,21 @@ public static class PrivilegeModule
             (
                 new Privilege
                 {
-                    Id = Guid.NewGuid(),
-                    Name = data.name,
-                    Enabled = 1,
-                    CreatedDate = data.createdDate,
-                    UpdatedDate = data.updatedDate,
-                    CreatedUser = data.createdUser,
-                    UpdatedUser = data.updatedUser
+                    Id = data.id,
+                    ResourceId = data.resourceId,
+                    Url = data.url,
+                    Ttl = data.ttl,
+                    Status = data.status,
+                    CreatedAt = data.createdAt,
+                    ModifiedAt = data.modifiedAt,
+                    CreatedBy = data.createdBy,
+                    ModifiedBy = data.modifiedBy,
+                    CreatedByBehalfOf = data.createdByBehalfOf,
+                    ModifiedByBehalfOf = data.modifiedByBehalfOf
                 }
             );
             context.SaveChanges();
-            return Results.Created($"/privilege/{data.name}", data);
+            return Results.Created($"/privilege/{data.id}", data);
         }
         else
         {
@@ -78,8 +72,9 @@ public static class PrivilegeModule
 
             // Apply update to only changed fields.
 
-            ModuleHelper.PreUpdate(data.name, existingRecord.Name, ref hasChanges);
-            ModuleHelper.PreUpdate(data.enabled.ToString(), existingRecord.Enabled.ToString(), ref hasChanges);
+            ModuleHelper.PreUpdate(data.url, existingRecord.Url, ref hasChanges);
+            ModuleHelper.PreUpdate(data.ttl.ToString(), existingRecord.Ttl.ToString(), ref hasChanges);
+            ModuleHelper.PreUpdate(data.status, existingRecord.Status, ref hasChanges);
 
             if (hasChanges)
             {
@@ -94,10 +89,10 @@ public static class PrivilegeModule
     }
 
     static IResult deletePrivilege(
-     [FromRoute(Name = "privilegeName")] string privilegeName,
+     [FromRoute(Name = "privilegeId")] Guid privilegeId,
      [FromServices] ResourceDBContext context)
     {
-        var existingRecord = context?.Privileges?.FirstOrDefault(t => t.Name == privilegeName);
+        var existingRecord = context?.Privileges?.FirstOrDefault(t => t.Id == privilegeId);
 
         if (existingRecord == null)
         {
@@ -111,29 +106,13 @@ public static class PrivilegeModule
         }
     }
 
-    static IResult searchPrivilege(
-    [FromQuery(Name = "privilegeName")] string privilegeName,
-    [FromServices] ResourceDBContext context
-    )
-    {
-        var privileges = context!.Privileges!
-            .Where(t => t.Name!.Contains(privilegeName));
-
-        if (privileges.ToList().Count == 0)
-            return Results.NotFound();
-
-        return Results.Ok(
-            privileges.ToArray()
-        );
-    }
-
     static IResult getPrivilege(
-    [FromRoute(Name = "privilegeName")] string privilegeName,
+    [FromRoute(Name = "privilegeId")] Guid privilegeId,
     [FromServices] ResourceDBContext context
     )
     {
         var privilege = context!.Privileges!
-            .FirstOrDefault(t => t.Name == privilegeName);
+            .FirstOrDefault(t => t.Id == privilegeId);
 
         if (privilege == null)
             return Results.NotFound();

@@ -9,16 +9,16 @@ public class ResourceRateLimit
     [ForeignKey("Resource")]
     public Guid ResourceId { get; set; }
     public Resource? Resource { get; set; }
-
-    [ForeignKey("Role")]
-    public Guid RoleId { get; set; }
-    public Role? Role { get; set; }
-
-    public int Period { get; set; }
+    
+    public string? Scope { get; set; }
+    public string? Condition { get; set; }    
+    public string? Cron { get; set; } 
     public int Limit { get; set; }
-    public int Enabled { get; set; }
-    public DateTime? CreatedDate { get; set; }
-    public DateTime? UpdatedDate { get; set; }
-    public string? CreatedUser { get; set; }
-    public string? UpdatedUser { get; set; }
+    public string? Status { get; set; } 
+    public DateTime? CreatedAt { get; set; }
+    public DateTime? ModifiedAt { get; set; }
+    public Guid? CreatedBy { get; set; }
+    public Guid? ModifiedBy { get; set; }
+    public Guid? CreatedByBehalfOf { get; set; }
+    public Guid? ModifiedByBehalfOf { get; set; }
 }

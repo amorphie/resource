@@ -1,11 +1,12 @@
-public record GetResourceRateLimitResponse
+public record GetResourceLanguageResponse
     (
         Guid id,
-        Guid resourceId,
-        string? scope,
-        string? condition,
-        string? cron,
-        int limit,
+        string? tableName,
+        Guid rowId,
+        string? fieldName,
+        string? text,
+        string? languageCode,
+        int order,
         string? status,
         DateTime? createdAt,
         DateTime? modifiedAt,
@@ -15,14 +16,15 @@ public record GetResourceRateLimitResponse
         Guid? modifiedByBehalfOf
      );
 
-public record SaveResourceRateLimitRequest
+public record SaveResourceLanguageRequest
     (
         Guid id,
-        Guid resourceId,
-        string? scope,
-        string? condition,
-        string? cron,
-        int limit,
+        string? tableName,
+        Guid rowId,
+        string? fieldName,
+        string? text,
+        string? languageCode,
+        int order,
         string? status,
         DateTime? createdAt,
         DateTime? modifiedAt,

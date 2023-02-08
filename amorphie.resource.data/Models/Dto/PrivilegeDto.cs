@@ -1,20 +1,29 @@
 public record GetPrivilegeResponse
     (
         Guid id,
-        string name,
-        int enabled,
-        DateTime? createdDate,
-        DateTime? updatedDate,
-        string createdUser,
-        string updatedUser
+        Guid resourceId,
+        string? url,
+        int ttl,
+        string? status,
+        DateTime? createdAt,
+        DateTime? modifiedAt,
+        Guid? createdBy,
+        Guid? modifiedBy,
+        Guid? createdByBehalfOf,
+        Guid? modifiedByBehalfOf
      );
 
 public record SavePrivilegeRequest
     (
-        string name,
-        int enabled,
-        DateTime? createdDate,
-        DateTime? updatedDate,
-        string createdUser,
-        string updatedUser
+        Guid id,
+        Guid resourceId,
+        string? url,
+        int ttl,
+        string? status,
+        DateTime? createdAt,
+        DateTime? modifiedAt,
+        Guid? createdBy,
+        Guid? modifiedBy,
+        Guid? createdByBehalfOf,
+        Guid? modifiedByBehalfOf
      );
