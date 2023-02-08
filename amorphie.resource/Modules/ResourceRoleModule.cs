@@ -30,39 +30,44 @@ public static class ResourceRoleModule
         [FromServices] ResourceDBContext context
         )
     {
-        var existingRecord = context?.ResourceRoles?.FirstOrDefault(t => t.ResourceId == data.ResourceId && t.RoleId == data.RoleId);
+        var existingRecord = context?.ResourceRoles?.FirstOrDefault(t => t.Id == data.id);
 
         if (existingRecord == null)
         {
-            var id = Guid.NewGuid();
-
             context!.ResourceRoles!.Add
             (
                 new ResourceRole
                 {
-                    Id = id,          
-                    ResourceId = data.ResourceId,
-                    RoleId = data.RoleId,          
-                    CreatedDate = data.createdDate,
-                    CreatedUser = data.createdUser
+                    Id = data.id,
+                    ResourceId = data.resourceId,
+                    RoleId = data.roleId,
+                    Status = data.status,
+                    CreatedAt = data.createdAt,
+                    ModifiedAt = data.modifiedAt,
+                    CreatedBy = data.createdBy,
+                    ModifiedBy = data.modifiedBy,
+                    CreatedByBehalfOf = data.createdByBehalfOf,
+                    ModifiedByBehalfOf = data.modifiedByBehalfOf
                 }
             );
             context.SaveChanges();
-            return Results.Created($"/resourceRole/{id}", data);
+            return Results.Created($"/resourceRole/{data.id}", data);
         }
         else
         {
-            // var hasChanges = false;
+            var hasChanges = false;
 
-            // if (hasChanges)
-            // {
+            ModuleHelper.PreUpdate(data.status, existingRecord.Status, ref hasChanges);
+
+            if (hasChanges)
+            {
                 context!.SaveChanges();
                 return Results.Ok(data);
-            // }
-            // else
-            // {
-            //     return Results.Problem("Not Modified.", null, 304);
-            // }
+            }
+            else
+            {
+                return Results.Problem("Not Modified.", null, 304);
+            }
         }
     }
 

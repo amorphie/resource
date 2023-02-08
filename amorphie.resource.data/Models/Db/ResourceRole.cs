@@ -14,6 +14,11 @@ public class ResourceRole
     public Guid RoleId { get; set; }
     public Role? Role { get; set; }
 
-    public DateTime? CreatedDate { get; set; }
-    public string? CreatedUser { get; set; }
+    public string? Status { get; set; } 
+    public DateTime? CreatedAt { get; set; }
+    public DateTime? ModifiedAt { get; set; }
+    public Guid? CreatedBy { get; set; }
+    public Guid? ModifiedBy { get; set; }
+    public Guid? CreatedByBehalfOf { get; set; }
+    public Guid? ModifiedByBehalfOf { get; set; }
 }

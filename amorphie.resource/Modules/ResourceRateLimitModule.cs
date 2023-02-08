@@ -30,43 +30,51 @@ public static class ResourceRateLimitModule
         [FromServices] ResourceDBContext context
         )
     {
-        var existingRecord = context?.ResourceRateLimits?.FirstOrDefault(t => t.ResourceId == data.ResourceId && t.RoleId == data.RoleId);
+        var existingRecord = context?.ResourceRateLimits?.FirstOrDefault(t => t.Id == data.id);
 
         if (existingRecord == null)
         {
-            var id = Guid.NewGuid();
-
             context!.ResourceRateLimits!.Add
             (
                 new ResourceRateLimit
                 {
-                    Id = id,          
-                    ResourceId = data.ResourceId,
-                    RoleId = data.RoleId,  
-                    Period = data.Period,
-                    Limit = data.Limit,        
-                    CreatedDate = data.createdDate,
-                    UpdatedDate  = data.updatedDate,
-                    CreatedUser = data.createdUser,
-                    UpdatedUser = data.updatedUser
+                    Id = data.id,
+                    ResourceId = data.resourceId,
+                    Scope = data.scope,
+                    Condition = data.condition,
+                    Cron = data.cron,
+                    Limit = data.limit,
+                    Status = data.status,
+                    CreatedAt = data.createdAt,
+                    ModifiedAt = data.modifiedAt,
+                    CreatedBy = data.createdBy,
+                    ModifiedBy = data.modifiedBy,
+                    CreatedByBehalfOf = data.createdByBehalfOf,
+                    ModifiedByBehalfOf = data.modifiedByBehalfOf
                 }
             );
             context.SaveChanges();
-            return Results.Created($"/resourceRateLimit/{id}", data);
+            return Results.Created($"/resourceRateLimit/{data.id}", data);
         }
         else
         {
-            // var hasChanges = false;
+            var hasChanges = false;
 
-            // if (hasChanges)
-            // {
+            ModuleHelper.PreUpdate(data.scope, existingRecord.Scope, ref hasChanges);
+            ModuleHelper.PreUpdate(data.condition, existingRecord.Condition, ref hasChanges);
+            ModuleHelper.PreUpdate(data.cron, existingRecord.Cron, ref hasChanges);
+            ModuleHelper.PreUpdate(data.limit.ToString(), existingRecord.Limit.ToString(), ref hasChanges);
+            ModuleHelper.PreUpdate(data.status, existingRecord.Status, ref hasChanges);
+
+            if (hasChanges)
+            {
                 context!.SaveChanges();
                 return Results.Ok(data);
-            // }
-            // else
-            // {
-            //     return Results.Problem("Not Modified.", null, 304);
-            // }
+            }
+            else
+            {
+                return Results.Problem("Not Modified.", null, 304);
+            }
         }
     }
 

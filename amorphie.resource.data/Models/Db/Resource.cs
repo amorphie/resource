@@ -5,15 +5,16 @@ public class Resource
 {
     [Key]
     public Guid Id { get; set; }
-    public string? Name { get; set; }
     public string? DisplayName { get; set; }
-    public string? Type { get; set; }
+    public HttpMethodType? Type { get; set; }
     public string? Url { get; set; }
     public string? Description { get; set; }
-    public int Enabled { get; set; }
-    public DateTime? CreatedDate { get; set; }
-    public DateTime? UpdatedDate { get; set; }
-    public string? CreatedUser { get; set; }
-    public string? UpdatedUser { get; set; }
-
+    // public string[]? Tags { get; set; }
+    public string? Status { get; set; }
+    public DateTime? CreatedAt { get; set; }
+    public DateTime? ModifiedAt { get; set; }
+    public Guid? CreatedBy { get; set; }
+    public Guid? ModifiedBy { get; set; }
+    public Guid? CreatedByBehalfOf { get; set; }
+    public Guid? ModifiedByBehalfOf { get; set; }
 }

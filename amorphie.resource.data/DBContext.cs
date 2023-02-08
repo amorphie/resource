@@ -25,20 +25,20 @@ public class ResourceDBContext : DbContext
     public DbSet<RoleGroupRole>? RoleGroupRoles { get; set; }
     public DbSet<ResourceRole>? ResourceRoles { get; set; }
     public DbSet<Privilege>? Privileges { get; set; }
-    public DbSet<RolePrivilege>? RolePrivileges { get; set; }
-     public DbSet<ResourceRateLimit>? ResourceRateLimits { get; set; }
+    public DbSet<ResourceRateLimit>? ResourceRateLimits { get; set; }
+    public DbSet<ResourceLanguage>? ResourceLanguages { get; set; }
     public ResourceDBContext(DbContextOptions options) : base(options) { AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true); }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Resource>()
-            .HasKey(r => r.Id);
+        .HasKey(r => r.Id);
 
         modelBuilder.Entity<Role>()
-           .HasKey(r => r.Id);
+        .HasKey(r => r.Id);
 
         modelBuilder.Entity<RoleGroup>()
-            .HasKey(r => r.Id);
+        .HasKey(r => r.Id);
 
         modelBuilder.Entity<RoleGroupRole>()
        .HasKey(r => r.Id);
@@ -49,112 +49,163 @@ public class ResourceDBContext : DbContext
         modelBuilder.Entity<Privilege>()
         .HasKey(r => r.Id);
 
-        modelBuilder.Entity<RolePrivilege>()
-        .HasKey(r => r.Id);
-
         modelBuilder.Entity<ResourceRateLimit>()
         .HasKey(r => r.Id);
+
+        modelBuilder.Entity<ResourceLanguage>()
+       .HasKey(r => r.Id);
+
+        //  modelBuilder.Entity<TagInRole>()
+        // .HasKey(r => r.Id);
+
+        // modelBuilder.Entity<TagInRole>().OwnsOne(p => p.Role);
 
         var ResourceId = Guid.NewGuid();
         var RoleId = Guid.NewGuid();
         var RoleGroupId = Guid.NewGuid();
         var PrivilegeId = Guid.NewGuid();
 
-        modelBuilder.Entity<Resource>().HasData(
-            new
-            {
-                Id = ResourceId,
-                Name = "account-list-get",
-                DisplayName = "Get Account List",
-                Type = "Get",
-                Url = "http://localhost:44000/cb.accounts",
-                Description = "Get Account List Resource",
-                Enabled = 1,
-                CreatedDate = DateTime.Now,
-                UpdatedDate = (DateTime?)null,
-                CreatedUser = "User1",
-                UpdatedUser = (string?)null
-            });
+        // var langList = new List<MultiLanguageText>();
+        // var langText1 = new MultiLanguageText("TR", "baslik");
+        // var langText2 = new MultiLanguageText("EN", "title");
 
-        modelBuilder.Entity<Role>().HasData(
-        new
-        {
-            Id = RoleId,
-            Name = "Admin",
-            Enabled = 1,
-            CreatedDate = DateTime.Now,
-            UpdatedDate = (DateTime?)null,
-            CreatedUser = "User1",
-            UpdatedUser = (string?)null
-        });
+        // langList.Add(langText1);
+        // langList.Add(langText2);
 
-        modelBuilder.Entity<RoleGroup>().HasData(
-        new
-        {
-            Id = RoleGroupId,
-            Name = "Bireysel",
-            Enabled = 1,
-            CreatedDate = DateTime.Now,
-            UpdatedDate = (DateTime?)null,
-            CreatedUser = "User1",
-            UpdatedUser = (string?)null
-        });
+        var tagInRoles = new List<TagInRole>();
+        var tagInRole1 = new TagInRole();
+        var tagInRole2 = new TagInRole();
 
-        modelBuilder.Entity<RoleGroupRole>().HasData(
-        new
-        {
-            Id = Guid.NewGuid(),
-            RoleGroupId = RoleGroupId,
-            RoleId = RoleId,
-            CreatedDate = DateTime.Now,
-            CreatedUser = "User1"
-        });
+        tagInRole1.Id = Guid.NewGuid();
+        tagInRole1.Title = "tag1";
 
-        modelBuilder.Entity<ResourceRole>().HasData(
-        new
-        {
-            Id = Guid.NewGuid(),
-            ResourceId = ResourceId,
-            RoleId = RoleId,
-            CreatedDate = DateTime.Now,
-            CreatedUser = "User1"
-        });
+        tagInRole2.Id = Guid.NewGuid();
+        tagInRole2.Title = "tag2";
 
-        modelBuilder.Entity<Privilege>().HasData(
-        new
-        {
-            Id = PrivilegeId,
-            Name = "Write",
-            Enabled = 1,
-            CreatedDate = DateTime.Now,
-            UpdatedDate = (DateTime?)null,
-            CreatedUser = "User1",
-            UpdatedUser = (string?)null
-        });
+        tagInRoles.Add(tagInRole1);
+        tagInRoles.Add(tagInRole2);
 
-        modelBuilder.Entity<RolePrivilege>().HasData(
-        new
-        {
-            Id = Guid.NewGuid(),
-            RoleId = RoleId,
-            PrivilegeId = PrivilegeId,
-            CreatedDate = DateTime.Now,
-            CreatedUser = "User1"
-        });
+        // var langArray = langList.ToArray();
 
-        modelBuilder.Entity<ResourceRateLimit>().HasData(
-        new
-        {
-            Id = Guid.NewGuid(),
-            ResourceId = ResourceId,
-            RoleId = RoleId,
-            Period = 60,
-            Limit = 10,
-            Enabled = 1,
-            CreatedDate = DateTime.Now,
-            CreatedUser = "User1",
-            UpdatedDate = (DateTime?)null,
-            UpdatedUser = (string?)null
-        });
+        var tags = new string[] { "tag1", "tag2" };
+
+        //     modelBuilder.Entity<Resource>().HasData(
+        //         new
+        //         {
+        //             Id = ResourceId,
+        //             // DisplayName = langArray,
+        //             Type = HttpMethodType.GET,
+        //             Url = "http://localhost:44000/cb.accounts",
+        //             // Description = langArray,
+        //             Tags = tags,
+        //             Status = "A",
+        //             CreatedAt = DateTime.Now,
+        //             ModifiedAt = (DateTime?)null,
+        //             CreatedBy = Guid.NewGuid(),
+        //             ModifiedBy = (Guid?)null,
+        //             CreatedByBehalfOf = (Guid?)null,
+        //             ModifiedByBehalfOf = (Guid?)null
+        //         });
+
+        //     modelBuilder.Entity<Role>().HasData(
+        //     new Role
+        //     {
+        //         Id = RoleId,
+        //         // TagInRoles = tagInRoles,
+        //         Status = "A",
+        //         CreatedAt = DateTime.Now,
+        //         ModifiedAt = (DateTime?)null,
+        //         CreatedBy = Guid.NewGuid(),
+        //         ModifiedBy = (Guid?)null,
+        //         CreatedByBehalfOf = (Guid?)null,
+        //         ModifiedByBehalfOf = (Guid?)null
+        //     });
+
+        //     modelBuilder.Entity<TagInRole>().HasData(
+        //    new TagInRole
+        //    {
+        //        Id = Guid.NewGuid(),
+        //        RoleId = RoleId,
+        //        Title = "Title"
+        //    });
+
+        //     modelBuilder.Entity<RoleGroup>().HasData(
+        //     new
+        //     {
+        //         Id = RoleGroupId,
+        //         // Title = langArray,
+        //         Tags = tags,
+        //         Status = "A",
+        //         CreatedAt = DateTime.Now,
+        //         ModifiedAt = (DateTime?)null,
+        //         CreatedBy = Guid.NewGuid(),
+        //         ModifiedBy = (Guid?)null,
+        //         CreatedByBehalfOf = (Guid?)null,
+        //         ModifiedByBehalfOf = (Guid?)null
+        //     });
+
+        // modelBuilder.Entity<RoleGroupRole>().HasData(
+        // new
+        // {
+        //     Id = Guid.NewGuid(),
+        //     RoleGroupId = RoleGroupId,
+        //     RoleId = RoleId,
+        //     Status = "A",
+        //     CreatedAt = DateTime.Now,
+        //     ModifiedAt = (DateTime?)null,
+        //     CreatedBy = Guid.NewGuid(),
+        //     ModifiedBy = (Guid?)null,
+        //     CreatedByBehalfOf = (Guid?)null,
+        //     ModifiedByBehalfOf = (Guid?)null
+        // });
+
+        // modelBuilder.Entity<ResourceRole>().HasData(
+        // new
+        // {
+        //     Id = Guid.NewGuid(),
+        //     ResourceId = ResourceId,
+        //     RoleId = RoleId,
+        //     Status = "A",
+        //     CreatedAt = DateTime.Now,
+        //     ModifiedAt = (DateTime?)null,
+        //     CreatedBy = Guid.NewGuid(),
+        //     ModifiedBy = (Guid?)null,
+        //     CreatedByBehalfOf = (Guid?)null,
+        //     ModifiedByBehalfOf = (Guid?)null
+        // });
+
+        // modelBuilder.Entity<Privilege>().HasData(
+        // new
+        // {
+        //     Id = PrivilegeId,
+        //     ResourceId = ResourceId,
+        //     Url = "Url",
+        //     Ttl = 1,
+        //     Status = "A",
+        //     CreatedAt = DateTime.Now,
+        //     ModifiedAt = (DateTime?)null,
+        //     CreatedBy = Guid.NewGuid(),
+        //     ModifiedBy = (Guid?)null,
+        //     CreatedByBehalfOf = (Guid?)null,
+        //     ModifiedByBehalfOf = (Guid?)null
+        // });
+
+        // modelBuilder.Entity<ResourceRateLimit>().HasData(
+        // new
+        // {
+        //     Id = Guid.NewGuid(),
+        //     ResourceId = ResourceId,
+        //     Scope = "Scope",
+        //     Condition = "Condition",
+        //     Cron = "Cron",
+        //     Limit = 10,
+        //     Status = "A",
+        //     CreatedAt = DateTime.Now,
+        //     ModifiedAt = (DateTime?)null,
+        //     CreatedBy = Guid.NewGuid(),
+        //     ModifiedBy = (Guid?)null,
+        //     CreatedByBehalfOf = (Guid?)null,
+        //     ModifiedByBehalfOf = (Guid?)null
+        // });
     }
 }
