@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-public class ResourceLanguage
+public class Translation
 {
     [Key]
     public Guid Id { get; set; }

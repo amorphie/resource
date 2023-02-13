@@ -28,9 +28,8 @@ app.MapRoleGroupEndpoints();
 app.MapRoleGroupRoleEndpoints();
 app.MapResourceRoleEndpoints();
 app.MapPrivilegeEndpoints();
-app.MapRolePrivilegeEndpoints();
 app.MapResourceRateLimitEndpoints();
-app.MapResourceLanguageEndpoints();
+// app.MapResourceLanguageEndpoints();
 
 try
 {
