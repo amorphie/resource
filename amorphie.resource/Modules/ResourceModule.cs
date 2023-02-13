@@ -1,5 +1,6 @@
 using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 public static class ResourceModule
 {
@@ -117,23 +118,8 @@ public static class ResourceModule
         var resource = context!.Resources!
             .FirstOrDefault(t => t.Id == resourceId);
 
-        if (resource == null)
+            if (resource == null)
             return Results.NotFound();
-
-        var resourceLanguages = context!.ResourceLanguages!
-        .Where(t => t.RowId == resourceId && t.LanguageCode == "tr");
-
-        foreach (ResourceLanguage resourceLanguage in resourceLanguages)
-        {
-            Type type = resource.GetType();
-
-            PropertyInfo? prop = type.GetProperty(resourceLanguage.FieldName!);
-
-            if (prop != null)
-            {
-                prop.SetValue(resource, resourceLanguage.Text, null);
-            }
-        }
 
         return Results.Ok(resource);
     }

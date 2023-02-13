@@ -2,9 +2,10 @@ public record GetResourceResponse
     (
         Guid id, 
         string? displayName,
-        HttpMethodType? type,
+        string? type,
         string? url,
         string? description,
+        string[]? tags, 
         string? status,
         DateTime? createdAt,
         DateTime? modifiedAt,        
@@ -18,9 +19,10 @@ public record SaveResourceRequest
     (
         Guid id, 
         string? displayName,
-        HttpMethodType? type,
+        string? type,
         string? url,
         string? description,
+        string[]? tags, 
         string? status,
         DateTime? createdAt,
         DateTime? modifiedAt,        

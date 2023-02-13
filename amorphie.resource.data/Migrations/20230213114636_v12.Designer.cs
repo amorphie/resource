@@ -11,8 +11,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace amorphie.resource.data.Migrations
 {
     [DbContext(typeof(ResourceDBContext))]
-    [Migration("20230207133120_v10")]
-    partial class v10
+    [Migration("20230213114636_v12")]
+    partial class v12
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -82,12 +82,6 @@ namespace amorphie.resource.data.Migrations
                     b.Property<Guid?>("CreatedByBehalfOf")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Description")
-                        .HasColumnType("text");
-
-                    b.Property<string>("DisplayName")
-                        .HasColumnType("text");
-
                     b.Property<DateTime?>("ModifiedAt")
                         .HasColumnType("timestamp without time zone");
 
@@ -100,8 +94,11 @@ namespace amorphie.resource.data.Migrations
                     b.Property<string>("Status")
                         .HasColumnType("text");
 
-                    b.Property<int?>("Type")
-                        .HasColumnType("integer");
+                    b.Property<string[]>("Tags")
+                        .HasColumnType("text[]");
+
+                    b.Property<string>("Type")
+                        .HasColumnType("text");
 
                     b.Property<string>("Url")
                         .HasColumnType("text");
@@ -109,56 +106,22 @@ namespace amorphie.resource.data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Resources");
-                });
 
-            modelBuilder.Entity("ResourceLanguage", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("CreatedAt")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("CreatedByBehalfOf")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("FieldName")
-                        .HasColumnType("text");
-
-                    b.Property<string>("LanguageCode")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("ModifiedAt")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<Guid?>("ModifiedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("ModifiedByBehalfOf")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("Order")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid>("RowId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Status")
-                        .HasColumnType("text");
-
-                    b.Property<string>("TableName")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Text")
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("ResourceLanguage");
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("331ee6bf-0a59-411b-85c1-98b3f80a4728"),
+                            CreatedAt = new DateTime(2023, 2, 13, 14, 46, 36, 205, DateTimeKind.Local).AddTicks(4701),
+                            CreatedBy = new Guid("cda86159-ea2a-4af8-b765-20e339d5682c"),
+                            CreatedByBehalfOf = new Guid("cda86159-ea2a-4af8-b765-20e339d5682c"),
+                            ModifiedAt = new DateTime(2023, 2, 13, 14, 46, 36, 205, DateTimeKind.Local).AddTicks(4719),
+                            ModifiedBy = new Guid("cda86159-ea2a-4af8-b765-20e339d5682c"),
+                            ModifiedByBehalfOf = new Guid("cda86159-ea2a-4af8-b765-20e339d5682c"),
+                            Status = "A",
+                            Tags = new[] { "tag1", "tag2" },
+                            Type = "CONNECT",
+                            Url = "urlsample"
+                        });
                 });
 
             modelBuilder.Entity("ResourceRateLimit", b =>
@@ -279,9 +242,25 @@ namespace amorphie.resource.data.Migrations
                     b.Property<string>("Status")
                         .HasColumnType("text");
 
+                    b.Property<string[]>("Tags")
+                        .HasColumnType("text[]");
+
                     b.HasKey("Id");
 
                     b.ToTable("Roles");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("5508c729-888f-4f85-b04e-df71c7139115"),
+                            CreatedAt = new DateTime(2023, 2, 13, 14, 46, 36, 205, DateTimeKind.Local).AddTicks(4752),
+                            CreatedBy = new Guid("cda86159-ea2a-4af8-b765-20e339d5682c"),
+                            CreatedByBehalfOf = new Guid("cda86159-ea2a-4af8-b765-20e339d5682c"),
+                            ModifiedAt = new DateTime(2023, 2, 13, 14, 46, 36, 205, DateTimeKind.Local).AddTicks(4753),
+                            ModifiedBy = new Guid("cda86159-ea2a-4af8-b765-20e339d5682c"),
+                            ModifiedByBehalfOf = new Guid("cda86159-ea2a-4af8-b765-20e339d5682c"),
+                            Status = "A"
+                        });
                 });
 
             modelBuilder.Entity("RoleGroup", b =>
@@ -310,6 +289,9 @@ namespace amorphie.resource.data.Migrations
 
                     b.Property<string>("Status")
                         .HasColumnType("text");
+
+                    b.Property<string[]>("Tags")
+                        .HasColumnType("text[]");
 
                     b.HasKey("Id");
 
@@ -356,6 +338,109 @@ namespace amorphie.resource.data.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("RoleGroupRoles");
+                });
+
+            modelBuilder.Entity("Translation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("CreatedByBehalfOf")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("FieldName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("LanguageCode")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<Guid?>("ModifiedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("ModifiedByBehalfOf")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("RowId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Status")
+                        .HasColumnType("text");
+
+                    b.Property<string>("TableName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Text")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Translation");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("73ea2492-1630-46ad-867a-9566aa33b2b8"),
+                            CreatedAt = new DateTime(2023, 2, 13, 14, 46, 36, 205, DateTimeKind.Local).AddTicks(4771),
+                            CreatedBy = new Guid("cda86159-ea2a-4af8-b765-20e339d5682c"),
+                            CreatedByBehalfOf = new Guid("cda86159-ea2a-4af8-b765-20e339d5682c"),
+                            FieldName = "DisplayName",
+                            LanguageCode = "tr",
+                            ModifiedAt = new DateTime(2023, 2, 13, 14, 46, 36, 205, DateTimeKind.Local).AddTicks(4772),
+                            ModifiedBy = new Guid("cda86159-ea2a-4af8-b765-20e339d5682c"),
+                            ModifiedByBehalfOf = new Guid("cda86159-ea2a-4af8-b765-20e339d5682c"),
+                            Order = 1,
+                            RowId = new Guid("331ee6bf-0a59-411b-85c1-98b3f80a4728"),
+                            Status = "A",
+                            TableName = "Resources",
+                            Text = "Hesaplar"
+                        },
+                        new
+                        {
+                            Id = new Guid("795ec60d-c5b0-4534-b102-7876ff7cc1e0"),
+                            CreatedAt = new DateTime(2023, 2, 13, 14, 46, 36, 205, DateTimeKind.Local).AddTicks(4774),
+                            CreatedBy = new Guid("cda86159-ea2a-4af8-b765-20e339d5682c"),
+                            CreatedByBehalfOf = new Guid("cda86159-ea2a-4af8-b765-20e339d5682c"),
+                            FieldName = "Description",
+                            LanguageCode = "tr",
+                            ModifiedAt = new DateTime(2023, 2, 13, 14, 46, 36, 205, DateTimeKind.Local).AddTicks(4774),
+                            ModifiedBy = new Guid("cda86159-ea2a-4af8-b765-20e339d5682c"),
+                            ModifiedByBehalfOf = new Guid("cda86159-ea2a-4af8-b765-20e339d5682c"),
+                            Order = 1,
+                            RowId = new Guid("331ee6bf-0a59-411b-85c1-98b3f80a4728"),
+                            Status = "A",
+                            TableName = "Resources",
+                            Text = "Açıklama"
+                        },
+                        new
+                        {
+                            Id = new Guid("4b8afabe-f1b8-416c-b0e4-c7cb5d26042d"),
+                            CreatedAt = new DateTime(2023, 2, 13, 14, 46, 36, 205, DateTimeKind.Local).AddTicks(4776),
+                            CreatedBy = new Guid("cda86159-ea2a-4af8-b765-20e339d5682c"),
+                            CreatedByBehalfOf = new Guid("cda86159-ea2a-4af8-b765-20e339d5682c"),
+                            FieldName = "RoleName",
+                            LanguageCode = "tr",
+                            ModifiedAt = new DateTime(2023, 2, 13, 14, 46, 36, 205, DateTimeKind.Local).AddTicks(4776),
+                            ModifiedBy = new Guid("cda86159-ea2a-4af8-b765-20e339d5682c"),
+                            ModifiedByBehalfOf = new Guid("cda86159-ea2a-4af8-b765-20e339d5682c"),
+                            Order = 1,
+                            RowId = new Guid("5508c729-888f-4f85-b04e-df71c7139115"),
+                            Status = "A",
+                            TableName = "Roles",
+                            Text = "Admin"
+                        });
                 });
 
             modelBuilder.Entity("Privilege", b =>

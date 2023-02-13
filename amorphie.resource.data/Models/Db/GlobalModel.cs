@@ -1,29 +1,14 @@
 using System.ComponentModel.DataAnnotations;
 
-// public class MultiLanguageText
-// {
-//     public MultiLanguageText(string language, string label)
-//     {
-//         Id = Guid.NewGuid();
-//         Language = language;
-//         Label = label;
-//     }
 
-//     [Key]
-//     public Guid Id { get; set; }
-//     public string? Language { get; set; }
-//     public string? Label { get; set; }
-// }
-
-
-public enum HttpMethodType
+public static class HttpMethodType
 {
-    CONNECT,
-    DELETE,
-    GET,
-    HEAD,
-    OPTIONS,
-    POST,
-    PUT,
-    TRACE
+    public const string CONNECT = "CONNECT";
+    public const string DELETE = "DELETE";
+    public const string GET = "GET";
+    public const string HEAD = "HEAD";
+    public const string OPTIONS = "OPTIONS";
+    public const string POST = "POST";
+    public const string PUT = "PUT";
+    public const string TRACE = "TRACE";
 }

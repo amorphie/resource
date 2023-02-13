@@ -1,20 +1,27 @@
 public record GetRoleResponse
     (
         Guid id,
-        string name,
-        DateTime? createdDate,
-        DateTime? updatedDate,
-        int enabled,
-        string createdUser,
-        string updatedUser
+        string title,
+        string[]? tags,
+        string? status,
+        DateTime? createdAt,
+        DateTime? modifiedAt,
+        Guid? createdBy,
+        Guid? modifiedBy,
+        Guid? createdByBehalfOf,
+        Guid? modifiedByBehalfOf
      );
 
 public record SaveRoleRequest
     (
-        string name,
-        DateTime? createdDate,
-        DateTime? updatedDate,
-        int enabled,
-        string createdUser,
-        string updatedUser
+        Guid id,
+        string title,
+        string[]? tags,
+        string? status,
+        DateTime? createdAt,
+        DateTime? modifiedAt,
+        Guid? createdBy,
+        Guid? modifiedBy,
+        Guid? createdByBehalfOf,
+        Guid? modifiedByBehalfOf
      );
