@@ -1,7 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using SecretExtensions;
 
 var builder = WebApplication.CreateBuilder(args);
+
+await builder.Configuration.AddVaultSecrets("amorphie-secretstore", "amorphie-secretstore");
+var postgreSql = builder.Configuration["PostgreSql"];
+
 
 
 builder.Logging.ClearProviders();
@@ -11,7 +16,7 @@ builder.Services.AddDaprClient();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<ResourceDBContext>
-    (options => options.UseNpgsql("Host=localhost:5432;Database=resources;Username=postgres;Password=postgres"));
+    (options => options.UseNpgsql(postgreSql));
 
 var app = builder.Build();
 
