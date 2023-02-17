@@ -16,9 +16,13 @@ builder.Services.AddDaprClient();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<ResourceDBContext>
-    (options => options.UseNpgsql(postgreSql));
+    (options => options.UseNpgsql(postgreSql,b => b.MigrationsAssembly("amorphie.resource.data")));
 
 var app = builder.Build();
+
+using var scope = app.Services.CreateScope();
+var db = scope.ServiceProvider.GetRequiredService<ResourceDBContext>();
+db.Database.Migrate();
 
 app.UseCloudEvents();
 app.UseRouting();
