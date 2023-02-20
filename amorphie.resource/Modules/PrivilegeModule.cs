@@ -128,7 +128,21 @@ public static class PrivilegeModule
         if (privilege == null)
             return Results.NotFound();
 
-        return Results.Ok(privilege);
+        return Results.Ok(
+             new GetPrivilegeResponse(
+              privilege.Id,
+              privilege.ResourceId,
+              privilege.Url,
+              privilege.Ttl,
+              privilege.Status,
+              privilege.CreatedAt,
+              privilege.ModifiedAt,
+              privilege.CreatedBy,
+              privilege.ModifiedBy,
+              privilege.CreatedByBehalfOf,
+              privilege.ModifiedByBehalfOf
+              )
+           );
     }
 
     static IResult getAllPrivileges(
@@ -146,19 +160,19 @@ public static class PrivilegeModule
 
         if (privileges.Count() > 0)
         {
-            return Results.Ok(privileges.Select(privelege =>
+            return Results.Ok(privileges.Select(privilege =>
              new GetPrivilegeResponse(
-              privelege.Id,
-              privelege.ResourceId,
-              privelege.Url,
-              privelege.Ttl,
-              privelege.Status,
-              privelege.CreatedAt,
-              privelege.ModifiedAt,
-              privelege.CreatedBy,
-              privelege.ModifiedBy,
-              privelege.CreatedByBehalfOf,
-              privelege.ModifiedByBehalfOf
+              privilege.Id,
+              privilege.ResourceId,
+              privilege.Url,
+              privilege.Ttl,
+              privilege.Status,
+              privilege.CreatedAt,
+              privilege.ModifiedAt,
+              privilege.CreatedBy,
+              privilege.ModifiedBy,
+              privilege.CreatedByBehalfOf,
+              privilege.ModifiedByBehalfOf
               )
            ).ToArray());
         }

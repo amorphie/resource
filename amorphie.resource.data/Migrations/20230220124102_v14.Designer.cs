@@ -11,8 +11,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace amorphie.resource.data.Migrations
 {
     [DbContext(typeof(ResourceDBContext))]
-    [Migration("20230217125030_v13")]
-    partial class v13
+    [Migration("20230220124102_v14")]
+    partial class v14
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -69,7 +69,7 @@ namespace amorphie.resource.data.Migrations
 
             modelBuilder.Entity("Resource", b =>
                 {
-                    b.Property<Guid>("RowId")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
@@ -80,9 +80,6 @@ namespace amorphie.resource.data.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<Guid?>("CreatedByBehalfOf")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("Id")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime?>("ModifiedAt")
@@ -106,9 +103,25 @@ namespace amorphie.resource.data.Migrations
                     b.Property<string>("Url")
                         .HasColumnType("text");
 
-                    b.HasKey("RowId");
+                    b.HasKey("Id");
 
                     b.ToTable("Resources");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("44d59b76-0bfd-4fe4-a740-2d027c81afd3"),
+                            CreatedAt = new DateTime(2023, 2, 20, 15, 41, 2, 643, DateTimeKind.Local).AddTicks(6129),
+                            CreatedBy = new Guid("9533ecb6-236e-4b13-9628-21ac386281ac"),
+                            CreatedByBehalfOf = new Guid("9533ecb6-236e-4b13-9628-21ac386281ac"),
+                            ModifiedAt = new DateTime(2023, 2, 20, 15, 41, 2, 643, DateTimeKind.Local).AddTicks(6141),
+                            ModifiedBy = new Guid("9533ecb6-236e-4b13-9628-21ac386281ac"),
+                            ModifiedByBehalfOf = new Guid("9533ecb6-236e-4b13-9628-21ac386281ac"),
+                            Status = "A",
+                            Tags = new[] { "tag1", "tag2" },
+                            Type = "CONNECT",
+                            Url = "urlsample"
+                        });
                 });
 
             modelBuilder.Entity("ResourceRateLimit", b =>
@@ -204,7 +217,7 @@ namespace amorphie.resource.data.Migrations
 
             modelBuilder.Entity("Role", b =>
                 {
-                    b.Property<Guid>("RowId")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
@@ -215,9 +228,6 @@ namespace amorphie.resource.data.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<Guid?>("CreatedByBehalfOf")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("Id")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime?>("ModifiedAt")
@@ -235,7 +245,7 @@ namespace amorphie.resource.data.Migrations
                     b.Property<string[]>("Tags")
                         .HasColumnType("text[]");
 
-                    b.HasKey("RowId");
+                    b.HasKey("Id");
 
                     b.ToTable("Roles");
                 });
@@ -332,10 +342,12 @@ namespace amorphie.resource.data.Migrations
                     b.Property<Guid?>("CreatedByBehalfOf")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("FieldName")
+                    b.Property<string>("Label")
+                        .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("LanguageCode")
+                    b.Property<string>("Language")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime?>("ModifiedAt")
@@ -347,34 +359,60 @@ namespace amorphie.resource.data.Migrations
                     b.Property<Guid?>("ModifiedByBehalfOf")
                         .HasColumnType("uuid");
 
-                    b.Property<int>("Order")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid?>("ResourceRowId")
+                    b.Property<Guid?>("ResourceId_Description")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("RoleRowId")
+                    b.Property<Guid?>("ResourceId_DisplayName")
                         .HasColumnType("uuid");
-
-                    b.Property<Guid>("RowId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Status")
-                        .HasColumnType("text");
-
-                    b.Property<string>("TableName")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Text")
-                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ResourceRowId");
+                    b.HasIndex("ResourceId_Description");
 
-                    b.HasIndex("RoleRowId");
+                    b.HasIndex("ResourceId_DisplayName");
 
                     b.ToTable("Translations");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("6da252bd-6206-4fc9-874d-46addbaabdd6"),
+                            CreatedAt = new DateTime(2023, 2, 20, 15, 41, 2, 643, DateTimeKind.Local).AddTicks(6162),
+                            CreatedBy = new Guid("9533ecb6-236e-4b13-9628-21ac386281ac"),
+                            CreatedByBehalfOf = new Guid("9533ecb6-236e-4b13-9628-21ac386281ac"),
+                            Label = "Açıklama",
+                            Language = "tr",
+                            ModifiedAt = new DateTime(2023, 2, 20, 15, 41, 2, 643, DateTimeKind.Local).AddTicks(6163),
+                            ModifiedBy = new Guid("9533ecb6-236e-4b13-9628-21ac386281ac"),
+                            ModifiedByBehalfOf = new Guid("9533ecb6-236e-4b13-9628-21ac386281ac"),
+                            ResourceIdDescription = new Guid("44d59b76-0bfd-4fe4-a740-2d027c81afd3")
+                        },
+                        new
+                        {
+                            Id = new Guid("1a10e902-de26-4ba7-bf78-a46fbe44ddb1"),
+                            CreatedAt = new DateTime(2023, 2, 20, 15, 41, 2, 643, DateTimeKind.Local).AddTicks(6165),
+                            CreatedBy = new Guid("9533ecb6-236e-4b13-9628-21ac386281ac"),
+                            CreatedByBehalfOf = new Guid("9533ecb6-236e-4b13-9628-21ac386281ac"),
+                            Label = "Description",
+                            Language = "en",
+                            ModifiedAt = new DateTime(2023, 2, 20, 15, 41, 2, 643, DateTimeKind.Local).AddTicks(6165),
+                            ModifiedBy = new Guid("9533ecb6-236e-4b13-9628-21ac386281ac"),
+                            ModifiedByBehalfOf = new Guid("9533ecb6-236e-4b13-9628-21ac386281ac"),
+                            ResourceIdDescription = new Guid("44d59b76-0bfd-4fe4-a740-2d027c81afd3")
+                        },
+                        new
+                        {
+                            Id = new Guid("5de13603-a5b4-4c44-aea6-9a61584b8988"),
+                            CreatedAt = new DateTime(2023, 2, 20, 15, 41, 2, 643, DateTimeKind.Local).AddTicks(6166),
+                            CreatedBy = new Guid("9533ecb6-236e-4b13-9628-21ac386281ac"),
+                            CreatedByBehalfOf = new Guid("9533ecb6-236e-4b13-9628-21ac386281ac"),
+                            Label = "Başlık",
+                            Language = "tr",
+                            ModifiedAt = new DateTime(2023, 2, 20, 15, 41, 2, 643, DateTimeKind.Local).AddTicks(6166),
+                            ModifiedBy = new Guid("9533ecb6-236e-4b13-9628-21ac386281ac"),
+                            ModifiedByBehalfOf = new Guid("9533ecb6-236e-4b13-9628-21ac386281ac"),
+                            ResourceIdDisplayName = new Guid("44d59b76-0bfd-4fe4-a740-2d027c81afd3")
+                        });
                 });
 
             modelBuilder.Entity("Privilege", b =>
@@ -440,22 +478,19 @@ namespace amorphie.resource.data.Migrations
             modelBuilder.Entity("Translation", b =>
                 {
                     b.HasOne("Resource", null)
-                        .WithMany("Translations")
-                        .HasForeignKey("ResourceRowId");
+                        .WithMany("Descriptions")
+                        .HasForeignKey("ResourceId_Description");
 
-                    b.HasOne("Role", null)
-                        .WithMany("Translations")
-                        .HasForeignKey("RoleRowId");
+                    b.HasOne("Resource", null)
+                        .WithMany("DisplayNames")
+                        .HasForeignKey("ResourceId_DisplayName");
                 });
 
             modelBuilder.Entity("Resource", b =>
                 {
-                    b.Navigation("Translations");
-                });
+                    b.Navigation("Descriptions");
 
-            modelBuilder.Entity("Role", b =>
-                {
-                    b.Navigation("Translations");
+                    b.Navigation("DisplayNames");
                 });
 #pragma warning restore 612, 618
         }

@@ -61,10 +61,10 @@ public static class ResourceModule
                 new Resource
                 {
                     Id = data.id,
-                    DisplayName = data.displayName,
+                    DisplayNames = data.displayNames,
                     Type = data.type,
                     Url = data.url,
-                    Description = data.description,
+                    Descriptions = data.descriptions,
                     Status = data.status,
                     CreatedAt = data.createdAt,
                     ModifiedAt = data.modifiedAt,
@@ -83,9 +83,7 @@ public static class ResourceModule
 
             // Apply update to only changed fields.
 
-            ModuleHelper.PreUpdate(data.displayName, existingRecord.DisplayName, ref hasChanges);
             ModuleHelper.PreUpdate(data.url, existingRecord.Url, ref hasChanges);
-            ModuleHelper.PreUpdate(data.description, existingRecord.Description, ref hasChanges);
             ModuleHelper.PreUpdate(data.status, existingRecord.Status, ref hasChanges);
 
             if (hasChanges)
@@ -123,13 +121,29 @@ public static class ResourceModule
     [FromServices] ResourceDBContext context
     )
     {
-        var resource = context!.Resources.Include(t => t.Translations.Where(a => a.LanguageCode == "tr"))!
+        var resource = context!.Resources!.Include(t => t.DisplayNames).Include(t=>t.Descriptions)
             .FirstOrDefault(t => t.Id == resourceId);
 
         if (resource == null)
             return Results.NotFound();
 
-        return Results.Ok(resource);
+        return Results.Ok(
+           new GetResourceResponse(
+             resource.Id,
+             resource.DisplayNames.ToArray(),
+             resource.Type,
+             resource.Url,
+             resource.Descriptions.ToArray(),
+             resource.Tags,
+             resource.Status,
+             resource.CreatedAt,
+             resource.ModifiedAt,
+             resource.CreatedBy,
+             resource.ModifiedBy,
+             resource.CreatedByBehalfOf,
+             resource.ModifiedByBehalfOf
+            )
+         );
     }
 
     static IResult getAllResources(
@@ -139,31 +153,32 @@ public static class ResourceModule
         )
     {
         var query = context!.Resources!
-            // .Include(t => t.Tags)
+            .Include(t=>t.DisplayNames)
+            .Include(t=>t.Descriptions)
             .Skip(page * pageSize)
             .Take(pageSize);
-       
+
         var resources = query.ToList();
 
         if (resources.Count() > 0)
         {
-             return Results.Ok(resources.Select(res =>
-              new GetResourceResponse(
-               res.Id,
-               res.DisplayName,
-               res.Type,
-               res.Url,
-               res.Description,
-               res.Tags,
-               res.Status,
-               res.CreatedAt,
-               res.ModifiedAt,
-               res.CreatedBy,
-               res.ModifiedBy,
-               res.CreatedByBehalfOf,
-               res.ModifiedByBehalfOf
-               )
-            ).ToArray());
+            return Results.Ok(resources.Select(res =>
+             new GetResourceResponse(
+              res.Id,
+              res.DisplayNames.ToArray(),
+              res.Type,
+              res.Url,
+              res.Descriptions.ToArray(),
+              res.Tags,
+              res.Status,
+              res.CreatedAt,
+              res.ModifiedAt,
+              res.CreatedBy,
+              res.ModifiedBy,
+              res.CreatedByBehalfOf,
+              res.ModifiedByBehalfOf
+              )
+           ).ToArray());
         }
         else
             return Results.NoContent();

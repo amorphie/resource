@@ -1,33 +1,33 @@
 public record GetResourceResponse
     (
-        Guid id, 
-        string? displayName,
+        Guid id,
+        Translation[] displayNames,
         string? type,
         string? url,
-        string? description,
-        string[]? tags, 
+        Translation[] descriptions,
+        string[]? tags,
         string? status,
         DateTime? createdAt,
-        DateTime? modifiedAt,        
-        Guid? createdBy, 
+        DateTime? modifiedAt,
+        Guid? createdBy,
         Guid? modifiedBy,
-        Guid? createdByBehalfOf, 
+        Guid? createdByBehalfOf,
         Guid? modifiedByBehalfOf
      );
 
 public record SaveResourceRequest
     (
-        Guid id, 
-        string? displayName,
+        Guid id,
+        Translation[] displayNames,
         string? type,
         string? url,
-        string? description,
-        string[]? tags, 
+        Translation[] descriptions,
+        string[]? tags,
         string? status,
         DateTime? createdAt,
-        DateTime? modifiedAt,        
-        Guid? createdBy, 
+        DateTime? modifiedAt,
+        Guid? createdBy,
         Guid? modifiedBy,
-        Guid? createdByBehalfOf, 
+        Guid? createdByBehalfOf,
         Guid? modifiedByBehalfOf
      );

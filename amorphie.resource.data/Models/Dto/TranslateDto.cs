@@ -1,12 +1,8 @@
 public record GetResourceLanguageResponse
     (
         Guid id,
-        string? tableName,
-        Guid rowId,
-        string? fieldName,
-        string? text,
-        string? languageCode,
-        int order,
+        string language,        
+        string label,
         string? status,
         DateTime? createdAt,
         DateTime? modifiedAt,
@@ -19,12 +15,8 @@ public record GetResourceLanguageResponse
 public record SaveResourceLanguageRequest
     (
         Guid id,
-        string? tableName,
-        Guid rowId,
-        string? fieldName,
-        string? text,
-        string? languageCode,
-        int order,
+        string language,        
+        string label,
         string? status,
         DateTime? createdAt,
         DateTime? modifiedAt,
