@@ -3,6 +3,17 @@ public static class PrivilegeModule
 {
     public static void MapPrivilegeEndpoints(this WebApplication app)
     {
+        //getAllPrivileges
+        app.MapGet("/privilege", getAllPrivileges)
+            .WithOpenApi(operation =>
+            {
+                operation.Summary = "Returns all privileges.";
+                operation.Parameters[0].Description = "Paging parameter. **limit** is the page size of resultset.";
+                operation.Parameters[1].Description = "Paging parameter. **Token** is returned from last query.";
+                return operation;
+            })
+         .Produces<GetPrivilegeResponse[]>(StatusCodes.Status200OK)
+         .Produces(StatusCodes.Status204NoContent);
 
         //getPrivilege
         app.MapGet("/privilege/{privilegeId}", getPrivilege)
@@ -118,6 +129,41 @@ public static class PrivilegeModule
             return Results.NotFound();
 
         return Results.Ok(privilege);
+    }
+
+    static IResult getAllPrivileges(
+        [FromServices] ResourceDBContext context,
+        [FromQuery][Range(0, 100)] int page = 0,
+        [FromQuery][Range(5, 100)] int pageSize = 100
+        )
+    {
+        var query = context!.Privileges!
+            // .Include(t => t.Tags)
+            .Skip(page * pageSize)
+            .Take(pageSize);
+
+        var privileges = query.ToList();
+
+        if (privileges.Count() > 0)
+        {
+            return Results.Ok(privileges.Select(privelege =>
+             new GetPrivilegeResponse(
+              privelege.Id,
+              privelege.ResourceId,
+              privelege.Url,
+              privelege.Ttl,
+              privelege.Status,
+              privelege.CreatedAt,
+              privelege.ModifiedAt,
+              privelege.CreatedBy,
+              privelege.ModifiedBy,
+              privelege.CreatedByBehalfOf,
+              privelege.ModifiedByBehalfOf
+              )
+           ).ToArray());
+        }
+        else
+            return Results.NoContent();
     }
 
 }

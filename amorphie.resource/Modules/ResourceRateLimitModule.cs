@@ -3,6 +3,18 @@ public static class ResourceRateLimitModule
 {
     public static void MapResourceRateLimitEndpoints(this WebApplication app)
     {
+        //getAllResourceRateLimits
+        app.MapGet("/resourceRateLimit", getAllResourceRateLimits)
+            .WithOpenApi(operation =>
+            {
+                operation.Summary = "Returns all resource rate limits.";
+                operation.Parameters[0].Description = "Paging parameter. **limit** is the page size of resultset.";
+                operation.Parameters[1].Description = "Paging parameter. **Token** is returned from last query.";
+                return operation;
+            })
+         .Produces<GetResourceRateLimitResponse[]>(StatusCodes.Status200OK)
+         .Produces(StatusCodes.Status204NoContent);
+
         //saveResourceRateLimit
         app.MapPost("/resourceRateLimit", saveResourceRateLimit)
        .WithTopic("pubsub", "SaveResourceRateLimit")
@@ -94,5 +106,42 @@ public static class ResourceRateLimitModule
             context.SaveChanges();
             return Results.NoContent();
         }
+    }
+
+    static IResult getAllResourceRateLimits(
+        [FromServices] ResourceDBContext context,
+        [FromQuery][Range(0, 100)] int page = 0,
+        [FromQuery][Range(5, 100)] int pageSize = 100
+        )
+    {
+        var query = context!.ResourceRateLimits!
+            // .Include(t => t.Tags)
+            .Skip(page * pageSize)
+            .Take(pageSize);
+       
+        var resourceRateLimits = query.ToList();
+
+        if (resourceRateLimits.Count() > 0)
+        {
+             return Results.Ok(resourceRateLimits.Select(res =>
+              new GetResourceRateLimitResponse(
+               res.Id,
+               res.ResourceId,
+               res.Scope,
+               res.Condition,
+               res.Cron,
+               res.Limit,
+               res.Status,
+               res.CreatedAt,
+               res.ModifiedAt,
+               res.CreatedBy,
+               res.ModifiedBy,
+               res.CreatedByBehalfOf,
+               res.ModifiedByBehalfOf
+               )
+            ).ToArray());
+        }
+        else
+            return Results.NoContent();
     }
 }

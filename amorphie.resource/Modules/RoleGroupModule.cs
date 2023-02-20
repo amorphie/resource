@@ -3,16 +3,28 @@ public static class RoleGroupModule
 {
     public static void MapRoleGroupEndpoints(this WebApplication app)
     {
-        //searchRoleGroup
-        app.MapGet("/roleGroup", searchRoleGroup)
+        //getAllRoleGroups
+        app.MapGet("/roleGroup", getAllRoleGroups)
             .WithOpenApi(operation =>
-                {
-                    operation.Summary = "Returns queried role groups.";
-                    operation.Parameters[0].Description = "Full or partial name of role group name to be queried.";
-                    return operation;
-                })
-            .Produces<GetRoleGroupResponse[]>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status204NoContent);
+            {
+                operation.Summary = "Returns all role groups.";
+                operation.Parameters[0].Description = "Paging parameter. **limit** is the page size of resultset.";
+                operation.Parameters[1].Description = "Paging parameter. **Token** is returned from last query.";
+                return operation;
+            })
+         .Produces<GetRoleGroupResponse[]>(StatusCodes.Status200OK)
+         .Produces(StatusCodes.Status204NoContent);
+
+        // //searchRoleGroup
+        // app.MapGet("/roleGroup", searchRoleGroup)
+        //     .WithOpenApi(operation =>
+        //         {
+        //             operation.Summary = "Returns queried role groups.";
+        //             operation.Parameters[0].Description = "Full or partial name of role group name to be queried.";
+        //             return operation;
+        //         })
+        //     .Produces<GetRoleGroupResponse[]>(StatusCodes.Status200OK)
+        //     .Produces(StatusCodes.Status204NoContent);
 
         //getRoleGroup
         app.MapGet("/roleGroup/{roleGroupId}", getRoleGroup)
@@ -143,6 +155,40 @@ public static class RoleGroupModule
             return Results.NotFound();
 
         return Results.Ok(roleGroup);
+    }
+
+    static IResult getAllRoleGroups(
+        [FromServices] ResourceDBContext context,
+        [FromQuery][Range(0, 100)] int page = 0,
+        [FromQuery][Range(5, 100)] int pageSize = 100
+        )
+    {
+        var query = context!.RoleGroups!
+            // .Include(t => t.Tags)
+            .Skip(page * pageSize)
+            .Take(pageSize);
+       
+        var roleGroups = query.ToList();
+
+        if (roleGroups.Count() > 0)
+        {
+             return Results.Ok(roleGroups.Select(roleGroup =>
+              new GetRoleGroupResponse(
+               roleGroup.Id,
+               roleGroup.Title,
+               roleGroup.Tags,
+               roleGroup.Status,
+               roleGroup.CreatedAt,
+               roleGroup.ModifiedAt,
+               roleGroup.CreatedBy,
+               roleGroup.ModifiedBy,
+               roleGroup.CreatedByBehalfOf,
+               roleGroup.ModifiedByBehalfOf
+               )
+            ).ToArray());
+        }
+        else
+            return Results.NoContent();
     }
 }
 

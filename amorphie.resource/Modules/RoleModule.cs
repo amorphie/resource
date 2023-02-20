@@ -3,16 +3,29 @@ public static class RoleModule
 {
     public static void MapRoleEndpoints(this WebApplication app)
     {
-        //searchRole
-        app.MapGet("/role", searchRole)
+        //getAllRoles
+        app.MapGet("/role", getAllRoles)
             .WithOpenApi(operation =>
-                {
-                    operation.Summary = "Returns queried roles.";
-                    operation.Parameters[0].Description = "Full or partial name of role name to be queried.";
-                    return operation;
-                })
-            .Produces<GetRoleResponse[]>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status204NoContent);
+            {
+                operation.Summary = "Returns all roles.";
+                operation.Parameters[0].Description = "Paging parameter. **limit** is the page size of resultset.";
+                operation.Parameters[1].Description = "Paging parameter. **Token** is returned from last query.";
+                return operation;
+            })
+         .Produces<GetRoleResponse[]>(StatusCodes.Status200OK)
+         .Produces(StatusCodes.Status204NoContent);
+
+
+        // //searchRole
+        // app.MapGet("/role", searchRole)
+        //     .WithOpenApi(operation =>
+        //         {
+        //             operation.Summary = "Returns queried roles.";
+        //             operation.Parameters[0].Description = "Full or partial name of role name to be queried.";
+        //             return operation;
+        //         })
+        //     .Produces<GetRoleResponse[]>(StatusCodes.Status200OK)
+        //     .Produces(StatusCodes.Status204NoContent);
 
         //getRole
         app.MapGet("/role/{roleId}", getRole)
@@ -145,4 +158,37 @@ public static class RoleModule
         return Results.Ok(role);
     }
 
+    static IResult getAllRoles(
+        [FromServices] ResourceDBContext context,
+        [FromQuery][Range(0, 100)] int page = 0,
+        [FromQuery][Range(5, 100)] int pageSize = 100
+        )
+    {
+        var query = context!.Roles!
+            // .Include(t => t.Tags)
+            .Skip(page * pageSize)
+            .Take(pageSize);
+       
+        var roles = query.ToList();
+
+        if (roles.Count() > 0)
+        {
+             return Results.Ok(roles.Select(role =>
+              new GetRoleResponse(
+               role.Id,
+               role.Title,
+               role.Tags,
+               role.Status,
+               role.CreatedAt,
+               role.ModifiedAt,
+               role.CreatedBy,
+               role.ModifiedBy,
+               role.CreatedByBehalfOf,
+               role.ModifiedByBehalfOf
+               )
+            ).ToArray());
+        }
+        else
+            return Results.NoContent();
+    }
 }
