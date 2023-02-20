@@ -155,7 +155,20 @@ public static class RoleModule
         if (role == null)
             return Results.NotFound();
 
-        return Results.Ok(role);
+        return Results.Ok(
+              new GetRoleResponse(
+               role.Id,
+               role.Title,
+               role.Tags,
+               role.Status,
+               role.CreatedAt,
+               role.ModifiedAt,
+               role.CreatedBy,
+               role.ModifiedBy,
+               role.CreatedByBehalfOf,
+               role.ModifiedByBehalfOf
+               )
+            );
     }
 
     static IResult getAllRoles(
