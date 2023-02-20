@@ -6,6 +6,9 @@ public class Resource : BaseDbEntityWithId
     [NotMapped]
     public string? DisplayName { get; set; }//ML
 
+    [Key]
+    public Guid RowId { get; set; }
+
     public string? Type { get; set; }
     public string? Url { get; set; }
 
@@ -14,5 +17,7 @@ public class Resource : BaseDbEntityWithId
 
     public string[]? Tags { get; set; }
 
-    public string? Status { get; set; }  
+    public string? Status { get; set; }
+
+    public virtual List<Translation>? Translations { get; set; }
 }

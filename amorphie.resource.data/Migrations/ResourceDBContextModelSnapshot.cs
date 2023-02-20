@@ -66,7 +66,7 @@ namespace amorphie.resource.data.Migrations
 
             modelBuilder.Entity("Resource", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<Guid>("RowId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
@@ -77,6 +77,9 @@ namespace amorphie.resource.data.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<Guid?>("CreatedByBehalfOf")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("Id")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime?>("ModifiedAt")
@@ -100,25 +103,9 @@ namespace amorphie.resource.data.Migrations
                     b.Property<string>("Url")
                         .HasColumnType("text");
 
-                    b.HasKey("Id");
+                    b.HasKey("RowId");
 
                     b.ToTable("Resources");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("331ee6bf-0a59-411b-85c1-98b3f80a4728"),
-                            CreatedAt = new DateTime(2023, 2, 13, 14, 46, 36, 205, DateTimeKind.Local).AddTicks(4701),
-                            CreatedBy = new Guid("cda86159-ea2a-4af8-b765-20e339d5682c"),
-                            CreatedByBehalfOf = new Guid("cda86159-ea2a-4af8-b765-20e339d5682c"),
-                            ModifiedAt = new DateTime(2023, 2, 13, 14, 46, 36, 205, DateTimeKind.Local).AddTicks(4719),
-                            ModifiedBy = new Guid("cda86159-ea2a-4af8-b765-20e339d5682c"),
-                            ModifiedByBehalfOf = new Guid("cda86159-ea2a-4af8-b765-20e339d5682c"),
-                            Status = "A",
-                            Tags = new[] { "tag1", "tag2" },
-                            Type = "CONNECT",
-                            Url = "urlsample"
-                        });
                 });
 
             modelBuilder.Entity("ResourceRateLimit", b =>
@@ -214,7 +201,7 @@ namespace amorphie.resource.data.Migrations
 
             modelBuilder.Entity("Role", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<Guid>("RowId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
@@ -225,6 +212,9 @@ namespace amorphie.resource.data.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<Guid?>("CreatedByBehalfOf")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("Id")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime?>("ModifiedAt")
@@ -242,22 +232,9 @@ namespace amorphie.resource.data.Migrations
                     b.Property<string[]>("Tags")
                         .HasColumnType("text[]");
 
-                    b.HasKey("Id");
+                    b.HasKey("RowId");
 
                     b.ToTable("Roles");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("5508c729-888f-4f85-b04e-df71c7139115"),
-                            CreatedAt = new DateTime(2023, 2, 13, 14, 46, 36, 205, DateTimeKind.Local).AddTicks(4752),
-                            CreatedBy = new Guid("cda86159-ea2a-4af8-b765-20e339d5682c"),
-                            CreatedByBehalfOf = new Guid("cda86159-ea2a-4af8-b765-20e339d5682c"),
-                            ModifiedAt = new DateTime(2023, 2, 13, 14, 46, 36, 205, DateTimeKind.Local).AddTicks(4753),
-                            ModifiedBy = new Guid("cda86159-ea2a-4af8-b765-20e339d5682c"),
-                            ModifiedByBehalfOf = new Guid("cda86159-ea2a-4af8-b765-20e339d5682c"),
-                            Status = "A"
-                        });
                 });
 
             modelBuilder.Entity("RoleGroup", b =>
@@ -370,6 +347,12 @@ namespace amorphie.resource.data.Migrations
                     b.Property<int>("Order")
                         .HasColumnType("integer");
 
+                    b.Property<Guid?>("ResourceRowId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("RoleRowId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid>("RowId")
                         .HasColumnType("uuid");
 
@@ -384,60 +367,11 @@ namespace amorphie.resource.data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Translation");
+                    b.HasIndex("ResourceRowId");
 
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("73ea2492-1630-46ad-867a-9566aa33b2b8"),
-                            CreatedAt = new DateTime(2023, 2, 13, 14, 46, 36, 205, DateTimeKind.Local).AddTicks(4771),
-                            CreatedBy = new Guid("cda86159-ea2a-4af8-b765-20e339d5682c"),
-                            CreatedByBehalfOf = new Guid("cda86159-ea2a-4af8-b765-20e339d5682c"),
-                            FieldName = "DisplayName",
-                            LanguageCode = "tr",
-                            ModifiedAt = new DateTime(2023, 2, 13, 14, 46, 36, 205, DateTimeKind.Local).AddTicks(4772),
-                            ModifiedBy = new Guid("cda86159-ea2a-4af8-b765-20e339d5682c"),
-                            ModifiedByBehalfOf = new Guid("cda86159-ea2a-4af8-b765-20e339d5682c"),
-                            Order = 1,
-                            RowId = new Guid("331ee6bf-0a59-411b-85c1-98b3f80a4728"),
-                            Status = "A",
-                            TableName = "Resources",
-                            Text = "Hesaplar"
-                        },
-                        new
-                        {
-                            Id = new Guid("795ec60d-c5b0-4534-b102-7876ff7cc1e0"),
-                            CreatedAt = new DateTime(2023, 2, 13, 14, 46, 36, 205, DateTimeKind.Local).AddTicks(4774),
-                            CreatedBy = new Guid("cda86159-ea2a-4af8-b765-20e339d5682c"),
-                            CreatedByBehalfOf = new Guid("cda86159-ea2a-4af8-b765-20e339d5682c"),
-                            FieldName = "Description",
-                            LanguageCode = "tr",
-                            ModifiedAt = new DateTime(2023, 2, 13, 14, 46, 36, 205, DateTimeKind.Local).AddTicks(4774),
-                            ModifiedBy = new Guid("cda86159-ea2a-4af8-b765-20e339d5682c"),
-                            ModifiedByBehalfOf = new Guid("cda86159-ea2a-4af8-b765-20e339d5682c"),
-                            Order = 1,
-                            RowId = new Guid("331ee6bf-0a59-411b-85c1-98b3f80a4728"),
-                            Status = "A",
-                            TableName = "Resources",
-                            Text = "Açıklama"
-                        },
-                        new
-                        {
-                            Id = new Guid("4b8afabe-f1b8-416c-b0e4-c7cb5d26042d"),
-                            CreatedAt = new DateTime(2023, 2, 13, 14, 46, 36, 205, DateTimeKind.Local).AddTicks(4776),
-                            CreatedBy = new Guid("cda86159-ea2a-4af8-b765-20e339d5682c"),
-                            CreatedByBehalfOf = new Guid("cda86159-ea2a-4af8-b765-20e339d5682c"),
-                            FieldName = "RoleName",
-                            LanguageCode = "tr",
-                            ModifiedAt = new DateTime(2023, 2, 13, 14, 46, 36, 205, DateTimeKind.Local).AddTicks(4776),
-                            ModifiedBy = new Guid("cda86159-ea2a-4af8-b765-20e339d5682c"),
-                            ModifiedByBehalfOf = new Guid("cda86159-ea2a-4af8-b765-20e339d5682c"),
-                            Order = 1,
-                            RowId = new Guid("5508c729-888f-4f85-b04e-df71c7139115"),
-                            Status = "A",
-                            TableName = "Roles",
-                            Text = "Admin"
-                        });
+                    b.HasIndex("RoleRowId");
+
+                    b.ToTable("Translations");
                 });
 
             modelBuilder.Entity("Privilege", b =>
@@ -498,6 +432,27 @@ namespace amorphie.resource.data.Migrations
                     b.Navigation("Role");
 
                     b.Navigation("RoleGroup");
+                });
+
+            modelBuilder.Entity("Translation", b =>
+                {
+                    b.HasOne("Resource", null)
+                        .WithMany("Translations")
+                        .HasForeignKey("ResourceRowId");
+
+                    b.HasOne("Role", null)
+                        .WithMany("Translations")
+                        .HasForeignKey("RoleRowId");
+                });
+
+            modelBuilder.Entity("Resource", b =>
+                {
+                    b.Navigation("Translations");
+                });
+
+            modelBuilder.Entity("Role", b =>
+                {
+                    b.Navigation("Translations");
                 });
 #pragma warning restore 612, 618
         }

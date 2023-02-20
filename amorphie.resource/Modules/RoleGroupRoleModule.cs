@@ -3,6 +3,18 @@ public static class RoleGroupRoleModule
 {
     public static void MapRoleGroupRoleEndpoints(this WebApplication app)
     {
+        //getAllRoleGroupRoles
+        app.MapGet("/roleGroupRole", getAllRoleGroupRoles)
+            .WithOpenApi(operation =>
+            {
+                operation.Summary = "Returns all role group roles.";
+                operation.Parameters[0].Description = "Paging parameter. **limit** is the page size of resultset.";
+                operation.Parameters[1].Description = "Paging parameter. **Token** is returned from last query.";
+                return operation;
+            })
+         .Produces<GetRoleGroupRoleResponse[]>(StatusCodes.Status200OK)
+         .Produces(StatusCodes.Status204NoContent);
+
         //saveRoleGroupRole
         app.MapPost("/roleGroupRole", saveRoleGroupRole)
        .WithTopic("pubsub", "SaveRoleGroupRole")
@@ -89,5 +101,39 @@ public static class RoleGroupRoleModule
             context.SaveChanges();
             return Results.NoContent();
         }
+    }
+
+    static IResult getAllRoleGroupRoles(
+        [FromServices] ResourceDBContext context,
+        [FromQuery][Range(0, 100)] int page = 0,
+        [FromQuery][Range(5, 100)] int pageSize = 100
+        )
+    {
+        var query = context!.RoleGroupRoles!
+            // .Include(t => t.Tags)
+            .Skip(page * pageSize)
+            .Take(pageSize);
+       
+        var roleGroupRoles = query.ToList();
+
+        if (roleGroupRoles.Count() > 0)
+        {
+             return Results.Ok(roleGroupRoles.Select(roleGroup =>
+              new GetRoleGroupRoleResponse(
+               roleGroup.Id,
+               roleGroup.RoleGroupId,
+               roleGroup.RoleId,
+               roleGroup.Status,
+               roleGroup.CreatedAt,
+               roleGroup.ModifiedAt,
+               roleGroup.CreatedBy,
+               roleGroup.ModifiedBy,
+               roleGroup.CreatedByBehalfOf,
+               roleGroup.ModifiedByBehalfOf
+               )
+            ).ToArray());
+        }
+        else
+            return Results.NoContent();
     }
 }

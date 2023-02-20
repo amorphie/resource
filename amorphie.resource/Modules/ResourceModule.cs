@@ -1,11 +1,19 @@
-using System.Reflection;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-
 public static class ResourceModule
 {
     public static void MapResourceEndpoints(this WebApplication app)
     {
+        //getAllResources
+        app.MapGet("/resource", getAllResources)
+            .WithOpenApi(operation =>
+            {
+                operation.Summary = "Returns all resources.";
+                operation.Parameters[0].Description = "Paging parameter. **limit** is the page size of resultset.";
+                operation.Parameters[1].Description = "Paging parameter. **Token** is returned from last query.";
+                return operation;
+            })
+         .Produces<GetResourceResponse[]>(StatusCodes.Status200OK)
+         .Produces(StatusCodes.Status204NoContent);
+
         //getResource
         app.MapGet("/resource/{resourceId}", getResource)
             .WithOpenApi(operation =>
@@ -115,13 +123,51 @@ public static class ResourceModule
     [FromServices] ResourceDBContext context
     )
     {
-        var resource = context!.Resources!
+        var resource = context!.Resources.Include(t => t.Translations.Where(a => a.LanguageCode == "tr"))!
             .FirstOrDefault(t => t.Id == resourceId);
 
-            if (resource == null)
+        if (resource == null)
             return Results.NotFound();
 
         return Results.Ok(resource);
     }
 
+    static IResult getAllResources(
+        [FromServices] ResourceDBContext context,
+        [FromQuery][Range(0, 100)] int page = 0,
+        [FromQuery][Range(5, 100)] int pageSize = 100
+        )
+    {
+        var query = context!.Resources!
+            // .Include(t => t.Tags)
+            .Skip(page * pageSize)
+            .Take(pageSize);
+       
+        var resources = query.ToList();
+
+        if (resources.Count() > 0)
+        {
+             return Results.Ok(resources.Select(res =>
+              new GetResourceResponse(
+               res.Id,
+               res.DisplayName,
+               res.Type,
+               res.Url,
+               res.Description,
+               res.Tags,
+               res.Status,
+               res.CreatedAt,
+               res.ModifiedAt,
+               res.CreatedBy,
+               res.ModifiedBy,
+               res.CreatedByBehalfOf,
+               res.ModifiedByBehalfOf
+               )
+            ).ToArray());
+        }
+        else
+            return Results.NoContent();
+    }
+
 }
+

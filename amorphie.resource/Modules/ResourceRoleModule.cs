@@ -3,6 +3,18 @@ public static class ResourceRoleModule
 {
     public static void MapResourceRoleEndpoints(this WebApplication app)
     {
+         //getAllResourceRoles
+        app.MapGet("/resourceRole", getAllResourceRoles)
+            .WithOpenApi(operation =>
+            {
+                operation.Summary = "Returns all resource roles.";
+                operation.Parameters[0].Description = "Paging parameter. **limit** is the page size of resultset.";
+                operation.Parameters[1].Description = "Paging parameter. **Token** is returned from last query.";
+                return operation;
+            })
+         .Produces<GetResourceRoleResponse[]>(StatusCodes.Status200OK)
+         .Produces(StatusCodes.Status204NoContent);
+
         //saveResourceRole
         app.MapPost("/resourceRole", saveResourceRole)
        .WithTopic("pubsub", "SaveResourceRole")
@@ -87,5 +99,39 @@ public static class ResourceRoleModule
             context.SaveChanges();
             return Results.NoContent();
         }
+    }
+
+    static IResult getAllResourceRoles(
+        [FromServices] ResourceDBContext context,
+        [FromQuery][Range(0, 100)] int page = 0,
+        [FromQuery][Range(5, 100)] int pageSize = 100
+        )
+    {
+        var query = context!.ResourceRoles!
+            // .Include(t => t.Tags)
+            .Skip(page * pageSize)
+            .Take(pageSize);
+       
+        var resourceRoles = query.ToList();
+
+        if (resourceRoles.Count() > 0)
+        {
+             return Results.Ok(resourceRoles.Select(res =>
+              new GetResourceRoleResponse(
+               res.Id,
+               res.ResourceId,
+               res.RoleId,
+               res.Status,
+               res.CreatedAt,
+               res.ModifiedAt,
+               res.CreatedBy,
+               res.ModifiedBy,
+               res.CreatedByBehalfOf,
+               res.ModifiedByBehalfOf
+               )
+            ).ToArray());
+        }
+        else
+            return Results.NoContent();
     }
 }
