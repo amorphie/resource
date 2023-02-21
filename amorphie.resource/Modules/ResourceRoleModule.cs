@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Mvc;
 public static class ResourceRoleModule
 {
     public static void MapResourceRoleEndpoints(this WebApplication app)
@@ -108,7 +107,6 @@ public static class ResourceRoleModule
         )
     {
         var query = context!.ResourceRoles!
-            // .Include(t => t.Tags)
             .Skip(page * pageSize)
             .Take(pageSize);
        

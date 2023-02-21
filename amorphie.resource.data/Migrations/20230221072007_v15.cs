@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace amorphie.resource.data.Migrations
 {
     /// <inheritdoc />
-    public partial class v14 : Migration
+    public partial class v15 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -129,37 +129,6 @@ namespace amorphie.resource.data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Translations",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Language = table.Column<string>(type: "text", nullable: false),
-                    Label = table.Column<string>(type: "text", nullable: false),
-                    ResourceIdDescription = table.Column<Guid>(name: "ResourceId_Description", type: "uuid", nullable: true),
-                    ResourceIdDisplayName = table.Column<Guid>(name: "ResourceId_DisplayName", type: "uuid", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    CreatedByBehalfOf = table.Column<Guid>(type: "uuid", nullable: true),
-                    ModifiedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
-                    ModifiedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    ModifiedByBehalfOf = table.Column<Guid>(type: "uuid", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Translations", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Translations_Resources_ResourceId_Description",
-                        column: x => x.ResourceIdDescription,
-                        principalTable: "Resources",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_Translations_Resources_ResourceId_DisplayName",
-                        column: x => x.ResourceIdDisplayName,
-                        principalTable: "Resources",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
                 name: "ResourceRoles",
                 columns: table => new
                 {
@@ -223,19 +192,74 @@ namespace amorphie.resource.data.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Translations",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Language = table.Column<string>(type: "text", nullable: false),
+                    Label = table.Column<string>(type: "text", nullable: false),
+                    ResourceIdDescription = table.Column<Guid>(name: "ResourceId_Description", type: "uuid", nullable: true),
+                    ResourceIdDisplayName = table.Column<Guid>(name: "ResourceId_DisplayName", type: "uuid", nullable: true),
+                    RoleGroupIdTitle = table.Column<Guid>(name: "RoleGroupId_Title", type: "uuid", nullable: true),
+                    RoleIdTitle = table.Column<Guid>(name: "RoleId_Title", type: "uuid", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    CreatedByBehalfOf = table.Column<Guid>(type: "uuid", nullable: true),
+                    ModifiedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    ModifiedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    ModifiedByBehalfOf = table.Column<Guid>(type: "uuid", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Translations", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Translations_Resources_ResourceId_Description",
+                        column: x => x.ResourceIdDescription,
+                        principalTable: "Resources",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Translations_Resources_ResourceId_DisplayName",
+                        column: x => x.ResourceIdDisplayName,
+                        principalTable: "Resources",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Translations_RoleGroups_RoleGroupId_Title",
+                        column: x => x.RoleGroupIdTitle,
+                        principalTable: "RoleGroups",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Translations_Roles_RoleId_Title",
+                        column: x => x.RoleIdTitle,
+                        principalTable: "Roles",
+                        principalColumn: "Id");
+                });
+
             migrationBuilder.InsertData(
                 table: "Resources",
                 columns: new[] { "Id", "CreatedAt", "CreatedBy", "CreatedByBehalfOf", "ModifiedAt", "ModifiedBy", "ModifiedByBehalfOf", "Status", "Tags", "Type", "Url" },
-                values: new object[] { new Guid("44d59b76-0bfd-4fe4-a740-2d027c81afd3"), new DateTime(2023, 2, 20, 15, 41, 2, 643, DateTimeKind.Local).AddTicks(6129), new Guid("9533ecb6-236e-4b13-9628-21ac386281ac"), new Guid("9533ecb6-236e-4b13-9628-21ac386281ac"), new DateTime(2023, 2, 20, 15, 41, 2, 643, DateTimeKind.Local).AddTicks(6141), new Guid("9533ecb6-236e-4b13-9628-21ac386281ac"), new Guid("9533ecb6-236e-4b13-9628-21ac386281ac"), "A", new[] { "tag1", "tag2" }, "CONNECT", "urlsample" });
+                values: new object[] { new Guid("83135033-d8bf-4729-99e7-4734ad197f5d"), new DateTime(2023, 2, 21, 10, 20, 7, 224, DateTimeKind.Local).AddTicks(1352), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), new DateTime(2023, 2, 21, 10, 20, 7, 224, DateTimeKind.Local).AddTicks(1369), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), "A", new[] { "tag1", "tag2" }, "CONNECT", "urlsample" });
+
+            migrationBuilder.InsertData(
+                table: "RoleGroups",
+                columns: new[] { "Id", "CreatedAt", "CreatedBy", "CreatedByBehalfOf", "ModifiedAt", "ModifiedBy", "ModifiedByBehalfOf", "Status", "Tags" },
+                values: new object[] { new Guid("4462ca2c-981c-401d-8bcf-e228b05ddb96"), new DateTime(2023, 2, 21, 10, 20, 7, 224, DateTimeKind.Local).AddTicks(1428), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), new DateTime(2023, 2, 21, 10, 20, 7, 224, DateTimeKind.Local).AddTicks(1430), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), "A", new[] { "tag1", "tag2" } });
+
+            migrationBuilder.InsertData(
+                table: "Roles",
+                columns: new[] { "Id", "CreatedAt", "CreatedBy", "CreatedByBehalfOf", "ModifiedAt", "ModifiedBy", "ModifiedByBehalfOf", "Status", "Tags" },
+                values: new object[] { new Guid("d62d4d38-ecdf-4b4e-b17c-0882412340bb"), new DateTime(2023, 2, 21, 10, 20, 7, 224, DateTimeKind.Local).AddTicks(1411), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), new DateTime(2023, 2, 21, 10, 20, 7, 224, DateTimeKind.Local).AddTicks(1413), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), "A", new[] { "tag1", "tag2" } });
 
             migrationBuilder.InsertData(
                 table: "Translations",
-                columns: new[] { "Id", "CreatedAt", "CreatedBy", "CreatedByBehalfOf", "Label", "Language", "ModifiedAt", "ModifiedBy", "ModifiedByBehalfOf", "ResourceId_Description", "ResourceId_DisplayName" },
+                columns: new[] { "Id", "CreatedAt", "CreatedBy", "CreatedByBehalfOf", "Label", "Language", "ModifiedAt", "ModifiedBy", "ModifiedByBehalfOf", "ResourceId_Description", "ResourceId_DisplayName", "RoleGroupId_Title", "RoleId_Title" },
                 values: new object[,]
                 {
-                    { new Guid("1a10e902-de26-4ba7-bf78-a46fbe44ddb1"), new DateTime(2023, 2, 20, 15, 41, 2, 643, DateTimeKind.Local).AddTicks(6165), new Guid("9533ecb6-236e-4b13-9628-21ac386281ac"), new Guid("9533ecb6-236e-4b13-9628-21ac386281ac"), "Description", "en", new DateTime(2023, 2, 20, 15, 41, 2, 643, DateTimeKind.Local).AddTicks(6165), new Guid("9533ecb6-236e-4b13-9628-21ac386281ac"), new Guid("9533ecb6-236e-4b13-9628-21ac386281ac"), new Guid("44d59b76-0bfd-4fe4-a740-2d027c81afd3"), null },
-                    { new Guid("5de13603-a5b4-4c44-aea6-9a61584b8988"), new DateTime(2023, 2, 20, 15, 41, 2, 643, DateTimeKind.Local).AddTicks(6166), new Guid("9533ecb6-236e-4b13-9628-21ac386281ac"), new Guid("9533ecb6-236e-4b13-9628-21ac386281ac"), "Başlık", "tr", new DateTime(2023, 2, 20, 15, 41, 2, 643, DateTimeKind.Local).AddTicks(6166), new Guid("9533ecb6-236e-4b13-9628-21ac386281ac"), new Guid("9533ecb6-236e-4b13-9628-21ac386281ac"), null, new Guid("44d59b76-0bfd-4fe4-a740-2d027c81afd3") },
-                    { new Guid("6da252bd-6206-4fc9-874d-46addbaabdd6"), new DateTime(2023, 2, 20, 15, 41, 2, 643, DateTimeKind.Local).AddTicks(6162), new Guid("9533ecb6-236e-4b13-9628-21ac386281ac"), new Guid("9533ecb6-236e-4b13-9628-21ac386281ac"), "Açıklama", "tr", new DateTime(2023, 2, 20, 15, 41, 2, 643, DateTimeKind.Local).AddTicks(6163), new Guid("9533ecb6-236e-4b13-9628-21ac386281ac"), new Guid("9533ecb6-236e-4b13-9628-21ac386281ac"), new Guid("44d59b76-0bfd-4fe4-a740-2d027c81afd3"), null }
+                    { new Guid("3bdfe9ce-c4b8-4a60-a526-a8d3de22b8db"), new DateTime(2023, 2, 21, 10, 20, 7, 224, DateTimeKind.Local).AddTicks(1454), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), "Başlık", "tr", new DateTime(2023, 2, 21, 10, 20, 7, 224, DateTimeKind.Local).AddTicks(1454), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), null, new Guid("83135033-d8bf-4729-99e7-4734ad197f5d"), null, null },
+                    { new Guid("6edc0d4e-c4b0-476e-a493-1df98dfefb68"), new DateTime(2023, 2, 21, 10, 20, 7, 224, DateTimeKind.Local).AddTicks(1461), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), "Rol Başlık", "tr", new DateTime(2023, 2, 21, 10, 20, 7, 224, DateTimeKind.Local).AddTicks(1461), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), null, null, null, new Guid("d62d4d38-ecdf-4b4e-b17c-0882412340bb") },
+                    { new Guid("a000f232-0bad-4740-a789-e67a5995c91f"), new DateTime(2023, 2, 21, 10, 20, 7, 224, DateTimeKind.Local).AddTicks(1446), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), "Açıklama", "tr", new DateTime(2023, 2, 21, 10, 20, 7, 224, DateTimeKind.Local).AddTicks(1447), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), new Guid("83135033-d8bf-4729-99e7-4734ad197f5d"), null, null, null },
+                    { new Guid("c11d2b3a-79d1-4245-82f4-7ead28650baa"), new DateTime(2023, 2, 21, 10, 20, 7, 224, DateTimeKind.Local).AddTicks(1451), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), "Description", "en", new DateTime(2023, 2, 21, 10, 20, 7, 224, DateTimeKind.Local).AddTicks(1451), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), new Guid("83135033-d8bf-4729-99e7-4734ad197f5d"), null, null, null },
+                    { new Guid("fcb45d0c-fd75-45ba-bf5d-0ba577a63994"), new DateTime(2023, 2, 21, 10, 20, 7, 224, DateTimeKind.Local).AddTicks(1465), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), "Rol Grup Başlık", "tr", new DateTime(2023, 2, 21, 10, 20, 7, 224, DateTimeKind.Local).AddTicks(1465), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), null, null, new Guid("4462ca2c-981c-401d-8bcf-e228b05ddb96"), null }
                 });
 
             migrationBuilder.CreateIndex(
@@ -277,6 +301,16 @@ namespace amorphie.resource.data.Migrations
                 name: "IX_Translations_ResourceId_DisplayName",
                 table: "Translations",
                 column: "ResourceId_DisplayName");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Translations_RoleGroupId_Title",
+                table: "Translations",
+                column: "RoleGroupId_Title");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Translations_RoleId_Title",
+                table: "Translations",
+                column: "RoleId_Title");
         }
 
         /// <inheritdoc />
@@ -298,13 +332,13 @@ namespace amorphie.resource.data.Migrations
                 name: "Translations");
 
             migrationBuilder.DropTable(
+                name: "Resources");
+
+            migrationBuilder.DropTable(
                 name: "RoleGroups");
 
             migrationBuilder.DropTable(
                 name: "Roles");
-
-            migrationBuilder.DropTable(
-                name: "Resources");
         }
     }
 }

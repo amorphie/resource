@@ -1,6 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-
-
 public static class HttpMethodType
 {
     public const string CONNECT = "CONNECT";

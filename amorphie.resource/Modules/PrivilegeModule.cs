@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Mvc;
 public static class PrivilegeModule
 {
     public static void MapPrivilegeEndpoints(this WebApplication app)

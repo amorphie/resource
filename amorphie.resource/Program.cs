@@ -1,13 +1,9 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using SecretExtensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
 await builder.Configuration.AddVaultSecrets("amorphie-secretstore", "amorphie-secretstore");
 var postgreSql = builder.Configuration["PostgreSql"];
-
-
 
 builder.Logging.ClearProviders();
 builder.Logging.AddJsonConsole();
