@@ -107,13 +107,13 @@ namespace amorphie.resource.data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("44d59b76-0bfd-4fe4-a740-2d027c81afd3"),
-                            CreatedAt = new DateTime(2023, 2, 20, 15, 41, 2, 643, DateTimeKind.Local).AddTicks(6129),
-                            CreatedBy = new Guid("9533ecb6-236e-4b13-9628-21ac386281ac"),
-                            CreatedByBehalfOf = new Guid("9533ecb6-236e-4b13-9628-21ac386281ac"),
-                            ModifiedAt = new DateTime(2023, 2, 20, 15, 41, 2, 643, DateTimeKind.Local).AddTicks(6141),
-                            ModifiedBy = new Guid("9533ecb6-236e-4b13-9628-21ac386281ac"),
-                            ModifiedByBehalfOf = new Guid("9533ecb6-236e-4b13-9628-21ac386281ac"),
+                            Id = new Guid("83135033-d8bf-4729-99e7-4734ad197f5d"),
+                            CreatedAt = new DateTime(2023, 2, 21, 10, 20, 7, 224, DateTimeKind.Local).AddTicks(1352),
+                            CreatedBy = new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"),
+                            CreatedByBehalfOf = new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"),
+                            ModifiedAt = new DateTime(2023, 2, 21, 10, 20, 7, 224, DateTimeKind.Local).AddTicks(1369),
+                            ModifiedBy = new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"),
+                            ModifiedByBehalfOf = new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"),
                             Status = "A",
                             Tags = new[] { "tag1", "tag2" },
                             Type = "CONNECT",
@@ -245,6 +245,20 @@ namespace amorphie.resource.data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Roles");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("d62d4d38-ecdf-4b4e-b17c-0882412340bb"),
+                            CreatedAt = new DateTime(2023, 2, 21, 10, 20, 7, 224, DateTimeKind.Local).AddTicks(1411),
+                            CreatedBy = new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"),
+                            CreatedByBehalfOf = new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"),
+                            ModifiedAt = new DateTime(2023, 2, 21, 10, 20, 7, 224, DateTimeKind.Local).AddTicks(1413),
+                            ModifiedBy = new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"),
+                            ModifiedByBehalfOf = new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"),
+                            Status = "A",
+                            Tags = new[] { "tag1", "tag2" }
+                        });
                 });
 
             modelBuilder.Entity("RoleGroup", b =>
@@ -280,6 +294,20 @@ namespace amorphie.resource.data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("RoleGroups");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("4462ca2c-981c-401d-8bcf-e228b05ddb96"),
+                            CreatedAt = new DateTime(2023, 2, 21, 10, 20, 7, 224, DateTimeKind.Local).AddTicks(1428),
+                            CreatedBy = new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"),
+                            CreatedByBehalfOf = new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"),
+                            ModifiedAt = new DateTime(2023, 2, 21, 10, 20, 7, 224, DateTimeKind.Local).AddTicks(1430),
+                            ModifiedBy = new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"),
+                            ModifiedByBehalfOf = new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"),
+                            Status = "A",
+                            Tags = new[] { "tag1", "tag2" }
+                        });
                 });
 
             modelBuilder.Entity("RoleGroupRole", b =>
@@ -362,53 +390,89 @@ namespace amorphie.resource.data.Migrations
                     b.Property<Guid?>("ResourceId_DisplayName")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("RoleGroupId_Title")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("RoleId_Title")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ResourceId_Description");
 
                     b.HasIndex("ResourceId_DisplayName");
 
+                    b.HasIndex("RoleGroupId_Title");
+
+                    b.HasIndex("RoleId_Title");
+
                     b.ToTable("Translations");
 
                     b.HasData(
                         new
                         {
-                            Id = new Guid("6da252bd-6206-4fc9-874d-46addbaabdd6"),
-                            CreatedAt = new DateTime(2023, 2, 20, 15, 41, 2, 643, DateTimeKind.Local).AddTicks(6162),
-                            CreatedBy = new Guid("9533ecb6-236e-4b13-9628-21ac386281ac"),
-                            CreatedByBehalfOf = new Guid("9533ecb6-236e-4b13-9628-21ac386281ac"),
+                            Id = new Guid("a000f232-0bad-4740-a789-e67a5995c91f"),
+                            CreatedAt = new DateTime(2023, 2, 21, 10, 20, 7, 224, DateTimeKind.Local).AddTicks(1446),
+                            CreatedBy = new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"),
+                            CreatedByBehalfOf = new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"),
                             Label = "Açıklama",
                             Language = "tr",
-                            ModifiedAt = new DateTime(2023, 2, 20, 15, 41, 2, 643, DateTimeKind.Local).AddTicks(6163),
-                            ModifiedBy = new Guid("9533ecb6-236e-4b13-9628-21ac386281ac"),
-                            ModifiedByBehalfOf = new Guid("9533ecb6-236e-4b13-9628-21ac386281ac"),
-                            ResourceIdDescription = new Guid("44d59b76-0bfd-4fe4-a740-2d027c81afd3")
+                            ModifiedAt = new DateTime(2023, 2, 21, 10, 20, 7, 224, DateTimeKind.Local).AddTicks(1447),
+                            ModifiedBy = new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"),
+                            ModifiedByBehalfOf = new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"),
+                            ResourceIdDescription = new Guid("83135033-d8bf-4729-99e7-4734ad197f5d")
                         },
                         new
                         {
-                            Id = new Guid("1a10e902-de26-4ba7-bf78-a46fbe44ddb1"),
-                            CreatedAt = new DateTime(2023, 2, 20, 15, 41, 2, 643, DateTimeKind.Local).AddTicks(6165),
-                            CreatedBy = new Guid("9533ecb6-236e-4b13-9628-21ac386281ac"),
-                            CreatedByBehalfOf = new Guid("9533ecb6-236e-4b13-9628-21ac386281ac"),
+                            Id = new Guid("c11d2b3a-79d1-4245-82f4-7ead28650baa"),
+                            CreatedAt = new DateTime(2023, 2, 21, 10, 20, 7, 224, DateTimeKind.Local).AddTicks(1451),
+                            CreatedBy = new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"),
+                            CreatedByBehalfOf = new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"),
                             Label = "Description",
                             Language = "en",
-                            ModifiedAt = new DateTime(2023, 2, 20, 15, 41, 2, 643, DateTimeKind.Local).AddTicks(6165),
-                            ModifiedBy = new Guid("9533ecb6-236e-4b13-9628-21ac386281ac"),
-                            ModifiedByBehalfOf = new Guid("9533ecb6-236e-4b13-9628-21ac386281ac"),
-                            ResourceIdDescription = new Guid("44d59b76-0bfd-4fe4-a740-2d027c81afd3")
+                            ModifiedAt = new DateTime(2023, 2, 21, 10, 20, 7, 224, DateTimeKind.Local).AddTicks(1451),
+                            ModifiedBy = new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"),
+                            ModifiedByBehalfOf = new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"),
+                            ResourceIdDescription = new Guid("83135033-d8bf-4729-99e7-4734ad197f5d")
                         },
                         new
                         {
-                            Id = new Guid("5de13603-a5b4-4c44-aea6-9a61584b8988"),
-                            CreatedAt = new DateTime(2023, 2, 20, 15, 41, 2, 643, DateTimeKind.Local).AddTicks(6166),
-                            CreatedBy = new Guid("9533ecb6-236e-4b13-9628-21ac386281ac"),
-                            CreatedByBehalfOf = new Guid("9533ecb6-236e-4b13-9628-21ac386281ac"),
+                            Id = new Guid("3bdfe9ce-c4b8-4a60-a526-a8d3de22b8db"),
+                            CreatedAt = new DateTime(2023, 2, 21, 10, 20, 7, 224, DateTimeKind.Local).AddTicks(1454),
+                            CreatedBy = new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"),
+                            CreatedByBehalfOf = new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"),
                             Label = "Başlık",
                             Language = "tr",
-                            ModifiedAt = new DateTime(2023, 2, 20, 15, 41, 2, 643, DateTimeKind.Local).AddTicks(6166),
-                            ModifiedBy = new Guid("9533ecb6-236e-4b13-9628-21ac386281ac"),
-                            ModifiedByBehalfOf = new Guid("9533ecb6-236e-4b13-9628-21ac386281ac"),
-                            ResourceIdDisplayName = new Guid("44d59b76-0bfd-4fe4-a740-2d027c81afd3")
+                            ModifiedAt = new DateTime(2023, 2, 21, 10, 20, 7, 224, DateTimeKind.Local).AddTicks(1454),
+                            ModifiedBy = new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"),
+                            ModifiedByBehalfOf = new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"),
+                            ResourceIdDisplayName = new Guid("83135033-d8bf-4729-99e7-4734ad197f5d")
+                        },
+                        new
+                        {
+                            Id = new Guid("6edc0d4e-c4b0-476e-a493-1df98dfefb68"),
+                            CreatedAt = new DateTime(2023, 2, 21, 10, 20, 7, 224, DateTimeKind.Local).AddTicks(1461),
+                            CreatedBy = new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"),
+                            CreatedByBehalfOf = new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"),
+                            Label = "Rol Başlık",
+                            Language = "tr",
+                            ModifiedAt = new DateTime(2023, 2, 21, 10, 20, 7, 224, DateTimeKind.Local).AddTicks(1461),
+                            ModifiedBy = new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"),
+                            ModifiedByBehalfOf = new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"),
+                            RoleIdTitle = new Guid("d62d4d38-ecdf-4b4e-b17c-0882412340bb")
+                        },
+                        new
+                        {
+                            Id = new Guid("fcb45d0c-fd75-45ba-bf5d-0ba577a63994"),
+                            CreatedAt = new DateTime(2023, 2, 21, 10, 20, 7, 224, DateTimeKind.Local).AddTicks(1465),
+                            CreatedBy = new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"),
+                            CreatedByBehalfOf = new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"),
+                            Label = "Rol Grup Başlık",
+                            Language = "tr",
+                            ModifiedAt = new DateTime(2023, 2, 21, 10, 20, 7, 224, DateTimeKind.Local).AddTicks(1465),
+                            ModifiedBy = new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"),
+                            ModifiedByBehalfOf = new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"),
+                            RoleGroupIdTitle = new Guid("4462ca2c-981c-401d-8bcf-e228b05ddb96")
                         });
                 });
 
@@ -481,6 +545,14 @@ namespace amorphie.resource.data.Migrations
                     b.HasOne("Resource", null)
                         .WithMany("DisplayNames")
                         .HasForeignKey("ResourceId_DisplayName");
+
+                    b.HasOne("RoleGroup", null)
+                        .WithMany("Titles")
+                        .HasForeignKey("RoleGroupId_Title");
+
+                    b.HasOne("Role", null)
+                        .WithMany("Titles")
+                        .HasForeignKey("RoleId_Title");
                 });
 
             modelBuilder.Entity("Resource", b =>
@@ -488,6 +560,16 @@ namespace amorphie.resource.data.Migrations
                     b.Navigation("Descriptions");
 
                     b.Navigation("DisplayNames");
+                });
+
+            modelBuilder.Entity("Role", b =>
+                {
+                    b.Navigation("Titles");
+                });
+
+            modelBuilder.Entity("RoleGroup", b =>
+                {
+                    b.Navigation("Titles");
                 });
 #pragma warning restore 612, 618
         }

@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Mvc;
 public static class RoleGroupModule
 {
     public static void MapRoleGroupEndpoints(this WebApplication app)
@@ -13,18 +12,7 @@ public static class RoleGroupModule
                 return operation;
             })
          .Produces<GetRoleGroupResponse[]>(StatusCodes.Status200OK)
-         .Produces(StatusCodes.Status204NoContent);
-
-        // //searchRoleGroup
-        // app.MapGet("/roleGroup", searchRoleGroup)
-        //     .WithOpenApi(operation =>
-        //         {
-        //             operation.Summary = "Returns queried role groups.";
-        //             operation.Parameters[0].Description = "Full or partial name of role group name to be queried.";
-        //             return operation;
-        //         })
-        //     .Produces<GetRoleGroupResponse[]>(StatusCodes.Status200OK)
-        //     .Produces(StatusCodes.Status204NoContent);
+         .Produces(StatusCodes.Status204NoContent);       
 
         //getRoleGroup
         app.MapGet("/roleGroup/{roleGroupId}", getRoleGroup)
@@ -73,7 +61,7 @@ public static class RoleGroupModule
                 new RoleGroup
                 {
                     Id = data.id,
-                    Title = data.title,
+                    Titles = data.titles,
                     Tags = data.tags,
                     Status = data.status,
                     CreatedAt = data.createdAt,
@@ -93,7 +81,6 @@ public static class RoleGroupModule
 
             // Apply update to only changed fields.
 
-            ModuleHelper.PreUpdate(data.title.ToString(), existingRecord.Title!.ToString(), ref hasChanges);
             ModuleHelper.PreUpdate(data.status, existingRecord.Status!.ToString(), ref hasChanges);
 
             if (hasChanges)
@@ -126,35 +113,31 @@ public static class RoleGroupModule
         }
     }
 
-
-    static IResult searchRoleGroup(
-    [FromQuery(Name = "roleGroupTitle")] string roleGroupTitle,
-    [FromServices] ResourceDBContext context
-    )
-    {
-        var roleGroups = context!.RoleGroups!
-            .Where(t => t.Title!.Contains(roleGroupTitle));
-
-        if (roleGroups.ToList().Count == 0)
-            return Results.NotFound();
-
-        return Results.Ok(
-            roleGroups.ToArray()
-        );
-    }
-
     static IResult getRoleGroup(
     [FromRoute(Name = "roleGroupId")] Guid roleGroupId,
     [FromServices] ResourceDBContext context
     )
     {
-        var roleGroup = context!.RoleGroups!
+        var roleGroup = context!.RoleGroups!.Include(t => t.Titles)
             .FirstOrDefault(t => t.Id == roleGroupId);
 
         if (roleGroup == null)
             return Results.NotFound();
 
-        return Results.Ok(roleGroup);
+          return Results.Ok(
+              new GetRoleGroupResponse(
+               roleGroup.Id,
+               roleGroup.Titles.ToArray(),
+               roleGroup.Tags,
+               roleGroup.Status,
+               roleGroup.CreatedAt,
+               roleGroup.ModifiedAt,
+               roleGroup.CreatedBy,
+               roleGroup.ModifiedBy,
+               roleGroup.CreatedByBehalfOf,
+               roleGroup.ModifiedByBehalfOf
+               )
+            );
     }
 
     static IResult getAllRoleGroups(
@@ -164,7 +147,7 @@ public static class RoleGroupModule
         )
     {
         var query = context!.RoleGroups!
-            // .Include(t => t.Tags)
+            .Include(t => t.Titles)
             .Skip(page * pageSize)
             .Take(pageSize);
        
@@ -175,7 +158,7 @@ public static class RoleGroupModule
              return Results.Ok(roleGroups.Select(roleGroup =>
               new GetRoleGroupResponse(
                roleGroup.Id,
-               roleGroup.Title,
+               roleGroup.Titles.ToArray(),
                roleGroup.Tags,
                roleGroup.Status,
                roleGroup.CreatedAt,

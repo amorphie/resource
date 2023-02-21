@@ -3,8 +3,6 @@ using Microsoft.EntityFrameworkCore.Design;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-//namespace amorphie.tag.data;
-
 class ResourceDbContextFactory : IDesignTimeDbContextFactory<ResourceDBContext>
 {
     public ResourceDBContext CreateDbContext(string[] args)
@@ -26,7 +24,6 @@ public class ResourceDBContext : DbContext
     public DbSet<ResourceRole>? ResourceRoles { get; set; }
     public DbSet<Privilege>? Privileges { get; set; }
     public DbSet<ResourceRateLimit>? ResourceRateLimits { get; set; }
-
     public DbSet<Translation>? Translations { get; set; }
     public ResourceDBContext(DbContextOptions options) : base(options) { AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true); }
 
@@ -60,6 +57,10 @@ public class ResourceDBContext : DbContext
         modelBuilder.Entity<Translation>().Property<Guid?>("ResourceId_DisplayName");
         modelBuilder.Entity<Translation>().Property<Guid?>("ResourceId_Description");
 
+        modelBuilder.Entity<Translation>().Property<Guid?>("RoleId_Title");
+
+        modelBuilder.Entity<Translation>().Property<Guid?>("RoleGroupId_Title");
+
         modelBuilder.Entity<Resource>()
            .HasMany<Translation>(t => t.DisplayNames)
            .WithOne()
@@ -70,6 +71,16 @@ public class ResourceDBContext : DbContext
         .WithOne()
         .HasForeignKey("ResourceId_Description");
 
+        modelBuilder.Entity<Role>()
+        .HasMany<Translation>(t => t.Titles)
+        .WithOne()
+        .HasForeignKey("RoleId_Title");
+
+        modelBuilder.Entity<RoleGroup>()
+        .HasMany<Translation>(t => t.Titles)
+        .WithOne()
+        .HasForeignKey("RoleGroupId_Title");
+
         var ResourceId = Guid.NewGuid();
         var RoleId = Guid.NewGuid();
         var RoleGroupId = Guid.NewGuid();
@@ -77,16 +88,6 @@ public class ResourceDBContext : DbContext
         var UserId = Guid.NewGuid();
 
         var tags = new string[] { "tag1", "tag2" };
-
-        var translation1 = new Translation();
-        translation1.Id = Guid.NewGuid();
-        translation1.Language = "tr";
-        translation1.Label = "açıklama";
-        var translation2 = new Translation();
-        translation2.Id = Guid.NewGuid();
-        translation2.Language = "en";
-        translation2.Label = "description";
-        var translations = new List<Translation>(new Translation[] { translation1, translation2 });
 
         modelBuilder.Entity<Resource>().HasData(
           new
@@ -105,18 +106,33 @@ public class ResourceDBContext : DbContext
               ModifiedByBehalfOf = UserId,
           });
 
-        //         modelBuilder.Entity<Role>().HasData(
-        //         new
-        //         {
-        //             Id = RoleId,
-        //             Status = "A",
-        //             CreatedAt = DateTime.Now,
-        //             ModifiedAt = DateTime.Now,
-        //             CreatedBy = UserId,
-        //             ModifiedBy = UserId,
-        //             CreatedByBehalfOf = UserId,
-        //             ModifiedByBehalfOf = UserId
-        //         });
+        modelBuilder.Entity<Role>().HasData(
+        new
+        {
+            Id = RoleId,
+            Tags = tags,
+            Status = "A",
+            CreatedAt = DateTime.Now,
+            ModifiedAt = DateTime.Now,
+            CreatedBy = UserId,
+            ModifiedBy = UserId,
+            CreatedByBehalfOf = UserId,
+            ModifiedByBehalfOf = UserId
+        });
+
+        modelBuilder.Entity<RoleGroup>().HasData(
+        new
+        {
+            Id = RoleGroupId,
+            Tags = tags,
+            Status = "A",
+            CreatedAt = DateTime.Now,
+            ModifiedAt = DateTime.Now,
+            CreatedBy = UserId,
+            ModifiedBy = UserId,
+            CreatedByBehalfOf = UserId,
+            ModifiedByBehalfOf = UserId
+        });
 
         modelBuilder.Entity<Translation>().HasData(
          new
@@ -149,17 +165,45 @@ public class ResourceDBContext : DbContext
            },
             new
             {
-               Id = Guid.NewGuid(),
-               Language = "tr",
-               Label = "Başlık",
-               Status = "A",
-               CreatedAt = DateTime.Now,
-               ModifiedAt = DateTime.Now,
-               CreatedBy = UserId,
-               ModifiedBy = UserId,
-               CreatedByBehalfOf = UserId,
-               ModifiedByBehalfOf = UserId,
-               ResourceId_DisplayName = ResourceId
+                Id = Guid.NewGuid(),
+                Language = "tr",
+                Label = "Başlık",
+                Status = "A",
+                CreatedAt = DateTime.Now,
+                ModifiedAt = DateTime.Now,
+                CreatedBy = UserId,
+                ModifiedBy = UserId,
+                CreatedByBehalfOf = UserId,
+                ModifiedByBehalfOf = UserId,
+                ResourceId_DisplayName = ResourceId
+            },
+            new
+            {
+                Id = Guid.NewGuid(),
+                Language = "tr",
+                Label = "Rol Başlık",
+                Status = "A",
+                CreatedAt = DateTime.Now,
+                ModifiedAt = DateTime.Now,
+                CreatedBy = UserId,
+                ModifiedBy = UserId,
+                CreatedByBehalfOf = UserId,
+                ModifiedByBehalfOf = UserId,
+                RoleId_Title = RoleId
+            },
+            new
+            {
+                Id = Guid.NewGuid(),
+                Language = "tr",
+                Label = "Rol Grup Başlık",
+                Status = "A",
+                CreatedAt = DateTime.Now,
+                ModifiedAt = DateTime.Now,
+                CreatedBy = UserId,
+                ModifiedBy = UserId,
+                CreatedByBehalfOf = UserId,
+                ModifiedByBehalfOf = UserId,
+                RoleGroupId_Title = RoleGroupId
             }
          );
     }

@@ -1,6 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
 public class Resource : BaseDbEntityWithId
 {
     public ICollection<Translation> DisplayNames { get; set; } = default!;

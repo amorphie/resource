@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Mvc;
 public static class RoleModule
 {
     public static void MapRoleEndpoints(this WebApplication app)
@@ -15,17 +14,6 @@ public static class RoleModule
          .Produces<GetRoleResponse[]>(StatusCodes.Status200OK)
          .Produces(StatusCodes.Status204NoContent);
 
-
-        // //searchRole
-        // app.MapGet("/role", searchRole)
-        //     .WithOpenApi(operation =>
-        //         {
-        //             operation.Summary = "Returns queried roles.";
-        //             operation.Parameters[0].Description = "Full or partial name of role name to be queried.";
-        //             return operation;
-        //         })
-        //     .Produces<GetRoleResponse[]>(StatusCodes.Status200OK)
-        //     .Produces(StatusCodes.Status204NoContent);
 
         //getRole
         app.MapGet("/role/{roleId}", getRole)
@@ -74,7 +62,7 @@ public static class RoleModule
                 new Role
                 {
                     Id = data.id,
-                    Title = data.title,
+                    Titles = data.titles,
                     Tags = data.tags,
                     Status = data.status,
                     CreatedAt = data.createdAt,
@@ -94,7 +82,6 @@ public static class RoleModule
 
             // Apply update to only changed fields.
 
-            ModuleHelper.PreUpdate(data.title.ToString(), existingRecord.Title!.ToString(), ref hasChanges);
             ModuleHelper.PreUpdate(data.status, existingRecord.Status!.ToString(), ref hasChanges);
 
             if (hasChanges)
@@ -127,29 +114,12 @@ public static class RoleModule
         }
     }
 
-
-    static IResult searchRole(
-    [FromQuery(Name = "roleTitle")] string roleTitle,
-    [FromServices] ResourceDBContext context
-    )
-    {
-        var roles = context!.Roles!
-            .Where(t => t.Title!.Contains(roleTitle));
-
-        if (roles.ToList().Count == 0)
-            return Results.NotFound();
-
-        return Results.Ok(
-            roles.ToArray()
-        );
-    }
-
     static IResult getRole(
     [FromRoute(Name = "roleId")] Guid roleId,
     [FromServices] ResourceDBContext context
     )
     {
-        var role = context!.Roles!
+        var role = context!.Roles!.Include(t => t.Titles)
             .FirstOrDefault(t => t.Id == roleId);
 
         if (role == null)
@@ -158,7 +128,7 @@ public static class RoleModule
         return Results.Ok(
               new GetRoleResponse(
                role.Id,
-               role.Title,
+               role.Titles.ToArray(),
                role.Tags,
                role.Status,
                role.CreatedAt,
@@ -178,28 +148,28 @@ public static class RoleModule
         )
     {
         var query = context!.Roles!
-            // .Include(t => t.Tags)
+            .Include(t => t.Titles)
             .Skip(page * pageSize)
             .Take(pageSize);
-       
+
         var roles = query.ToList();
 
         if (roles.Count() > 0)
         {
-             return Results.Ok(roles.Select(role =>
-              new GetRoleResponse(
-               role.Id,
-               role.Title,
-               role.Tags,
-               role.Status,
-               role.CreatedAt,
-               role.ModifiedAt,
-               role.CreatedBy,
-               role.ModifiedBy,
-               role.CreatedByBehalfOf,
-               role.ModifiedByBehalfOf
-               )
-            ).ToArray());
+            return Results.Ok(roles.Select(role =>
+             new GetRoleResponse(
+              role.Id,
+              role.Titles.ToArray(),
+              role.Tags,
+              role.Status,
+              role.CreatedAt,
+              role.ModifiedAt,
+              role.CreatedBy,
+              role.ModifiedBy,
+              role.CreatedByBehalfOf,
+              role.ModifiedByBehalfOf
+              )
+           ).ToArray());
         }
         else
             return Results.NoContent();

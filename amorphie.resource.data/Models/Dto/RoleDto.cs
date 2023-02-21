@@ -1,7 +1,7 @@
 public record GetRoleResponse
     (
         Guid id,
-        string title,
+        Translation[] titles,
         string[]? tags,
         string? status,
         DateTime? createdAt,
@@ -15,7 +15,7 @@ public record GetRoleResponse
 public record SaveRoleRequest
     (
         Guid id,
-        string title,
+        Translation[] titles,
         string[]? tags,
         string? status,
         DateTime? createdAt,
