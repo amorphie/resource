@@ -9,6 +9,7 @@ public static class RoleModule
                 operation.Summary = "Returns all roles.";
                 operation.Parameters[0].Description = "Paging parameter. **limit** is the page size of resultset.";
                 operation.Parameters[1].Description = "Paging parameter. **Token** is returned from last query.";
+                operation.Parameters[2].Description = "RFC 5646 compliant language code.";
                 return operation;
             })
          .Produces<GetRoleResponse[]>(StatusCodes.Status200OK)
@@ -144,11 +145,12 @@ public static class RoleModule
     static IResult getAllRoles(
         [FromServices] ResourceDBContext context,
         [FromQuery][Range(0, 100)] int page = 0,
-        [FromQuery][Range(5, 100)] int pageSize = 100
+        [FromQuery][Range(5, 100)] int pageSize = 100,
+        [FromHeader(Name = "Language")] string? language = "en-EN"
         )
     {
         var query = context!.Roles!
-            .Include(t => t.Titles)
+            .Include(t => t.Titles.Where(t => t.Language == language))
             .Skip(page * pageSize)
             .Take(pageSize);
 
