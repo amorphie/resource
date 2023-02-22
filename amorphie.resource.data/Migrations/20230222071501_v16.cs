@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace amorphie.resource.data.Migrations
 {
     /// <inheritdoc />
-    public partial class v15 : Migration
+    public partial class v16 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -18,7 +18,7 @@ namespace amorphie.resource.data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Type = table.Column<string>(type: "text", nullable: true),
+                    Type = table.Column<byte>(type: "smallint", nullable: false),
                     Url = table.Column<string>(type: "text", nullable: true),
                     Tags = table.Column<string[]>(type: "text[]", nullable: true),
                     Status = table.Column<string>(type: "text", nullable: true),
@@ -238,28 +238,28 @@ namespace amorphie.resource.data.Migrations
             migrationBuilder.InsertData(
                 table: "Resources",
                 columns: new[] { "Id", "CreatedAt", "CreatedBy", "CreatedByBehalfOf", "ModifiedAt", "ModifiedBy", "ModifiedByBehalfOf", "Status", "Tags", "Type", "Url" },
-                values: new object[] { new Guid("83135033-d8bf-4729-99e7-4734ad197f5d"), new DateTime(2023, 2, 21, 10, 20, 7, 224, DateTimeKind.Local).AddTicks(1352), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), new DateTime(2023, 2, 21, 10, 20, 7, 224, DateTimeKind.Local).AddTicks(1369), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), "A", new[] { "tag1", "tag2" }, "CONNECT", "urlsample" });
+                values: new object[] { new Guid("874001e3-b769-497b-b047-33b1b256c659"), new DateTime(2023, 2, 22, 10, 15, 0, 930, DateTimeKind.Local).AddTicks(7684), new Guid("97e40e79-ad08-4b5e-896e-cb3e9d6a111b"), new Guid("97e40e79-ad08-4b5e-896e-cb3e9d6a111b"), new DateTime(2023, 2, 22, 10, 15, 0, 930, DateTimeKind.Local).AddTicks(7699), new Guid("97e40e79-ad08-4b5e-896e-cb3e9d6a111b"), new Guid("97e40e79-ad08-4b5e-896e-cb3e9d6a111b"), "A", new[] { "tag1", "tag2" }, (byte)0, "urlsample" });
 
             migrationBuilder.InsertData(
                 table: "RoleGroups",
                 columns: new[] { "Id", "CreatedAt", "CreatedBy", "CreatedByBehalfOf", "ModifiedAt", "ModifiedBy", "ModifiedByBehalfOf", "Status", "Tags" },
-                values: new object[] { new Guid("4462ca2c-981c-401d-8bcf-e228b05ddb96"), new DateTime(2023, 2, 21, 10, 20, 7, 224, DateTimeKind.Local).AddTicks(1428), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), new DateTime(2023, 2, 21, 10, 20, 7, 224, DateTimeKind.Local).AddTicks(1430), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), "A", new[] { "tag1", "tag2" } });
+                values: new object[] { new Guid("81cf2e59-964a-4af8-83c0-454f0b642d76"), new DateTime(2023, 2, 22, 10, 15, 0, 930, DateTimeKind.Local).AddTicks(7781), new Guid("97e40e79-ad08-4b5e-896e-cb3e9d6a111b"), new Guid("97e40e79-ad08-4b5e-896e-cb3e9d6a111b"), new DateTime(2023, 2, 22, 10, 15, 0, 930, DateTimeKind.Local).AddTicks(7782), new Guid("97e40e79-ad08-4b5e-896e-cb3e9d6a111b"), new Guid("97e40e79-ad08-4b5e-896e-cb3e9d6a111b"), "A", new[] { "tag1", "tag2" } });
 
             migrationBuilder.InsertData(
                 table: "Roles",
                 columns: new[] { "Id", "CreatedAt", "CreatedBy", "CreatedByBehalfOf", "ModifiedAt", "ModifiedBy", "ModifiedByBehalfOf", "Status", "Tags" },
-                values: new object[] { new Guid("d62d4d38-ecdf-4b4e-b17c-0882412340bb"), new DateTime(2023, 2, 21, 10, 20, 7, 224, DateTimeKind.Local).AddTicks(1411), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), new DateTime(2023, 2, 21, 10, 20, 7, 224, DateTimeKind.Local).AddTicks(1413), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), "A", new[] { "tag1", "tag2" } });
+                values: new object[] { new Guid("93e8b671-641f-493f-bf54-4a67a0b64d2e"), new DateTime(2023, 2, 22, 10, 15, 0, 930, DateTimeKind.Local).AddTicks(7756), new Guid("97e40e79-ad08-4b5e-896e-cb3e9d6a111b"), new Guid("97e40e79-ad08-4b5e-896e-cb3e9d6a111b"), new DateTime(2023, 2, 22, 10, 15, 0, 930, DateTimeKind.Local).AddTicks(7757), new Guid("97e40e79-ad08-4b5e-896e-cb3e9d6a111b"), new Guid("97e40e79-ad08-4b5e-896e-cb3e9d6a111b"), "A", new[] { "tag1", "tag2" } });
 
             migrationBuilder.InsertData(
                 table: "Translations",
                 columns: new[] { "Id", "CreatedAt", "CreatedBy", "CreatedByBehalfOf", "Label", "Language", "ModifiedAt", "ModifiedBy", "ModifiedByBehalfOf", "ResourceId_Description", "ResourceId_DisplayName", "RoleGroupId_Title", "RoleId_Title" },
                 values: new object[,]
                 {
-                    { new Guid("3bdfe9ce-c4b8-4a60-a526-a8d3de22b8db"), new DateTime(2023, 2, 21, 10, 20, 7, 224, DateTimeKind.Local).AddTicks(1454), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), "Başlık", "tr", new DateTime(2023, 2, 21, 10, 20, 7, 224, DateTimeKind.Local).AddTicks(1454), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), null, new Guid("83135033-d8bf-4729-99e7-4734ad197f5d"), null, null },
-                    { new Guid("6edc0d4e-c4b0-476e-a493-1df98dfefb68"), new DateTime(2023, 2, 21, 10, 20, 7, 224, DateTimeKind.Local).AddTicks(1461), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), "Rol Başlık", "tr", new DateTime(2023, 2, 21, 10, 20, 7, 224, DateTimeKind.Local).AddTicks(1461), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), null, null, null, new Guid("d62d4d38-ecdf-4b4e-b17c-0882412340bb") },
-                    { new Guid("a000f232-0bad-4740-a789-e67a5995c91f"), new DateTime(2023, 2, 21, 10, 20, 7, 224, DateTimeKind.Local).AddTicks(1446), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), "Açıklama", "tr", new DateTime(2023, 2, 21, 10, 20, 7, 224, DateTimeKind.Local).AddTicks(1447), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), new Guid("83135033-d8bf-4729-99e7-4734ad197f5d"), null, null, null },
-                    { new Guid("c11d2b3a-79d1-4245-82f4-7ead28650baa"), new DateTime(2023, 2, 21, 10, 20, 7, 224, DateTimeKind.Local).AddTicks(1451), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), "Description", "en", new DateTime(2023, 2, 21, 10, 20, 7, 224, DateTimeKind.Local).AddTicks(1451), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), new Guid("83135033-d8bf-4729-99e7-4734ad197f5d"), null, null, null },
-                    { new Guid("fcb45d0c-fd75-45ba-bf5d-0ba577a63994"), new DateTime(2023, 2, 21, 10, 20, 7, 224, DateTimeKind.Local).AddTicks(1465), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), "Rol Grup Başlık", "tr", new DateTime(2023, 2, 21, 10, 20, 7, 224, DateTimeKind.Local).AddTicks(1465), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), new Guid("1b354a8e-c956-46cc-80fa-032914b179e0"), null, null, new Guid("4462ca2c-981c-401d-8bcf-e228b05ddb96"), null }
+                    { new Guid("0a20e26d-c612-42b8-8618-76615112e609"), new DateTime(2023, 2, 22, 10, 15, 0, 930, DateTimeKind.Local).AddTicks(7843), new Guid("97e40e79-ad08-4b5e-896e-cb3e9d6a111b"), new Guid("97e40e79-ad08-4b5e-896e-cb3e9d6a111b"), "Rol Grup Başlık", "tr", new DateTime(2023, 2, 22, 10, 15, 0, 930, DateTimeKind.Local).AddTicks(7844), new Guid("97e40e79-ad08-4b5e-896e-cb3e9d6a111b"), new Guid("97e40e79-ad08-4b5e-896e-cb3e9d6a111b"), null, null, new Guid("81cf2e59-964a-4af8-83c0-454f0b642d76"), null },
+                    { new Guid("133e4993-fdf6-4066-9236-25db1bbb6ee4"), new DateTime(2023, 2, 22, 10, 15, 0, 930, DateTimeKind.Local).AddTicks(7809), new Guid("97e40e79-ad08-4b5e-896e-cb3e9d6a111b"), new Guid("97e40e79-ad08-4b5e-896e-cb3e9d6a111b"), "Açıklama", "tr", new DateTime(2023, 2, 22, 10, 15, 0, 930, DateTimeKind.Local).AddTicks(7811), new Guid("97e40e79-ad08-4b5e-896e-cb3e9d6a111b"), new Guid("97e40e79-ad08-4b5e-896e-cb3e9d6a111b"), new Guid("874001e3-b769-497b-b047-33b1b256c659"), null, null, null },
+                    { new Guid("464c0dd7-8aad-4e4a-b9e8-7b6856ab7efb"), new DateTime(2023, 2, 22, 10, 15, 0, 930, DateTimeKind.Local).AddTicks(7829), new Guid("97e40e79-ad08-4b5e-896e-cb3e9d6a111b"), new Guid("97e40e79-ad08-4b5e-896e-cb3e9d6a111b"), "Başlık", "tr", new DateTime(2023, 2, 22, 10, 15, 0, 930, DateTimeKind.Local).AddTicks(7829), new Guid("97e40e79-ad08-4b5e-896e-cb3e9d6a111b"), new Guid("97e40e79-ad08-4b5e-896e-cb3e9d6a111b"), null, new Guid("874001e3-b769-497b-b047-33b1b256c659"), null, null },
+                    { new Guid("5a0e94c8-33b5-4361-891b-3c78ab60c6f9"), new DateTime(2023, 2, 22, 10, 15, 0, 930, DateTimeKind.Local).AddTicks(7825), new Guid("97e40e79-ad08-4b5e-896e-cb3e9d6a111b"), new Guid("97e40e79-ad08-4b5e-896e-cb3e9d6a111b"), "Description", "en", new DateTime(2023, 2, 22, 10, 15, 0, 930, DateTimeKind.Local).AddTicks(7826), new Guid("97e40e79-ad08-4b5e-896e-cb3e9d6a111b"), new Guid("97e40e79-ad08-4b5e-896e-cb3e9d6a111b"), new Guid("874001e3-b769-497b-b047-33b1b256c659"), null, null, null },
+                    { new Guid("689cc733-306a-4891-9ed6-11791f2f10a9"), new DateTime(2023, 2, 22, 10, 15, 0, 930, DateTimeKind.Local).AddTicks(7838), new Guid("97e40e79-ad08-4b5e-896e-cb3e9d6a111b"), new Guid("97e40e79-ad08-4b5e-896e-cb3e9d6a111b"), "Rol Başlık", "tr", new DateTime(2023, 2, 22, 10, 15, 0, 930, DateTimeKind.Local).AddTicks(7839), new Guid("97e40e79-ad08-4b5e-896e-cb3e9d6a111b"), new Guid("97e40e79-ad08-4b5e-896e-cb3e9d6a111b"), null, null, null, new Guid("93e8b671-641f-493f-bf54-4a67a0b64d2e") }
                 });
 
             migrationBuilder.CreateIndex(

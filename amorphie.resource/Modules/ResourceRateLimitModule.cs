@@ -114,7 +114,6 @@ public static class ResourceRateLimitModule
         )
     {
         var query = context!.ResourceRateLimits!
-            // .Include(t => t.Tags)
             .Skip(page * pageSize)
             .Take(pageSize);
        

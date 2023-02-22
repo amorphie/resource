@@ -9,6 +9,7 @@ public static class ResourceModule
                 operation.Summary = "Returns all resources.";
                 operation.Parameters[0].Description = "Paging parameter. **limit** is the page size of resultset.";
                 operation.Parameters[1].Description = "Paging parameter. **Token** is returned from last query.";
+                operation.Parameters[2].Description = "RFC 5646 compliant language code.";
                 return operation;
             })
          .Produces<GetResourceResponse[]>(StatusCodes.Status200OK)
@@ -121,7 +122,7 @@ public static class ResourceModule
     [FromServices] ResourceDBContext context
     )
     {
-        var resource = context!.Resources!.Include(t => t.DisplayNames).Include(t=>t.Descriptions)
+        var resource = context!.Resources!.Include(t => t.DisplayNames).Include(t => t.Descriptions)
             .FirstOrDefault(t => t.Id == resourceId);
 
         if (resource == null)
@@ -149,12 +150,13 @@ public static class ResourceModule
     static IResult getAllResources(
         [FromServices] ResourceDBContext context,
         [FromQuery][Range(0, 100)] int page = 0,
-        [FromQuery][Range(5, 100)] int pageSize = 100
+        [FromQuery][Range(5, 100)] int pageSize = 100,
+        [FromHeader(Name = "Language")] string? language = "en-EN"
         )
     {
         var query = context!.Resources!
-            .Include(t=>t.DisplayNames)
-            .Include(t=>t.Descriptions)
+            .Include(t => t.DisplayNames.Where(t => t.Language == language))
+            .Include(t => t.Descriptions.Where(t => t.Language == language))
             .Skip(page * pageSize)
             .Take(pageSize);
 

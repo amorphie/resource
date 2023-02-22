@@ -9,10 +9,11 @@ public static class RoleGroupModule
                 operation.Summary = "Returns all role groups.";
                 operation.Parameters[0].Description = "Paging parameter. **limit** is the page size of resultset.";
                 operation.Parameters[1].Description = "Paging parameter. **Token** is returned from last query.";
+                operation.Parameters[2].Description = "RFC 5646 compliant language code.";
                 return operation;
             })
          .Produces<GetRoleGroupResponse[]>(StatusCodes.Status200OK)
-         .Produces(StatusCodes.Status204NoContent);       
+         .Produces(StatusCodes.Status204NoContent);
 
         //getRoleGroup
         app.MapGet("/roleGroup/{roleGroupId}", getRoleGroup)
@@ -124,51 +125,52 @@ public static class RoleGroupModule
         if (roleGroup == null)
             return Results.NotFound();
 
-          return Results.Ok(
-              new GetRoleGroupResponse(
-               roleGroup.Id,
-               roleGroup.Titles.ToArray(),
-               roleGroup.Tags,
-               roleGroup.Status,
-               roleGroup.CreatedAt,
-               roleGroup.ModifiedAt,
-               roleGroup.CreatedBy,
-               roleGroup.ModifiedBy,
-               roleGroup.CreatedByBehalfOf,
-               roleGroup.ModifiedByBehalfOf
-               )
-            );
+        return Results.Ok(
+            new GetRoleGroupResponse(
+             roleGroup.Id,
+             roleGroup.Titles.ToArray(),
+             roleGroup.Tags,
+             roleGroup.Status,
+             roleGroup.CreatedAt,
+             roleGroup.ModifiedAt,
+             roleGroup.CreatedBy,
+             roleGroup.ModifiedBy,
+             roleGroup.CreatedByBehalfOf,
+             roleGroup.ModifiedByBehalfOf
+             )
+          );
     }
 
     static IResult getAllRoleGroups(
         [FromServices] ResourceDBContext context,
         [FromQuery][Range(0, 100)] int page = 0,
-        [FromQuery][Range(5, 100)] int pageSize = 100
+        [FromQuery][Range(5, 100)] int pageSize = 100,
+        [FromHeader(Name = "Language")] string? language = "en-EN"
         )
     {
         var query = context!.RoleGroups!
-            .Include(t => t.Titles)
+            .Include(t => t.Titles.Where(t => t.Language == language))
             .Skip(page * pageSize)
             .Take(pageSize);
-       
+
         var roleGroups = query.ToList();
 
         if (roleGroups.Count() > 0)
         {
-             return Results.Ok(roleGroups.Select(roleGroup =>
-              new GetRoleGroupResponse(
-               roleGroup.Id,
-               roleGroup.Titles.ToArray(),
-               roleGroup.Tags,
-               roleGroup.Status,
-               roleGroup.CreatedAt,
-               roleGroup.ModifiedAt,
-               roleGroup.CreatedBy,
-               roleGroup.ModifiedBy,
-               roleGroup.CreatedByBehalfOf,
-               roleGroup.ModifiedByBehalfOf
-               )
-            ).ToArray());
+            return Results.Ok(roleGroups.Select(roleGroup =>
+             new GetRoleGroupResponse(
+              roleGroup.Id,
+              roleGroup.Titles.ToArray(),
+              roleGroup.Tags,
+              roleGroup.Status,
+              roleGroup.CreatedAt,
+              roleGroup.ModifiedAt,
+              roleGroup.CreatedBy,
+              roleGroup.ModifiedBy,
+              roleGroup.CreatedByBehalfOf,
+              roleGroup.ModifiedByBehalfOf
+              )
+           ).ToArray());
         }
         else
             return Results.NoContent();

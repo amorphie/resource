@@ -2,7 +2,7 @@ public record GetResourceResponse
     (
         Guid id,
         Translation[] displayNames,
-        string? type,
+        HttpMethodType type,
         string? url,
         Translation[] descriptions,
         string[]? tags,
@@ -19,7 +19,7 @@ public record SaveResourceRequest
     (
         Guid id,
         Translation[] displayNames,
-        string? type,
+        HttpMethodType type,
         string? url,
         Translation[] descriptions,
         string[]? tags,
