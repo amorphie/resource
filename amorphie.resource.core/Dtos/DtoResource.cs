@@ -1,4 +1,7 @@
-public class Resource : BaseDbEntityWithId
+using amorphie.core.Base;
+using amorphie.core.Enums;
+
+public class DtoResource : DtoBase
 {
     public ICollection<Translation> DisplayNames { get; set; } = default!;
     public HttpMethodType Type { get; set; }

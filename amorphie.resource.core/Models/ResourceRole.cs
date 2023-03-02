@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using amorphie.core.Base;
 
-public class ResourceRole : BaseDbEntityWithId
+public class ResourceRole : EntityBase
 {
     [ForeignKey("Resource")]
     public Guid ResourceId { get; set; }

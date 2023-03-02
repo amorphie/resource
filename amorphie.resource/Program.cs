@@ -1,4 +1,5 @@
-using SecretExtensions;
+using amorphie.core.security;
+using amorphie.core.security.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,7 +35,6 @@ app.MapRoleGroupRoleEndpoints();
 app.MapResourceRoleEndpoints();
 app.MapPrivilegeEndpoints();
 app.MapResourceRateLimitEndpoints();
-// app.MapResourceLanguageEndpoints();
 
 try
 {

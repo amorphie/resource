@@ -1,4 +1,6 @@
-public record GetRoleGroupResponse
+using amorphie.core.Base;
+
+public record GetRoleResponse
     (
         Guid id,
         Translation[] titles,
@@ -12,7 +14,7 @@ public record GetRoleGroupResponse
         Guid? modifiedByBehalfOf
      );
 
-public record SaveRoleGroupRequest
+public record SaveRoleRequest
     (
         Guid id,
         Translation[] titles,

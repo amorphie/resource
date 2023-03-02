@@ -1,4 +1,6 @@
-public class Role : BaseDbEntityWithId
+using amorphie.core.Base;
+
+public class Role : EntityBase
 {
     public ICollection<Translation> Titles { get; set; } = default!;
     public string[]? Tags { get; set; }

@@ -1,9 +1,10 @@
-public record GetPrivilegeResponse
+using amorphie.core.Base;
+
+public record GetRoleGroupResponse
     (
         Guid id,
-        Guid resourceId,
-        string? url,
-        int ttl,
+        Translation[] titles,
+        string[]? tags,
         string? status,
         DateTime? createdAt,
         DateTime? modifiedAt,
@@ -13,12 +14,11 @@ public record GetPrivilegeResponse
         Guid? modifiedByBehalfOf
      );
 
-public record SavePrivilegeRequest
+public record SaveRoleGroupRequest
     (
         Guid id,
-        Guid resourceId,
-        string? url,
-        int ttl,
+        Translation[] titles,
+        string[]? tags,
         string? status,
         DateTime? createdAt,
         DateTime? modifiedAt,
