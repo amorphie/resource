@@ -16,8 +16,20 @@ public static class ResourceModule
                 operation.Parameters[2].Description = "RFC 5646 compliant language code.";
                 return operation;
             })
-         .Produces<GetResourceResponse>(StatusCodes.Status200OK)
+         .Produces<DtoResource>(StatusCodes.Status200OK)
          .Produces(StatusCodes.Status204NoContent);
+
+        //getResource
+        app.MapGet("/resource/{resourceId}", getResource)
+            .WithOpenApi(operation =>
+            {
+                operation.Summary = "Returns requested resource.";
+                operation.Parameters[0].Description = "Id of the requested resource.";
+                return operation;
+            })
+            .Produces<DtoResource>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound);
+
 
         //savePrivilege
         app.MapPost("/resource", saveResource)
@@ -27,8 +39,18 @@ public static class ResourceModule
                     operation.Summary = "Saves or updates requested resource.";
                     return operation;
                 })
-                .Produces<GetResourceResponse>(StatusCodes.Status200OK)
+                .Produces<DtoResource>(StatusCodes.Status200OK)
                 .Produces(StatusCodes.Status201Created);
+
+        //deleteResource
+        app.MapDelete("/resource/{resourceId}", deleteResource)
+                .WithOpenApi(operation =>
+                {
+                    operation.Summary = "Deletes existing resource.";
+                    return operation;
+                })
+                .Produces(StatusCodes.Status404NotFound)
+                .Produces(StatusCodes.Status204NoContent);
     }
 
     static IResponse<List<DtoResource>> getAllResources(
@@ -38,49 +60,50 @@ public static class ResourceModule
        [FromHeader(Name = "Language")] string? language = "en-EN"
        )
     {
-        var result = new List<GetResourceResponse>();
-        var queryAfterWhere = new List<Resource>();
-        var query = context!.Resources!
+        var resources = context!.Resources!
             .Include(t => t.DisplayNames.Where(t => t.Language == language))
             .Include(t => t.Descriptions.Where(t => t.Language == language))
             .Skip(page * pageSize).Take(pageSize)
             .AsQueryable().ToList();
 
-        queryAfterWhere = query.ToList();
-
-        var resources = queryAfterWhere.ToList();
-
-        foreach (var item in resources)
+        if (resources.Count == 0)
         {
-            result.Add(
-               new GetResourceResponse
-               (
-                        item.Id,
-                        item.DisplayNames.ToArray(),
-                        item.Type,
-                        item.Url,
-                        item.Descriptions.ToArray(),
-                        item.Tags,
-                        item.Status,
-                        item.CreatedAt,
-                        item.ModifiedAt,
-                        item.CreatedBy,
-                        item.ModifiedBy,
-                        item.CreatedByBehalfOf,
-                        item.ModifiedByBehalfOf
-              )
-                    );
+            return new Response<List<DtoResource>>
+            {
+                Data = null,
+                Result = new amorphie.core.Base.Result(Status.Success, "Veri bulunamadı")
+            };
         }
 
-        // if (result.Count == 0)
-        //      return Results.NoContent();
+        return new Response<List<DtoResource>>
+        {
+            Data = resources.Select(x => ObjectMapper.Mapper.Map<DtoResource>(x)).ToList(),
+            Result = new amorphie.core.Base.Result(Status.Success, "Getirme başarılı")
+        };
+    }
 
+    static IResponse<DtoResource> getResource(
+        [FromRoute(Name = "resourceId")] Guid resourceId,
+        [FromServices] ResourceDBContext context
+        )
+    {
+        var resource = context!.Resources!
+            .FirstOrDefault(t => t.Id == resourceId);
 
-         return new Response<List<DtoResource>>
+        if (resource == null)
+        {
+            return new Response<DtoResource>
             {
-                Data = ObjectMapper.Mapper.Map<List<DtoResource>>(result),
-                Result = new amorphie.core.Base.Result(Status.Success, "Getirme başarılı")
+                Data = null,
+                Result = new amorphie.core.Base.Result(Status.Success, "Veri bulunamadı")
             };
+        }
+
+        return new Response<DtoResource>
+        {
+            Data = ObjectMapper.Mapper.Map<DtoResource>(resource),
+            Result = new amorphie.core.Base.Result(Status.Success, "Getirme başarılı")
+        };
     }
 
     static IResponse<DtoResource> saveResource(
@@ -153,6 +176,31 @@ public static class ResourceModule
         else
         {
             return false;
+        }
+    }
+
+    static IResponse deleteResource(
+     [FromRoute(Name = "resourceId")] Guid resourceId,
+     [FromServices] ResourceDBContext context)
+    {
+        var existingRecord = context?.Resources?.FirstOrDefault(t => t.Id == resourceId);
+
+        if (existingRecord == null)
+        {
+              return new Response
+                {
+                    Result = new amorphie.core.Base.Result(Status.Error, "Kayıt bulunumadı")
+                };
+        }
+        else
+        {
+            context!.Remove(existingRecord);
+            context.SaveChanges();
+            
+            return new Response
+                {
+                    Result = new amorphie.core.Base.Result(Status.Error, "Silme başarılı")
+                };
         }
     }
 

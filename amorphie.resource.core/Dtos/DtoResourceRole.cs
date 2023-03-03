@@ -1,27 +1,8 @@
-public record GetResourceRoleResponse
-    (
-        Guid id,
-        Guid resourceId,
-        Guid roleId,
-        string? status,  
-        DateTime? createdAt, 
-        DateTime? modifiedAt, 
-        Guid? createdBy, 
-        Guid? modifiedBy, 
-        Guid? createdByBehalfOf, 
-        Guid? modifiedByBehalfOf 
-     );
+using amorphie.core.Base;
 
-public record SaveResourceRoleRequest
-    (
-        Guid id,
-        Guid resourceId,
-        Guid roleId,
-        string? status,  
-        DateTime? createdAt, 
-        DateTime? modifiedAt, 
-        Guid? createdBy, 
-        Guid? modifiedBy, 
-        Guid? createdByBehalfOf, 
-        Guid? modifiedByBehalfOf
-     );
+public class DtoResourceRole : DtoBase
+{
+    public Guid ResourceId { get; set; }
+    public Guid RoleId { get; set; }    
+    public string? Status { get; set; }   
+}

@@ -3,10 +3,10 @@ using amorphie.core.Enums;
 
 public class DtoResource : DtoBase
 {
-    public ICollection<Translation> DisplayNames { get; set; } = default!;
+    public ICollection<MultilanguageText> DisplayNames { get; set; } = default!;
     public HttpMethodType Type { get; set; }
     public string? Url { get; set; }
-    public ICollection<Translation> Descriptions { get; set; } = default!;
+    public ICollection<MultilanguageText> Descriptions { get; set; } = default!;
     public string[]? Tags { get; set; }
     public string? Status { get; set; }
 }

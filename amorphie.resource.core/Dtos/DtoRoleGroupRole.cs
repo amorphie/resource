@@ -1,27 +1,10 @@
-public record GetRoleGroupRoleResponse
-    (
-        Guid id,
-        Guid RoleGroupId,
-        Guid RoleId,
-        string? status,
-        DateTime? createdAt,
-        DateTime? modifiedAt,
-        Guid? createdBy,
-        Guid? modifiedBy,
-        Guid? createdByBehalfOf,
-        Guid? modifiedByBehalfOf
-     );
+using amorphie.core.Base;
 
-public record SaveRoleGroupRoleRequest
-    (
-        Guid id,
-        Guid RoleGroupId,
-        Guid RoleId,
-        string? status,
-        DateTime? createdAt,
-        DateTime? modifiedAt,
-        Guid? createdBy,
-        Guid? modifiedBy,
-        Guid? createdByBehalfOf,
-        Guid? modifiedByBehalfOf
-     );
+public class DtoRoleGroupRole : DtoBase
+{    
+    public Guid RoleGroupId { get; set; }
+    
+    public Guid RoleId { get; set; }
+
+    public string? Status { get; set; }
+}

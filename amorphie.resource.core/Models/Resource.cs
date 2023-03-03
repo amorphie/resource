@@ -10,3 +10,5 @@ public class Resource : EntityBase
     public string[]? Tags { get; set; }
     public string? Status { get; set; }
 }
+
+//10 model, 10 dto model,poco

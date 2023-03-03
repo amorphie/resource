@@ -6,7 +6,6 @@ public class ObjectMapper
 {
     var config = new MapperConfiguration(cfg =>
     {
-        cfg.AddProfile<PrivilegeMapper>();
         cfg.AddProfile<ResourceMapper>();
     });
 

@@ -1,33 +1,12 @@
-public record GetResourceRateLimitResponse
-    (
-        Guid id,
-        Guid resourceId,
-        string? scope,
-        string? condition,
-        string? cron,
-        int limit,
-        string? status,
-        DateTime? createdAt,
-        DateTime? modifiedAt,
-        Guid? createdBy,
-        Guid? modifiedBy,
-        Guid? createdByBehalfOf,
-        Guid? modifiedByBehalfOf
-     );
+using amorphie.core.Base;
 
-public record SaveResourceRateLimitRequest
-    (
-        Guid id,
-        Guid resourceId,
-        string? scope,
-        string? condition,
-        string? cron,
-        int limit,
-        string? status,
-        DateTime? createdAt,
-        DateTime? modifiedAt,
-        Guid? createdBy,
-        Guid? modifiedBy,
-        Guid? createdByBehalfOf,
-        Guid? modifiedByBehalfOf
-     );
+public class DtoResourceRateLimit : DtoBase
+{
+    
+    public Guid ResourceId { get; set; }
+    public string? Scope { get; set; }
+    public string? Condition { get; set; }
+    public string? Cron { get; set; }
+    public int? Limit { get; set; }
+    public string? Status { get; set; }  
+}

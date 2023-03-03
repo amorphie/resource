@@ -1,29 +1,8 @@
 using amorphie.core.Base;
 
-public record GetRoleGroupResponse
-    (
-        Guid id,
-        Translation[] titles,
-        string[]? tags,
-        string? status,
-        DateTime? createdAt,
-        DateTime? modifiedAt,
-        Guid? createdBy,
-        Guid? modifiedBy,
-        Guid? createdByBehalfOf,
-        Guid? modifiedByBehalfOf
-     );
-
-public record SaveRoleGroupRequest
-    (
-        Guid id,
-        Translation[] titles,
-        string[]? tags,
-        string? status,
-        DateTime? createdAt,
-        DateTime? modifiedAt,
-        Guid? createdBy,
-        Guid? modifiedBy,
-        Guid? createdByBehalfOf,
-        Guid? modifiedByBehalfOf
-     );
+public class DtoRoleGroup : DtoBase
+{
+    public ICollection<MultilanguageText> Titles { get; set; } = default!;    
+    public string[]? Tags { get; set; }
+    public string? Status { get; set; }
+}

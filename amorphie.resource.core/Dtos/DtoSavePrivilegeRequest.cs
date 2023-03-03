@@ -1,8 +1,6 @@
 using amorphie.core.Base;
 
-public class DtoSavePrivilegeRequest : DtoBase
+public class DtoSavePrivilegeRequest : DtoPrivilege
 {
-    public Guid ResourceId { get; set; }
-    public int? Ttl { get; set; }
-    public string? Status { get; set; }
+    
 }

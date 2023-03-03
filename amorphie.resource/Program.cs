@@ -3,7 +3,7 @@ using amorphie.core.security.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-await builder.Configuration.AddVaultSecrets("amorphie-secretstore", "amorphie-secretstore");
+await builder.Configuration.AddVaultSecrets("amorphie-secretstore", new string[] { "amorphie-secretstore" });
 var postgreSql = builder.Configuration["PostgreSql"];
 
 builder.Logging.ClearProviders();
@@ -13,7 +13,7 @@ builder.Services.AddDaprClient();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<ResourceDBContext>
-    (options => options.UseNpgsql(postgreSql,b => b.MigrationsAssembly("amorphie.resource.data")));
+    (options => options.UseNpgsql(postgreSql, b => b.MigrationsAssembly("amorphie.resource.data")));
 
 var app = builder.Build();
 
