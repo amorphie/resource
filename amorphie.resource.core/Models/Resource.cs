@@ -1,4 +1,7 @@
-public class Resource : BaseDbEntityWithId
+using amorphie.core.Base;
+using amorphie.core.Enums;
+
+public class Resource : EntityBase
 {
     public ICollection<Translation> DisplayNames { get; set; } = default!;
     public HttpMethodType Type { get; set; }
@@ -7,3 +10,5 @@ public class Resource : BaseDbEntityWithId
     public string[]? Tags { get; set; }
     public string? Status { get; set; }
 }
+
+//10 model, 10 dto model,poco

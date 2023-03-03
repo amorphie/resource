@@ -1,8 +1,12 @@
+using amorphie.core.Base;
+using amorphie.core.Enums;
+using amorphie.core.IBase;
+
 public static class ResourceRoleModule
 {
     public static void MapResourceRoleEndpoints(this WebApplication app)
     {
-         //getAllResourceRoles
+        //getAllResourceRoles
         app.MapGet("/resourceRole", getAllResourceRoles)
             .WithOpenApi(operation =>
             {
@@ -11,7 +15,7 @@ public static class ResourceRoleModule
                 operation.Parameters[1].Description = "Paging parameter. **Token** is returned from last query.";
                 return operation;
             })
-         .Produces<GetResourceRoleResponse[]>(StatusCodes.Status200OK)
+         .Produces<DtoResourceRole>(StatusCodes.Status200OK)
          .Produces(StatusCodes.Status204NoContent);
 
         //saveResourceRole
@@ -22,7 +26,7 @@ public static class ResourceRoleModule
                     operation.Summary = "Saves or updates requested resource role.";
                     return operation;
                 })
-                .Produces<GetResourceRoleResponse>(StatusCodes.Status200OK)
+                .Produces<DtoResourceRole>(StatusCodes.Status200OK)
                 .Produces(StatusCodes.Status201Created);
 
         //deleteResourceRole
@@ -36,71 +40,7 @@ public static class ResourceRoleModule
                 .Produces(StatusCodes.Status204NoContent);
     }
 
-    static IResult saveResourceRole(
-        [FromBody] SaveResourceRoleRequest data,
-        [FromServices] ResourceDBContext context
-        )
-    {
-        var existingRecord = context?.ResourceRoles?.FirstOrDefault(t => t.Id == data.id);
-
-        if (existingRecord == null)
-        {
-            context!.ResourceRoles!.Add
-            (
-                new ResourceRole
-                {
-                    Id = data.id,
-                    ResourceId = data.resourceId,
-                    RoleId = data.roleId,
-                    Status = data.status,
-                    CreatedAt = data.createdAt,
-                    ModifiedAt = data.modifiedAt,
-                    CreatedBy = data.createdBy,
-                    ModifiedBy = data.modifiedBy,
-                    CreatedByBehalfOf = data.createdByBehalfOf,
-                    ModifiedByBehalfOf = data.modifiedByBehalfOf
-                }
-            );
-            context.SaveChanges();
-            return Results.Created($"/resourceRole/{data.id}", data);
-        }
-        else
-        {
-            var hasChanges = false;
-
-            ModuleHelper.PreUpdate(data.status, existingRecord.Status, ref hasChanges);
-
-            if (hasChanges)
-            {
-                context!.SaveChanges();
-                return Results.Ok(data);
-            }
-            else
-            {
-                return Results.Problem("Not Modified.", null, 304);
-            }
-        }
-    }
-
-    static IResult deleteResourceRole(
-     [FromRoute(Name = "resourceRoleId")] Guid resourceRoleId,
-     [FromServices] ResourceDBContext context)
-    {
-        var existingRecord = context?.ResourceRoles?.FirstOrDefault(t => t.Id == resourceRoleId);
-
-        if (existingRecord == null)
-        {
-            return Results.NotFound();
-        }
-        else
-        {
-            context!.Remove(existingRecord);
-            context.SaveChanges();
-            return Results.NoContent();
-        }
-    }
-
-    static IResult getAllResourceRoles(
+    static IResponse<List<DtoResourceRole>> getAllResourceRoles(
         [FromServices] ResourceDBContext context,
         [FromQuery][Range(0, 100)] int page = 0,
         [FromQuery][Range(5, 100)] int pageSize = 100
@@ -109,27 +49,109 @@ public static class ResourceRoleModule
         var query = context!.ResourceRoles!
             .Skip(page * pageSize)
             .Take(pageSize);
-       
+
         var resourceRoles = query.ToList();
 
-        if (resourceRoles.Count() > 0)
+        if (resourceRoles.Count == 0)
         {
-             return Results.Ok(resourceRoles.Select(res =>
-              new GetResourceRoleResponse(
-               res.Id,
-               res.ResourceId,
-               res.RoleId,
-               res.Status,
-               res.CreatedAt,
-               res.ModifiedAt,
-               res.CreatedBy,
-               res.ModifiedBy,
-               res.CreatedByBehalfOf,
-               res.ModifiedByBehalfOf
-               )
-            ).ToArray());
+            return new Response<List<DtoResourceRole>>
+            {
+                Data = null,
+                Result = new amorphie.core.Base.Result(Status.Success, "Veri bulunamadı")
+            };
+        }
+
+        return new Response<List<DtoResourceRole>>
+        {
+            Data = resourceRoles.Select(x => ObjectMapper.Mapper.Map<DtoResourceRole>(x)).ToList(),
+            Result = new amorphie.core.Base.Result(Status.Success, "Getirme başarılı")
+        };
+    }
+
+    static IResponse<DtoResourceRole> saveResourceRole(
+        [FromBody] DtoSaveResourceRoleRequest data,
+        [FromServices] ResourceDBContext context
+        )
+    {
+        var existingRecord = context?.ResourceRoles?.FirstOrDefault(t => t.Id == data.Id);
+
+        if (existingRecord == null)
+        {
+            var resourceRole = ObjectMapper.Mapper.Map<ResourceRole>(data);
+            resourceRole.CreatedAt = DateTime.UtcNow;
+            context!.ResourceRoles!.Add(resourceRole);
+            context.SaveChanges();
+
+            return new Response<DtoResourceRole>
+            {
+                Data = ObjectMapper.Mapper.Map<DtoResourceRole>(resourceRole),
+                Result = new amorphie.core.Base.Result(Status.Success, "Kaydedildi")
+            };
         }
         else
-            return Results.NoContent();
+        {
+            if (CheckForUpdate(data, existingRecord))
+            {
+                context!.SaveChanges();
+
+                return new Response<DtoResourceRole>
+                {
+                    Data = ObjectMapper.Mapper.Map<DtoResourceRole>(existingRecord),
+                    Result = new amorphie.core.Base.Result(Status.Success, "Güncelleme Başarili")
+                };
+            }
+        }
+        return new Response<DtoResourceRole>
+        {
+            Data = ObjectMapper.Mapper.Map<DtoResourceRole>(existingRecord),
+            Result = new Result(Status.Error, "Değişiklik yok")
+        };
     }
+
+    static bool CheckForUpdate(DtoResourceRole data, ResourceRole existingRecord)
+    {
+        var hasChanges = false;
+
+        if (data.Status != null && data.Status != existingRecord.Status)
+        {
+            existingRecord.Status = data.Status;
+            hasChanges = true;
+        }
+
+        if (hasChanges)
+        {
+            existingRecord.ModifiedAt = DateTime.Now.ToUniversalTime();
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    static IResponse deleteResourceRole(
+  [FromRoute(Name = "resourceRoleId")] Guid resourceRoleId,
+  [FromServices] ResourceDBContext context)
+    {
+        var existingRecord = context?.ResourceRoles?.FirstOrDefault(t => t.Id == resourceRoleId);
+
+        if (existingRecord == null)
+        {
+            return new Response
+            {
+                Result = new amorphie.core.Base.Result(Status.Error, "Kayıt bulunumadı")
+            };
+        }
+        else
+        {
+            context!.Remove(existingRecord);
+            context.SaveChanges();
+
+            return new Response
+            {
+                Result = new amorphie.core.Base.Result(Status.Error, "Silme başarılı")
+            };
+        }
+    }
+
 }

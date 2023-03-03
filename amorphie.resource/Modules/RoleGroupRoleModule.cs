@@ -1,3 +1,7 @@
+using amorphie.core.Base;
+using amorphie.core.Enums;
+using amorphie.core.IBase;
+
 public static class RoleGroupRoleModule
 {
     public static void MapRoleGroupRoleEndpoints(this WebApplication app)
@@ -11,7 +15,7 @@ public static class RoleGroupRoleModule
                 operation.Parameters[1].Description = "Paging parameter. **Token** is returned from last query.";
                 return operation;
             })
-         .Produces<GetRoleGroupRoleResponse[]>(StatusCodes.Status200OK)
+         .Produces<DtoRoleGroupRole>(StatusCodes.Status200OK)
          .Produces(StatusCodes.Status204NoContent);
 
         //saveRoleGroupRole
@@ -22,7 +26,7 @@ public static class RoleGroupRoleModule
                     operation.Summary = "Saves or updates requested role group role.";
                     return operation;
                 })
-                .Produces<GetRoleGroupRoleResponse>(StatusCodes.Status200OK)
+                .Produces<DtoRoleGroupRole>(StatusCodes.Status200OK)
                 .Produces(StatusCodes.Status201Created);
 
         //deleteRoleGroupRole
@@ -36,55 +40,93 @@ public static class RoleGroupRoleModule
                 .Produces(StatusCodes.Status204NoContent);
     }
 
-    static IResult saveRoleGroupRole(
-        [FromBody] SaveRoleGroupRoleRequest data,
+    static IResponse<List<DtoRoleGroupRole>> getAllRoleGroupRoles(
+         [FromServices] ResourceDBContext context,
+         [FromQuery][Range(0, 100)] int page = 0,
+         [FromQuery][Range(5, 100)] int pageSize = 100
+         )
+    {
+        var roleGroupRoles = context!.RoleGroupRoles!
+            .Skip(page * pageSize).Take(pageSize)
+            .AsQueryable().ToList();
+
+        if (roleGroupRoles.Count == 0)
+        {
+            return new Response<List<DtoRoleGroupRole>>
+            {
+                Data = null,
+                Result = new amorphie.core.Base.Result(Status.Success, "Veri bulunamadı")
+            };
+        }
+
+        return new Response<List<DtoRoleGroupRole>>
+        {
+            Data = roleGroupRoles.Select(x => ObjectMapper.Mapper.Map<DtoRoleGroupRole>(x)).ToList(),
+            Result = new amorphie.core.Base.Result(Status.Success, "Getirme başarılı")
+        };
+    }
+
+    static IResponse<DtoRoleGroupRole> saveRoleGroupRole(
+        [FromBody] DtoSaveRoleGroupRoleRequest data,
         [FromServices] ResourceDBContext context
         )
     {
-        var existingRecord = context?.RoleGroupRoles?.FirstOrDefault(t => t.RoleGroupId == data.RoleGroupId && t.RoleId == data.RoleId);
+        var existingRecord = context?.RoleGroupRoles?.FirstOrDefault(t => t.Id == data.Id);
 
         if (existingRecord == null)
         {
-            var id = Guid.NewGuid();
-
-            context!.RoleGroupRoles!.Add
-            (
-                new RoleGroupRole
-                {
-                    Id = data.id,
-                    RoleGroupId = data.RoleGroupId,
-                    RoleId = data.RoleId,
-                    Status = data.status,
-                    CreatedAt = data.createdAt,
-                    ModifiedAt = data.modifiedAt,
-                    CreatedBy = data.createdBy,
-                    ModifiedBy = data.modifiedBy,
-                    CreatedByBehalfOf = data.createdByBehalfOf,
-                    ModifiedByBehalfOf = data.modifiedByBehalfOf
-                }
-            );
+            var roleGroupRole = ObjectMapper.Mapper.Map<RoleGroupRole>(data);
+            roleGroupRole.CreatedAt = DateTime.UtcNow;
+            context!.RoleGroupRoles!.Add(roleGroupRole);
             context.SaveChanges();
-            return Results.Created($"/roleGroupRole/{id}", data);
+
+            return new Response<DtoRoleGroupRole>
+            {
+                Data = ObjectMapper.Mapper.Map<DtoRoleGroupRole>(roleGroupRole),
+                Result = new amorphie.core.Base.Result(Status.Success, "Kaydedildi")
+            };
         }
         else
         {
-            var hasChanges = false;
-
-            ModuleHelper.PreUpdate(data.status, existingRecord.Status!.ToString(), ref hasChanges);
-
-            if (hasChanges)
+            if (CheckForUpdate(data, existingRecord))
             {
                 context!.SaveChanges();
-                return Results.Ok(data);
-            }
-            else
-            {
-                return Results.Problem("Not Modified.", null, 304);
+
+                return new Response<DtoRoleGroupRole>
+                {
+                    Data = ObjectMapper.Mapper.Map<DtoRoleGroupRole>(existingRecord),
+                    Result = new amorphie.core.Base.Result(Status.Success, "Güncelleme Başarili")
+                };
             }
         }
+        return new Response<DtoRoleGroupRole>
+        {
+            Data = ObjectMapper.Mapper.Map<DtoRoleGroupRole>(existingRecord),
+            Result = new Result(Status.Error, "Değişiklik yok")
+        };
     }
 
-    static IResult deleteRoleGroupRole(
+    static bool CheckForUpdate(DtoSaveRoleGroupRoleRequest data, RoleGroupRole existingRecord)
+    {
+        var hasChanges = false;        
+
+        if (data.Status != null && data.Status != existingRecord.Status)
+        {
+            existingRecord.Status = data.Status;
+            hasChanges = true;
+        }
+
+        if (hasChanges)
+        {
+            existingRecord.ModifiedAt = DateTime.Now.ToUniversalTime();
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+     static IResponse deleteRoleGroupRole(
      [FromRoute(Name = "roleGroupRoleId")] Guid roleGroupRoleId,
      [FromServices] ResourceDBContext context)
     {
@@ -92,47 +134,20 @@ public static class RoleGroupRoleModule
 
         if (existingRecord == null)
         {
-            return Results.NotFound();
+              return new Response
+                {
+                    Result = new amorphie.core.Base.Result(Status.Error, "Kayıt bulunumadı")
+                };
         }
         else
         {
             context!.Remove(existingRecord);
             context.SaveChanges();
-            return Results.NoContent();
+            
+            return new Response
+                {
+                    Result = new amorphie.core.Base.Result(Status.Error, "Silme başarılı")
+                };
         }
-    }
-
-    static IResult getAllRoleGroupRoles(
-        [FromServices] ResourceDBContext context,
-        [FromQuery][Range(0, 100)] int page = 0,
-        [FromQuery][Range(5, 100)] int pageSize = 100
-        )
-    {
-        var query = context!.RoleGroupRoles!
-            // .Include(t => t.Tags)
-            .Skip(page * pageSize)
-            .Take(pageSize);
-       
-        var roleGroupRoles = query.ToList();
-
-        if (roleGroupRoles.Count() > 0)
-        {
-             return Results.Ok(roleGroupRoles.Select(roleGroup =>
-              new GetRoleGroupRoleResponse(
-               roleGroup.Id,
-               roleGroup.RoleGroupId,
-               roleGroup.RoleId,
-               roleGroup.Status,
-               roleGroup.CreatedAt,
-               roleGroup.ModifiedAt,
-               roleGroup.CreatedBy,
-               roleGroup.ModifiedBy,
-               roleGroup.CreatedByBehalfOf,
-               roleGroup.ModifiedByBehalfOf
-               )
-            ).ToArray());
-        }
-        else
-            return Results.NoContent();
     }
 }

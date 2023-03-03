@@ -1,3 +1,7 @@
+using amorphie.core.Base;
+using amorphie.core.Enums;
+using amorphie.core.IBase;
+
 public static class RoleModule
 {
     public static void MapRoleEndpoints(this WebApplication app)
@@ -12,20 +16,8 @@ public static class RoleModule
                 operation.Parameters[2].Description = "RFC 5646 compliant language code.";
                 return operation;
             })
-         .Produces<GetRoleResponse[]>(StatusCodes.Status200OK)
+         .Produces<DtoRole>(StatusCodes.Status200OK)
          .Produces(StatusCodes.Status204NoContent);
-
-
-        //getRole
-        app.MapGet("/role/{roleId}", getRole)
-            .WithOpenApi(operation =>
-            {
-                operation.Summary = "Returns requested role.";
-                operation.Parameters[0].Description = "Id of the requested role.";
-                return operation;
-            })
-            .Produces<GetRoleResponse>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status404NotFound);
 
         //saveRole
         app.MapPost("/role", saveRole)
@@ -35,7 +27,7 @@ public static class RoleModule
                     operation.Summary = "Saves or updates requested role.";
                     return operation;
                 })
-                .Produces<GetRoleResponse>(StatusCodes.Status200OK)
+                .Produces<DtoRole>(StatusCodes.Status200OK)
                 .Produces(StatusCodes.Status201Created);
 
         //deleteRole
@@ -49,55 +41,96 @@ public static class RoleModule
                 .Produces(StatusCodes.Status204NoContent);
     }
 
-    static IResult saveRole(
-        [FromBody] SaveRoleRequest data,
+    static IResponse<List<DtoRole>> getAllRoles(
+        [FromServices] ResourceDBContext context,
+        [FromQuery][Range(0, 100)] int page = 0,
+        [FromQuery][Range(5, 100)] int pageSize = 100,
+        [FromHeader(Name = "Language")] string? language = "en-EN"
+        )
+    {
+        var roles = context!.Roles!
+            .Include(t => t.Titles.Where(t => t.Language == language))
+            .Skip(page * pageSize).Take(pageSize)
+            .AsQueryable().ToList();
+
+        if (roles.Count == 0)
+        {
+            return new Response<List<DtoRole>>
+            {
+                Data = null,
+                Result = new amorphie.core.Base.Result(Status.Success, "Veri bulunamadı")
+            };
+        }
+
+        return new Response<List<DtoRole>>
+        {
+            Data = roles.Select(x => ObjectMapper.Mapper.Map<DtoRole>(x)).ToList(),
+            Result = new amorphie.core.Base.Result(Status.Success, "Getirme başarılı")
+        };
+    }
+
+    static IResponse<DtoRole> saveRole(
+        [FromBody] DtoSaveRoleRequest data,
         [FromServices] ResourceDBContext context
         )
     {
-        var existingRecord = context?.Roles?.FirstOrDefault(t => t.Id == data.id);
+        var existingRecord = context?.Roles?.FirstOrDefault(t => t.Id == data.Id);
 
         if (existingRecord == null)
         {
-            context!.Roles!.Add
-            (
-                new Role
-                {
-                    Id = data.id,
-                    Titles = data.titles,
-                    Tags = data.tags,
-                    Status = data.status,
-                    CreatedAt = data.createdAt,
-                    ModifiedAt = data.modifiedAt,
-                    CreatedBy = data.createdBy,
-                    ModifiedBy = data.modifiedBy,
-                    CreatedByBehalfOf = data.createdByBehalfOf,
-                    ModifiedByBehalfOf = data.modifiedByBehalfOf
-                }
-            );
+            var role = ObjectMapper.Mapper.Map<Role>(data);
+            role.CreatedAt = DateTime.UtcNow;
+            context!.Roles!.Add(role);
             context.SaveChanges();
-            return Results.Created($"/role/{data.id}", data);
+
+            return new Response<DtoRole>
+            {
+                Data = ObjectMapper.Mapper.Map<DtoRole>(role),
+                Result = new amorphie.core.Base.Result(Status.Success, "Kaydedildi")
+            };
         }
         else
         {
-            var hasChanges = false;
-
-            // Apply update to only changed fields.
-
-            ModuleHelper.PreUpdate(data.status, existingRecord.Status!.ToString(), ref hasChanges);
-
-            if (hasChanges)
+            if (CheckForUpdate(data, existingRecord))
             {
                 context!.SaveChanges();
-                return Results.Ok(data);
+
+                return new Response<DtoRole>
+                {
+                    Data = ObjectMapper.Mapper.Map<DtoRole>(existingRecord),
+                    Result = new amorphie.core.Base.Result(Status.Success, "Güncelleme Başarili")
+                };
             }
-            else
-            {
-                return Results.Problem("Not Modified.", null, 304);
-            }
+        }
+        return new Response<DtoRole>
+        {
+            Data = ObjectMapper.Mapper.Map<DtoRole>(existingRecord),
+            Result = new Result(Status.Error, "Değişiklik yok")
+        };
+    }
+
+    static bool CheckForUpdate(DtoSaveRoleRequest data, Role existingRecord)
+    {
+        var hasChanges = false;
+
+        if (data.Status != null && data.Status != existingRecord.Status)
+        {
+            existingRecord.Status = data.Status;
+            hasChanges = true;
+        }
+
+        if (hasChanges)
+        {
+            existingRecord.ModifiedAt = DateTime.Now.ToUniversalTime();
+            return true;
+        }
+        else
+        {
+            return false;
         }
     }
 
-    static IResult deleteRole(
+     static IResponse deleteRole(
      [FromRoute(Name = "roleId")] Guid roleId,
      [FromServices] ResourceDBContext context)
     {
@@ -105,75 +138,21 @@ public static class RoleModule
 
         if (existingRecord == null)
         {
-            return Results.NotFound();
+            return new Response
+            {
+                Result = new amorphie.core.Base.Result(Status.Error, "Kayıt bulunumadı")
+            };
         }
         else
         {
             context!.Remove(existingRecord);
             context.SaveChanges();
-            return Results.NoContent();
+
+            return new Response
+            {
+                Result = new amorphie.core.Base.Result(Status.Error, "Silme başarılı")
+            };
         }
     }
 
-    static IResult getRole(
-    [FromRoute(Name = "roleId")] Guid roleId,
-    [FromServices] ResourceDBContext context
-    )
-    {
-        var role = context!.Roles!.Include(t => t.Titles)
-            .FirstOrDefault(t => t.Id == roleId);
-
-        if (role == null)
-            return Results.NotFound();
-
-        return Results.Ok(
-              new GetRoleResponse(
-               role.Id,
-               role.Titles.ToArray(),
-               role.Tags,
-               role.Status,
-               role.CreatedAt,
-               role.ModifiedAt,
-               role.CreatedBy,
-               role.ModifiedBy,
-               role.CreatedByBehalfOf,
-               role.ModifiedByBehalfOf
-               )
-            );
-    }
-
-    static IResult getAllRoles(
-        [FromServices] ResourceDBContext context,
-        [FromQuery][Range(0, 100)] int page = 0,
-        [FromQuery][Range(5, 100)] int pageSize = 100,
-        [FromHeader(Name = "Language")] string? language = "en-EN"
-        )
-    {
-        var query = context!.Roles!
-            .Include(t => t.Titles.Where(t => t.Language == language))
-            .Skip(page * pageSize)
-            .Take(pageSize);
-
-        var roles = query.ToList();
-
-        if (roles.Count() > 0)
-        {
-            return Results.Ok(roles.Select(role =>
-             new GetRoleResponse(
-              role.Id,
-              role.Titles.ToArray(),
-              role.Tags,
-              role.Status,
-              role.CreatedAt,
-              role.ModifiedAt,
-              role.CreatedBy,
-              role.ModifiedBy,
-              role.CreatedByBehalfOf,
-              role.ModifiedByBehalfOf
-              )
-           ).ToArray());
-        }
-        else
-            return Results.NoContent();
-    }
 }
