@@ -19,6 +19,18 @@ public static class RoleModule
          .Produces<DtoRole>(StatusCodes.Status200OK)
          .Produces(StatusCodes.Status204NoContent);
 
+        //getRole
+        app.MapGet("/role/{roleId}", getRole)
+            .WithOpenApi(operation =>
+            {
+                operation.Summary = "Returns requested role.";
+                operation.Parameters[0].Description = "Id of the requested role.";
+                operation.Parameters[1].Description = "RFC 5646 compliant language code.";
+                return operation;
+            })
+            .Produces<DtoRole>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound);
+
         //saveRole
         app.MapPost("/role", saveRole)
        .WithTopic("pubsub", "SaveRole")
@@ -68,6 +80,32 @@ public static class RoleModule
             Result = new amorphie.core.Base.Result(Status.Success, "Getirme başarılı")
         };
     }
+
+        static IResponse<DtoRole> getRole(
+        [FromRoute(Name = "roleId")] Guid roleId,
+        [FromServices] ResourceDBContext context,
+        [FromHeader(Name = "Language")] string? language = "en-EN"
+        )
+        {
+             var role = context!.Roles!
+            .Include(t => t.Titles.Where(t => t.Language == language))
+            .FirstOrDefault(t => t.Id == roleId);
+
+        if (role == null)
+        {
+            return new Response<DtoRole>
+            {
+                Data = null,
+                Result = new amorphie.core.Base.Result(Status.Success, "Veri bulunamadı")
+            };
+        }
+
+        return new Response<DtoRole>
+        {
+            Data = ObjectMapper.Mapper.Map<DtoRole>(role),
+            Result = new amorphie.core.Base.Result(Status.Success, "Getirme başarılı")
+        };
+        }
 
     static IResponse<DtoRole> saveRole(
         [FromBody] DtoSaveRoleRequest data,
@@ -130,9 +168,9 @@ public static class RoleModule
         }
     }
 
-     static IResponse deleteRole(
-     [FromRoute(Name = "roleId")] Guid roleId,
-     [FromServices] ResourceDBContext context)
+    static IResponse deleteRole(
+    [FromRoute(Name = "roleId")] Guid roleId,
+    [FromServices] ResourceDBContext context)
     {
         var existingRecord = context?.Roles?.FirstOrDefault(t => t.Id == roleId);
 
