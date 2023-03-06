@@ -19,6 +19,18 @@ public static class RoleGroupModule
          .Produces<DtoRoleGroup>(StatusCodes.Status200OK)
          .Produces(StatusCodes.Status204NoContent);
 
+          //getRoleGroup
+        app.MapGet("/roleGroup/{roleGroupId}", getRoleGroup)
+            .WithOpenApi(operation =>
+            {
+                operation.Summary = "Returns requested role group.";
+                operation.Parameters[0].Description = "Id of the requested role group.";
+                operation.Parameters[1].Description = "RFC 5646 compliant language code.";
+                return operation;
+            })
+            .Produces<DtoRole>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound);
+
         //saveRoleGroup
         app.MapPost("/roleGroup", saveRoleGroup)
        .WithTopic("pubsub", "SaveRoleGroup")
@@ -68,6 +80,32 @@ public static class RoleGroupModule
             Result = new amorphie.core.Base.Result(Status.Success, "Getirme başarılı")
         };
     }
+
+    static IResponse<DtoRoleGroup> getRoleGroup(
+        [FromRoute(Name = "roleGroupId")] Guid roleGroupId,
+        [FromServices] ResourceDBContext context,
+        [FromHeader(Name = "Language")] string? language = "en-EN"
+        )
+        {
+             var roleGroup = context!.RoleGroups!
+            .Include(t => t.Titles.Where(t => t.Language == language))
+            .FirstOrDefault(t => t.Id == roleGroupId);
+
+        if (roleGroup == null)
+        {
+            return new Response<DtoRoleGroup>
+            {
+                Data = null,
+                Result = new amorphie.core.Base.Result(Status.Success, "Veri bulunamadı")
+            };
+        }
+
+        return new Response<DtoRoleGroup>
+        {
+            Data = ObjectMapper.Mapper.Map<DtoRoleGroup>(roleGroup),
+            Result = new amorphie.core.Base.Result(Status.Success, "Getirme başarılı")
+        };
+        }
 
     static IResponse<DtoRoleGroup> saveRoleGroup(
         [FromBody] DtoSaveRoleGroupRequest data,
