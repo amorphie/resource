@@ -73,11 +73,10 @@ public static class ResourceRoleModule
         [FromServices] ResourceDBContext context
         )
     {
-        var existingRecord = context?.ResourceRoles?.FirstOrDefault(t => t.Id == data.Id);
-
-        if (existingRecord == null)
+        if (data.Id == null)
         {
             var resourceRole = ObjectMapper.Mapper.Map<ResourceRole>(data);
+            resourceRole.Id = Guid.NewGuid();
             resourceRole.CreatedAt = DateTime.UtcNow;
             context!.ResourceRoles!.Add(resourceRole);
             context.SaveChanges();
@@ -90,7 +89,9 @@ public static class ResourceRoleModule
         }
         else
         {
-            if (CheckForUpdate(data, existingRecord))
+            var existingRecord = context?.ResourceRoles?.FirstOrDefault(t => t.Id == data.Id);
+
+            if (CheckForUpdate(data, existingRecord!))
             {
                 context!.SaveChanges();
 
@@ -100,12 +101,12 @@ public static class ResourceRoleModule
                     Result = new amorphie.core.Base.Result(Status.Success, "Güncelleme Başarili")
                 };
             }
+            return new Response<DtoResourceRole>
+            {
+                Data = ObjectMapper.Mapper.Map<DtoResourceRole>(existingRecord),
+                Result = new Result(Status.Error, "Değişiklik yok")
+            };
         }
-        return new Response<DtoResourceRole>
-        {
-            Data = ObjectMapper.Mapper.Map<DtoResourceRole>(existingRecord),
-            Result = new Result(Status.Error, "Değişiklik yok")
-        };
     }
 
     static bool CheckForUpdate(DtoResourceRole data, ResourceRole existingRecord)
