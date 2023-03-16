@@ -31,7 +31,7 @@ public static class ResourceModule
             .Produces(StatusCodes.Status404NotFound);
 
 
-        //savePrivilege
+        //saveResource
         app.MapPost("/resource", saveResource)
        .WithTopic("pubsub", "saveResource")
                 .WithOpenApi(operation =>
@@ -111,11 +111,10 @@ public static class ResourceModule
         [FromServices] ResourceDBContext context
         )
     {
-        var existingRecord = context?.Resources?.FirstOrDefault(t => t.Id == data.Id);
-
-        if (existingRecord == null)
+        if (data.Id == null)
         {
             var resource = ObjectMapper.Mapper.Map<Resource>(data);
+            resource.Id = Guid.NewGuid();
             resource.CreatedAt = DateTime.UtcNow;
             context!.Resources!.Add(resource);
             context.SaveChanges();
@@ -128,7 +127,9 @@ public static class ResourceModule
         }
         else
         {
-            if (CheckForUpdate(data, existingRecord))
+            var existingRecord = context?.Resources?.FirstOrDefault(t => t.Id == data.Id);
+
+            if (CheckForUpdate(data, existingRecord!))
             {
                 context!.SaveChanges();
 
@@ -138,12 +139,13 @@ public static class ResourceModule
                     Result = new amorphie.core.Base.Result(Status.Success, "Güncelleme Başarili")
                 };
             }
+
+            return new Response<DtoResource>
+            {
+                Data = ObjectMapper.Mapper.Map<DtoResource>(existingRecord),
+                Result = new Result(Status.Error, "Değişiklik yok")
+            };
         }
-        return new Response<DtoResource>
-        {
-            Data = ObjectMapper.Mapper.Map<DtoResource>(existingRecord),
-            Result = new Result(Status.Error, "Değişiklik yok")
-        };
     }
 
     static bool CheckForUpdate(DtoSaveResourceRequest data, Resource existingRecord)
@@ -187,20 +189,20 @@ public static class ResourceModule
 
         if (existingRecord == null)
         {
-              return new Response
-                {
-                    Result = new amorphie.core.Base.Result(Status.Error, "Kayıt bulunumadı")
-                };
+            return new Response
+            {
+                Result = new amorphie.core.Base.Result(Status.Error, "Kayıt bulunumadı")
+            };
         }
         else
         {
             context!.Remove(existingRecord);
             context.SaveChanges();
-            
+
             return new Response
-                {
-                    Result = new amorphie.core.Base.Result(Status.Error, "Silme başarılı")
-                };
+            {
+                Result = new amorphie.core.Base.Result(Status.Error, "Silme başarılı")
+            };
         }
     }
 

@@ -71,11 +71,10 @@ public static class RoleGroupRoleModule
         [FromServices] ResourceDBContext context
         )
     {
-        var existingRecord = context?.RoleGroupRoles?.FirstOrDefault(t => t.Id == data.Id);
-
-        if (existingRecord == null)
+        if (data.Id == null)
         {
             var roleGroupRole = ObjectMapper.Mapper.Map<RoleGroupRole>(data);
+            roleGroupRole.Id = Guid.NewGuid();
             roleGroupRole.CreatedAt = DateTime.UtcNow;
             context!.RoleGroupRoles!.Add(roleGroupRole);
             context.SaveChanges();
@@ -88,7 +87,9 @@ public static class RoleGroupRoleModule
         }
         else
         {
-            if (CheckForUpdate(data, existingRecord))
+            var existingRecord = context?.RoleGroupRoles?.FirstOrDefault(t => t.Id == data.Id);
+
+            if (CheckForUpdate(data, existingRecord!))
             {
                 context!.SaveChanges();
 
@@ -98,17 +99,18 @@ public static class RoleGroupRoleModule
                     Result = new amorphie.core.Base.Result(Status.Success, "Güncelleme Başarili")
                 };
             }
+
+            return new Response<DtoRoleGroupRole>
+            {
+                Data = ObjectMapper.Mapper.Map<DtoRoleGroupRole>(existingRecord),
+                Result = new Result(Status.Error, "Değişiklik yok")
+            };
         }
-        return new Response<DtoRoleGroupRole>
-        {
-            Data = ObjectMapper.Mapper.Map<DtoRoleGroupRole>(existingRecord),
-            Result = new Result(Status.Error, "Değişiklik yok")
-        };
     }
 
     static bool CheckForUpdate(DtoSaveRoleGroupRoleRequest data, RoleGroupRole existingRecord)
     {
-        var hasChanges = false;        
+        var hasChanges = false;
 
         if (data.Status != null && data.Status != existingRecord.Status)
         {
@@ -126,28 +128,28 @@ public static class RoleGroupRoleModule
             return false;
         }
     }
-     static IResponse deleteRoleGroupRole(
-     [FromRoute(Name = "roleGroupRoleId")] Guid roleGroupRoleId,
-     [FromServices] ResourceDBContext context)
+    static IResponse deleteRoleGroupRole(
+    [FromRoute(Name = "roleGroupRoleId")] Guid roleGroupRoleId,
+    [FromServices] ResourceDBContext context)
     {
         var existingRecord = context?.RoleGroupRoles?.FirstOrDefault(t => t.Id == roleGroupRoleId);
 
         if (existingRecord == null)
         {
-              return new Response
-                {
-                    Result = new amorphie.core.Base.Result(Status.Error, "Kayıt bulunumadı")
-                };
+            return new Response
+            {
+                Result = new amorphie.core.Base.Result(Status.Error, "Kayıt bulunumadı")
+            };
         }
         else
         {
             context!.Remove(existingRecord);
             context.SaveChanges();
-            
+
             return new Response
-                {
-                    Result = new amorphie.core.Base.Result(Status.Error, "Silme başarılı")
-                };
+            {
+                Result = new amorphie.core.Base.Result(Status.Error, "Silme başarılı")
+            };
         }
     }
 }

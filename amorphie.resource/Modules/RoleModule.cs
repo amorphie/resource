@@ -81,15 +81,15 @@ public static class RoleModule
         };
     }
 
-        static IResponse<DtoRole> getRole(
-        [FromRoute(Name = "roleId")] Guid roleId,
-        [FromServices] ResourceDBContext context,
-        [FromHeader(Name = "Language")] string? language = "en-EN"
-        )
-        {
-             var role = context!.Roles!
-            .Include(t => t.Titles.Where(t => t.Language == language))
-            .FirstOrDefault(t => t.Id == roleId);
+    static IResponse<DtoRole> getRole(
+    [FromRoute(Name = "roleId")] Guid roleId,
+    [FromServices] ResourceDBContext context,
+    [FromHeader(Name = "Language")] string? language = "en-EN"
+    )
+    {
+        var role = context!.Roles!
+       .Include(t => t.Titles.Where(t => t.Language == language))
+       .FirstOrDefault(t => t.Id == roleId);
 
         if (role == null)
         {
@@ -105,18 +105,17 @@ public static class RoleModule
             Data = ObjectMapper.Mapper.Map<DtoRole>(role),
             Result = new amorphie.core.Base.Result(Status.Success, "Getirme başarılı")
         };
-        }
+    }
 
     static IResponse<DtoRole> saveRole(
         [FromBody] DtoSaveRoleRequest data,
         [FromServices] ResourceDBContext context
         )
     {
-        var existingRecord = context?.Roles?.FirstOrDefault(t => t.Id == data.Id);
-
-        if (existingRecord == null)
+        if (data.Id == null)
         {
             var role = ObjectMapper.Mapper.Map<Role>(data);
+            role.Id = Guid.NewGuid();
             role.CreatedAt = DateTime.UtcNow;
             context!.Roles!.Add(role);
             context.SaveChanges();
@@ -129,7 +128,9 @@ public static class RoleModule
         }
         else
         {
-            if (CheckForUpdate(data, existingRecord))
+            var existingRecord = context?.Roles?.FirstOrDefault(t => t.Id == data.Id);
+
+            if (CheckForUpdate(data, existingRecord!))
             {
                 context!.SaveChanges();
 
@@ -139,12 +140,13 @@ public static class RoleModule
                     Result = new amorphie.core.Base.Result(Status.Success, "Güncelleme Başarili")
                 };
             }
+
+            return new Response<DtoRole>
+            {
+                Data = ObjectMapper.Mapper.Map<DtoRole>(existingRecord),
+                Result = new Result(Status.Error, "Değişiklik yok")
+            };
         }
-        return new Response<DtoRole>
-        {
-            Data = ObjectMapper.Mapper.Map<DtoRole>(existingRecord),
-            Result = new Result(Status.Error, "Değişiklik yok")
-        };
     }
 
     static bool CheckForUpdate(DtoSaveRoleRequest data, Role existingRecord)

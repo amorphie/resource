@@ -19,7 +19,7 @@ public static class RoleGroupModule
          .Produces<DtoRoleGroup>(StatusCodes.Status200OK)
          .Produces(StatusCodes.Status204NoContent);
 
-          //getRoleGroup
+        //getRoleGroup
         app.MapGet("/roleGroup/{roleGroupId}", getRoleGroup)
             .WithOpenApi(operation =>
             {
@@ -86,10 +86,10 @@ public static class RoleGroupModule
         [FromServices] ResourceDBContext context,
         [FromHeader(Name = "Language")] string? language = "en-EN"
         )
-        {
-             var roleGroup = context!.RoleGroups!
-            .Include(t => t.Titles.Where(t => t.Language == language))
-            .FirstOrDefault(t => t.Id == roleGroupId);
+    {
+        var roleGroup = context!.RoleGroups!
+       .Include(t => t.Titles.Where(t => t.Language == language))
+       .FirstOrDefault(t => t.Id == roleGroupId);
 
         if (roleGroup == null)
         {
@@ -105,18 +105,17 @@ public static class RoleGroupModule
             Data = ObjectMapper.Mapper.Map<DtoRoleGroup>(roleGroup),
             Result = new amorphie.core.Base.Result(Status.Success, "Getirme başarılı")
         };
-        }
+    }
 
     static IResponse<DtoRoleGroup> saveRoleGroup(
         [FromBody] DtoSaveRoleGroupRequest data,
         [FromServices] ResourceDBContext context
         )
     {
-        var existingRecord = context?.RoleGroups?.FirstOrDefault(t => t.Id == data.Id);
-
-        if (existingRecord == null)
+        if (data.Id == null)
         {
             var roleGroup = ObjectMapper.Mapper.Map<RoleGroup>(data);
+            roleGroup.Id = Guid.NewGuid();
             roleGroup.CreatedAt = DateTime.UtcNow;
             context!.RoleGroups!.Add(roleGroup);
             context.SaveChanges();
@@ -129,7 +128,9 @@ public static class RoleGroupModule
         }
         else
         {
-            if (CheckForUpdate(data, existingRecord))
+            var existingRecord = context?.RoleGroups?.FirstOrDefault(t => t.Id == data.Id);
+
+            if (CheckForUpdate(data, existingRecord!))
             {
                 context!.SaveChanges();
 
@@ -139,12 +140,13 @@ public static class RoleGroupModule
                     Result = new amorphie.core.Base.Result(Status.Success, "Güncelleme Başarili")
                 };
             }
+
+            return new Response<DtoRoleGroup>
+            {
+                Data = ObjectMapper.Mapper.Map<DtoRoleGroup>(existingRecord),
+                Result = new Result(Status.Error, "Değişiklik yok")
+            };
         }
-        return new Response<DtoRoleGroup>
-        {
-            Data = ObjectMapper.Mapper.Map<DtoRoleGroup>(existingRecord),
-            Result = new Result(Status.Error, "Değişiklik yok")
-        };
     }
 
     static bool CheckForUpdate(DtoSaveRoleGroupRequest data, RoleGroup existingRecord)

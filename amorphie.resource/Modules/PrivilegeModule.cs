@@ -107,11 +107,10 @@ public static class PrivilegeModule
         [FromServices] ResourceDBContext context
         )
     {
-        var existingRecord = context?.Privileges?.FirstOrDefault(t => t.Id == data.Id);
-
-        if (existingRecord == null)
+        if (data.Id == null)
         {
             var privilege = ObjectMapper.Mapper.Map<Privilege>(data);
+            privilege.Id = Guid.NewGuid();
             privilege.CreatedAt = DateTime.UtcNow;
             context!.Privileges!.Add(privilege);
             context.SaveChanges();
@@ -124,7 +123,9 @@ public static class PrivilegeModule
         }
         else
         {
-            if (CheckForUpdate(data, existingRecord))
+            var existingRecord = context?.Privileges?.FirstOrDefault(t => t.Id == data.Id);
+
+            if (CheckForUpdate(data, existingRecord!))
             {
                 context!.SaveChanges();
 
@@ -134,12 +135,14 @@ public static class PrivilegeModule
                     Result = new amorphie.core.Base.Result(Status.Success, "Güncelleme Başarili")
                 };
             }
+
+            return new Response<DtoPrivilege>
+            {
+                Data = ObjectMapper.Mapper.Map<DtoPrivilege>(existingRecord),
+                Result = new Result(Status.Error, "Değişiklik yok")
+            };
         }
-        return new Response<DtoPrivilege>
-        {
-            Data = ObjectMapper.Mapper.Map<DtoPrivilege>(existingRecord),
-            Result = new Result(Status.Error, "Değişiklik yok")
-        };
+
     }
 
     static bool CheckForUpdate(DtoSavePrivilegeRequest data, Privilege existingRecord)
@@ -149,6 +152,12 @@ public static class PrivilegeModule
         if (data.Ttl != null && data.Ttl != existingRecord.Ttl)
         {
             existingRecord.Ttl = data.Ttl.Value;
+            hasChanges = true;
+        }
+
+        if (data.Url != null && data.Url != existingRecord.Url)
+        {
+            existingRecord.Status = data.Status;
             hasChanges = true;
         }
 
@@ -177,20 +186,20 @@ public static class PrivilegeModule
 
         if (existingRecord == null)
         {
-              return new Response
-                {
-                    Result = new amorphie.core.Base.Result(Status.Error, "Kayıt bulunumadı")
-                };
+            return new Response
+            {
+                Result = new amorphie.core.Base.Result(Status.Error, "Kayıt bulunumadı")
+            };
         }
         else
         {
             context!.Remove(existingRecord);
             context.SaveChanges();
-            
+
             return new Response
-                {
-                    Result = new amorphie.core.Base.Result(Status.Error, "Silme başarılı")
-                };
+            {
+                Result = new amorphie.core.Base.Result(Status.Error, "Silme başarılı")
+            };
         }
     }
 }
