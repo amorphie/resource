@@ -27,5 +27,8 @@ class ResourceMapper : Profile
 
         CreateMap<RoleGroupRole, DtoRoleGroupRole>().ReverseMap();
         CreateMap<DtoSaveRoleGroupRoleRequest, RoleGroupRole>();
+
+        CreateMap<Scope, DtoScope>().ReverseMap();
+        CreateMap<DtoSaveScopeRequest, Scope>();
     }
 }

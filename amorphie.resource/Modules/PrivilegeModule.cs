@@ -107,10 +107,20 @@ public static class PrivilegeModule
         [FromServices] ResourceDBContext context
         )
     {
+        Privilege? existingRecord = null;
+
         if (data.Id == null)
         {
+            data.Id = Guid.NewGuid();
+        }
+        else
+        {
+            existingRecord = context?.Privileges?.FirstOrDefault(t => t.Id == data.Id);
+        }
+
+        if (existingRecord == null)
+        {
             var privilege = ObjectMapper.Mapper.Map<Privilege>(data);
-            privilege.Id = Guid.NewGuid();
             privilege.CreatedAt = DateTime.UtcNow;
             context!.Privileges!.Add(privilege);
             context.SaveChanges();
@@ -123,8 +133,6 @@ public static class PrivilegeModule
         }
         else
         {
-            var existingRecord = context?.Privileges?.FirstOrDefault(t => t.Id == data.Id);
-
             if (CheckForUpdate(data, existingRecord!))
             {
                 context!.SaveChanges();

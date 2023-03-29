@@ -71,10 +71,20 @@ public static class ResourceRateLimitModule
       [FromServices] ResourceDBContext context
       )
     {
+        ResourceRateLimit? existingRecord = null;
+
         if (data.Id == null)
         {
+            data.Id = Guid.NewGuid();
+        }
+        else
+        {
+            existingRecord = context?.ResourceRateLimits?.FirstOrDefault(t => t.Id == data.Id);
+        }
+
+        if (existingRecord == null)
+        {
             var resourceRateLimit = ObjectMapper.Mapper.Map<ResourceRateLimit>(data);
-            resourceRateLimit.Id = Guid.NewGuid();
             resourceRateLimit.CreatedAt = DateTime.UtcNow;
             context!.ResourceRateLimits!.Add(resourceRateLimit);
             context.SaveChanges();
@@ -87,8 +97,6 @@ public static class ResourceRateLimitModule
         }
         else
         {
-            var existingRecord = context?.ResourceRateLimits?.FirstOrDefault(t => t.Id == data.Id);
-
             if (CheckForUpdate(data, existingRecord!))
             {
                 context!.SaveChanges();

@@ -3,8 +3,9 @@ using amorphie.core.security.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-await builder.Configuration.AddVaultSecrets("amorphie-secretstore", new string[] { "amorphie-secretstore" });
-var postgreSql = builder.Configuration["PostgreSql"];
+// await builder.Configuration.AddVaultSecrets("amorphie-secretstore", new string[] { "amorphie-secretstore" });
+// var postgreSql = builder.Configuration["PostgreSql"];
+var postgreSql = "Host=localhost:5432;Database=resources;Username=postgres;Password=postgres";
 
 builder.Logging.ClearProviders();
 builder.Logging.AddJsonConsole();
@@ -35,6 +36,7 @@ app.MapRoleGroupRoleEndpoints();
 app.MapResourceRoleEndpoints();
 app.MapPrivilegeEndpoints();
 app.MapResourceRateLimitEndpoints();
+app.MapScopeEndpoints();
 
 try
 {
