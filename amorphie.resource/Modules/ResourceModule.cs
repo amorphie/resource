@@ -111,10 +111,20 @@ public static class ResourceModule
         [FromServices] ResourceDBContext context
         )
     {
+        Resource? existingRecord = null;
+
         if (data.Id == null)
         {
+            data.Id = Guid.NewGuid();
+        }
+        else
+        {
+            existingRecord = context?.Resources?.FirstOrDefault(t => t.Id == data.Id);
+        }
+
+        if (existingRecord == null)
+        {
             var resource = ObjectMapper.Mapper.Map<Resource>(data);
-            resource.Id = Guid.NewGuid();
             resource.CreatedAt = DateTime.UtcNow;
             context!.Resources!.Add(resource);
             context.SaveChanges();
@@ -127,8 +137,6 @@ public static class ResourceModule
         }
         else
         {
-            var existingRecord = context?.Resources?.FirstOrDefault(t => t.Id == data.Id);
-
             if (CheckForUpdate(data, existingRecord!))
             {
                 context!.SaveChanges();
@@ -205,6 +213,4 @@ public static class ResourceModule
             };
         }
     }
-
 }
-

@@ -27,6 +27,7 @@ public class ResourceDBContext : DbContext
     public DbSet<Privilege>? Privileges { get; set; }
     public DbSet<ResourceRateLimit>? ResourceRateLimits { get; set; }
     public DbSet<Translation>? Translations { get; set; }
+    public DbSet<Scope>? Scopes { get; set; }
     public ResourceDBContext(DbContextOptions options) : base(options) { AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true); }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -52,6 +53,9 @@ public class ResourceDBContext : DbContext
         modelBuilder.Entity<ResourceRateLimit>()
         .HasKey(r => r.Id);
 
+        modelBuilder.Entity<Scope>()
+        .HasKey(r => r.Id);
+
         modelBuilder.Entity<Translation>()
        .HasKey(r => r.Id);
 
@@ -62,6 +66,8 @@ public class ResourceDBContext : DbContext
         modelBuilder.Entity<Translation>().Property<Guid?>("RoleId_Title");
 
         modelBuilder.Entity<Translation>().Property<Guid?>("RoleGroupId_Title");
+
+        modelBuilder.Entity<Translation>().Property<Guid?>("ScopeId_Title");
 
         modelBuilder.Entity<Resource>()
            .HasMany<Translation>(t => t.DisplayNames)
@@ -82,6 +88,11 @@ public class ResourceDBContext : DbContext
         .HasMany<Translation>(t => t.Titles)
         .WithOne()
         .HasForeignKey("RoleGroupId_Title");
+
+        modelBuilder.Entity<Scope>()
+        .HasMany<Translation>(t => t.Titles)
+        .WithOne()
+        .HasForeignKey("ScopeId_Title");
 
         var ResourceId = Guid.NewGuid();
         var RoleId = Guid.NewGuid();

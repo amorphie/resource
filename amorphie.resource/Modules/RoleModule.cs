@@ -112,10 +112,20 @@ public static class RoleModule
         [FromServices] ResourceDBContext context
         )
     {
+        Role? existingRecord = null;
+
         if (data.Id == null)
         {
+            data.Id = Guid.NewGuid();
+        }
+        else
+        {
+            existingRecord = context?.Roles?.FirstOrDefault(t => t.Id == data.Id);
+        }
+
+        if (existingRecord == null)
+        {
             var role = ObjectMapper.Mapper.Map<Role>(data);
-            role.Id = Guid.NewGuid();
             role.CreatedAt = DateTime.UtcNow;
             context!.Roles!.Add(role);
             context.SaveChanges();
@@ -128,8 +138,6 @@ public static class RoleModule
         }
         else
         {
-            var existingRecord = context?.Roles?.FirstOrDefault(t => t.Id == data.Id);
-
             if (CheckForUpdate(data, existingRecord!))
             {
                 context!.SaveChanges();

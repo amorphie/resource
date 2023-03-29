@@ -73,10 +73,20 @@ public static class ResourceRoleModule
         [FromServices] ResourceDBContext context
         )
     {
+        ResourceRole? existingRecord = null;
+
         if (data.Id == null)
         {
+            data.Id = Guid.NewGuid();
+        }
+        else
+        {
+            existingRecord = context?.ResourceRoles?.FirstOrDefault(t => t.Id == data.Id);
+        }
+
+        if (existingRecord == null)
+        {
             var resourceRole = ObjectMapper.Mapper.Map<ResourceRole>(data);
-            resourceRole.Id = Guid.NewGuid();
             resourceRole.CreatedAt = DateTime.UtcNow;
             context!.ResourceRoles!.Add(resourceRole);
             context.SaveChanges();
@@ -89,8 +99,6 @@ public static class ResourceRoleModule
         }
         else
         {
-            var existingRecord = context?.ResourceRoles?.FirstOrDefault(t => t.Id == data.Id);
-
             if (CheckForUpdate(data, existingRecord!))
             {
                 context!.SaveChanges();
