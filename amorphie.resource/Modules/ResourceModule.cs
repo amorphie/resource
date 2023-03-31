@@ -119,7 +119,7 @@ public static class ResourceModule
         }
         else
         {
-            existingRecord = context?.Resources?.FirstOrDefault(t => t.Id == data.Id);
+            existingRecord = context?.Resources!.FirstOrDefault(t => t.Id == data.Id);
         }
 
         if (existingRecord == null)

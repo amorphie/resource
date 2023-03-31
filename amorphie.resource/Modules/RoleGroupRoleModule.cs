@@ -79,7 +79,7 @@ public static class RoleGroupRoleModule
         }
         else
         {
-           existingRecord = context?.RoleGroupRoles?.FirstOrDefault(t => t.Id == data.Id);
+           existingRecord = context?.RoleGroupRoles!.FirstOrDefault(t => t.Id == data.Id);
         }         
 
         if (existingRecord == null)

@@ -79,7 +79,7 @@ public static class ResourceRateLimitModule
         }
         else
         {
-            existingRecord = context?.ResourceRateLimits?.FirstOrDefault(t => t.Id == data.Id);
+            existingRecord = context?.ResourceRateLimits!.FirstOrDefault(t => t.Id == data.Id);
         }
 
         if (existingRecord == null)

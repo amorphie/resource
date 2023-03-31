@@ -120,12 +120,13 @@ public static class RoleModule
         }
         else
         {
-            existingRecord = context?.Roles?.FirstOrDefault(t => t.Id == data.Id);
+            existingRecord = context?.Roles!.Include(t => t.Titles).FirstOrDefault(t => t.Id == data.Id);
         }
 
         if (existingRecord == null)
         {
             var role = ObjectMapper.Mapper.Map<Role>(data);
+
             role.CreatedAt = DateTime.UtcNow;
             context!.Roles!.Add(role);
             context.SaveChanges();
@@ -140,7 +141,18 @@ public static class RoleModule
         {
             if (CheckForUpdate(data, existingRecord!))
             {
+                context!.Update(existingRecord);
                 context!.SaveChanges();
+
+                // try
+                // {
+                //     context!.Entry(existingRecord).State = EntityState.Modified;
+                //     context!.SaveChanges();                    
+                // }
+                // catch (DbUpdateConcurrencyException ex)
+                // {
+                //     ex.Entries.Single().Reload(); context!.SaveChanges();
+                // }
 
                 return new Response<DtoRole>
                 {
@@ -167,9 +179,49 @@ public static class RoleModule
             hasChanges = true;
         }
 
+        if (data.Tags != null && data.Tags != existingRecord.Tags)
+        {
+            existingRecord.Tags = data.Tags;
+            hasChanges = true;
+        }
+        var currentTime = DateTime.Now.ToUniversalTime();
+
+        foreach (MultilanguageText multilanguageText in data.Titles)
+        {
+            var existingTitle = existingRecord.Titles.FirstOrDefault(t => t.Language == multilanguageText.Language);
+
+            if (existingTitle == null)
+            {
+                // existingRecord.Titles.Add(ObjectMapper.Mapper.Map<Translation>(multilanguageText));
+                //  context!.SaveChanges();
+                // context!.Translations!.Add(ObjectMapper.Mapper.Map<Translation>(multilanguageText));
+
+                Translation translation = new Translation();
+                translation.CreatedBy = data.CreatedBy;
+                translation.CreatedByBehalfOf = data.CreatedByBehalfOf;
+                translation.Id = Guid.NewGuid();
+                translation.Label = multilanguageText.Label;
+                translation.Language = multilanguageText.Language;
+                translation.ModifiedAt =  currentTime;
+                translation.ModifiedByBehalfOf = data.ModifiedByBehalfOf;
+
+                existingRecord.Titles.Add(translation);
+                
+                hasChanges = true;
+            }
+            else
+            {
+                if (existingTitle.Label != multilanguageText.Label)
+                {
+                    existingTitle.Label = multilanguageText.Label;
+                    hasChanges = true;
+                }
+            }
+        }
+
         if (hasChanges)
         {
-            existingRecord.ModifiedAt = DateTime.Now.ToUniversalTime();
+            existingRecord.ModifiedAt = currentTime;
             return true;
         }
         else
@@ -202,5 +254,4 @@ public static class RoleModule
             };
         }
     }
-
 }
