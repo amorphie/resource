@@ -139,21 +139,10 @@ public static class RoleModule
         }
         else
         {
-            if (CheckForUpdate(data, existingRecord!))
+            if (CheckForUpdate(data, existingRecord!, context!))
             {
-                context!.Update(existingRecord);
                 context!.SaveChanges();
-
-                // try
-                // {
-                //     context!.Entry(existingRecord).State = EntityState.Modified;
-                //     context!.SaveChanges();                    
-                // }
-                // catch (DbUpdateConcurrencyException ex)
-                // {
-                //     ex.Entries.Single().Reload(); context!.SaveChanges();
-                // }
-
+                
                 return new Response<DtoRole>
                 {
                     Data = ObjectMapper.Mapper.Map<DtoRole>(existingRecord),
@@ -169,7 +158,7 @@ public static class RoleModule
         }
     }
 
-    static bool CheckForUpdate(DtoSaveRoleRequest data, Role existingRecord)
+    static bool CheckForUpdate(DtoSaveRoleRequest data, Role existingRecord, ResourceDBContext context)
     {
         var hasChanges = false;
 
@@ -184,7 +173,6 @@ public static class RoleModule
             existingRecord.Tags = data.Tags;
             hasChanges = true;
         }
-        var currentTime = DateTime.Now.ToUniversalTime();
 
         foreach (MultilanguageText multilanguageText in data.Titles)
         {
@@ -192,21 +180,10 @@ public static class RoleModule
 
             if (existingTitle == null)
             {
-                // existingRecord.Titles.Add(ObjectMapper.Mapper.Map<Translation>(multilanguageText));
-                //  context!.SaveChanges();
-                // context!.Translations!.Add(ObjectMapper.Mapper.Map<Translation>(multilanguageText));
+                existingRecord.Titles!.Add(ObjectMapper.Mapper.Map<Translation>(multilanguageText));
+                var existingTitle2 = existingRecord.Titles!.FirstOrDefault(t => t.Language == multilanguageText.Language);
+                context.Add(existingTitle2);
 
-                Translation translation = new Translation();
-                translation.CreatedBy = data.CreatedBy;
-                translation.CreatedByBehalfOf = data.CreatedByBehalfOf;
-                translation.Id = Guid.NewGuid();
-                translation.Label = multilanguageText.Label;
-                translation.Language = multilanguageText.Language;
-                translation.ModifiedAt =  currentTime;
-                translation.ModifiedByBehalfOf = data.ModifiedByBehalfOf;
-
-                existingRecord.Titles.Add(translation);
-                
                 hasChanges = true;
             }
             else
@@ -221,7 +198,7 @@ public static class RoleModule
 
         if (hasChanges)
         {
-            existingRecord.ModifiedAt = currentTime;
+            existingRecord.ModifiedAt = DateTime.Now.ToUniversalTime();
             return true;
         }
         else

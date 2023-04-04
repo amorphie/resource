@@ -3,7 +3,8 @@ using amorphie.core.security.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var postgreSql = "Host=localhost:5432;Database=resources;Username=postgres;Password=postgres";
+await builder.Configuration.AddVaultSecrets("amorphie-secretstore", new string[] { "amorphie-secretstore" });
+var postgreSql = builder.Configuration["PostgreSql"];
 
 builder.Logging.ClearProviders();
 builder.Logging.AddJsonConsole();

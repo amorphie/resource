@@ -137,7 +137,7 @@ public static class ResourceModule
         }
         else
         {
-            if (CheckForUpdate(data, existingRecord!))
+            if (CheckForUpdate(data, existingRecord!, context!))
             {
                 context!.SaveChanges();
 
@@ -156,7 +156,7 @@ public static class ResourceModule
         }
     }
 
-    static bool CheckForUpdate(DtoSaveResourceRequest data, Resource existingRecord)
+    static bool CheckForUpdate(DtoSaveResourceRequest data, Resource existingRecord, ResourceDBContext context)
     {
         var hasChanges = false;
 
@@ -176,6 +176,56 @@ public static class ResourceModule
         {
             existingRecord.Status = data.Status;
             hasChanges = true;
+        }
+
+        if (data.Tags != null && data.Tags != existingRecord.Tags)
+        {
+            existingRecord.Tags = data.Tags;
+            hasChanges = true;
+        }
+
+        foreach (MultilanguageText multilanguageText in data.DisplayNames)
+        {
+            var existingName = existingRecord.DisplayNames.FirstOrDefault(t => t.Language == multilanguageText.Language);
+
+            if (existingName == null)
+            {
+                existingRecord.DisplayNames!.Add(ObjectMapper.Mapper.Map<Translation>(multilanguageText));
+                var existingName2 = existingRecord.DisplayNames!.FirstOrDefault(t => t.Language == multilanguageText.Language);
+                context.Add(existingName2);
+
+                hasChanges = true;
+            }
+            else
+            {
+                if (existingName.Label != multilanguageText.Label)
+                {
+                    existingName.Label = multilanguageText.Label;
+                    hasChanges = true;
+                }
+            }
+        }
+
+        foreach (MultilanguageText multilanguageText in data.Descriptions)
+        {
+            var existingDescription = existingRecord.Descriptions.FirstOrDefault(t => t.Language == multilanguageText.Language);
+
+            if (existingDescription == null)
+            {
+                existingRecord.Descriptions!.Add(ObjectMapper.Mapper.Map<Translation>(multilanguageText));
+                var existingDescription2 = existingRecord.Descriptions!.FirstOrDefault(t => t.Language == multilanguageText.Language);
+                context.Add(existingDescription2);
+
+                hasChanges = true;
+            }
+            else
+            {
+                if (existingDescription.Label != multilanguageText.Label)
+                {
+                    existingDescription.Label = multilanguageText.Label;
+                    hasChanges = true;
+                }
+            }
         }
 
         if (hasChanges)
