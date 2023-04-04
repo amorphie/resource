@@ -115,7 +115,7 @@ public static class PrivilegeModule
         }
         else
         {
-            existingRecord = context?.Privileges?.FirstOrDefault(t => t.Id == data.Id);
+            existingRecord = context?.Privileges!.FirstOrDefault(t => t.Id == data.Id);
         }
 
         if (existingRecord == null)

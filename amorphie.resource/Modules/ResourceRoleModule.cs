@@ -81,7 +81,7 @@ public static class ResourceRoleModule
         }
         else
         {
-            existingRecord = context?.ResourceRoles?.FirstOrDefault(t => t.Id == data.Id);
+            existingRecord = context?.ResourceRoles!.FirstOrDefault(t => t.Id == data.Id);
         }
 
         if (existingRecord == null)

@@ -8,7 +8,7 @@ class ResourceMapper : Profile
         CreateMap<Resource, DtoResource>().ReverseMap();
         CreateMap<DtoSaveResourceRequest, Resource>();
 
-        CreateMap<Translation, MultilanguageText>();
+        CreateMap<Translation, MultilanguageText>().ReverseMap();
 
         CreateMap<Privilege, DtoPrivilege>().ReverseMap();
         CreateMap<DtoSavePrivilegeRequest, Privilege>();
@@ -20,7 +20,7 @@ class ResourceMapper : Profile
         CreateMap<DtoSaveResourceRoleRequest, ResourceRole>();
 
         CreateMap<Role, DtoRole>().ReverseMap();
-        CreateMap<DtoSaveRoleRequest, Role>();
+        CreateMap<DtoSaveRoleRequest, Role>().ReverseMap();
 
         CreateMap<RoleGroup, DtoRoleGroup>().ReverseMap();
         CreateMap<DtoSaveRoleGroupRequest, RoleGroup>();

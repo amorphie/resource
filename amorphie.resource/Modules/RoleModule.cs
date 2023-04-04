@@ -120,12 +120,13 @@ public static class RoleModule
         }
         else
         {
-            existingRecord = context?.Roles?.FirstOrDefault(t => t.Id == data.Id);
+            existingRecord = context?.Roles!.Include(t => t.Titles).FirstOrDefault(t => t.Id == data.Id);
         }
 
         if (existingRecord == null)
         {
             var role = ObjectMapper.Mapper.Map<Role>(data);
+
             role.CreatedAt = DateTime.UtcNow;
             context!.Roles!.Add(role);
             context.SaveChanges();
@@ -138,10 +139,10 @@ public static class RoleModule
         }
         else
         {
-            if (CheckForUpdate(data, existingRecord!))
+            if (CheckForUpdate(data, existingRecord!, context!))
             {
                 context!.SaveChanges();
-
+                
                 return new Response<DtoRole>
                 {
                     Data = ObjectMapper.Mapper.Map<DtoRole>(existingRecord),
@@ -157,7 +158,7 @@ public static class RoleModule
         }
     }
 
-    static bool CheckForUpdate(DtoSaveRoleRequest data, Role existingRecord)
+    static bool CheckForUpdate(DtoSaveRoleRequest data, Role existingRecord, ResourceDBContext context)
     {
         var hasChanges = false;
 
@@ -165,6 +166,34 @@ public static class RoleModule
         {
             existingRecord.Status = data.Status;
             hasChanges = true;
+        }
+
+        if (data.Tags != null && data.Tags != existingRecord.Tags)
+        {
+            existingRecord.Tags = data.Tags;
+            hasChanges = true;
+        }
+
+        foreach (MultilanguageText multilanguageText in data.Titles)
+        {
+            var existingTitle = existingRecord.Titles.FirstOrDefault(t => t.Language == multilanguageText.Language);
+
+            if (existingTitle == null)
+            {
+                existingRecord.Titles!.Add(ObjectMapper.Mapper.Map<Translation>(multilanguageText));
+                var existingTitle2 = existingRecord.Titles!.FirstOrDefault(t => t.Language == multilanguageText.Language);
+                context.Add(existingTitle2);
+
+                hasChanges = true;
+            }
+            else
+            {
+                if (existingTitle.Label != multilanguageText.Label)
+                {
+                    existingTitle.Label = multilanguageText.Label;
+                    hasChanges = true;
+                }
+            }
         }
 
         if (hasChanges)
@@ -202,5 +231,4 @@ public static class RoleModule
             };
         }
     }
-
 }

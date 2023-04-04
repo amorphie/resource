@@ -120,7 +120,7 @@ public static class ScopeModule
         }
         else
         {
-            existingRecord = context?.Scopes?.FirstOrDefault(t => t.Id == data.Id);
+            existingRecord = context?.Scopes!.FirstOrDefault(t => t.Id == data.Id);
         }
 
         if (existingRecord == null)
@@ -138,7 +138,7 @@ public static class ScopeModule
         }
         else
         {
-            if (CheckForUpdate(data, existingRecord!))
+            if (CheckForUpdate(data, existingRecord!,context!))
             {
                 context!.SaveChanges();
 
@@ -157,7 +157,7 @@ public static class ScopeModule
         }
     }
 
-    static bool CheckForUpdate(DtoSaveScopeRequest data, Scope existingRecord)
+    static bool CheckForUpdate(DtoSaveScopeRequest data, Scope existingRecord, ResourceDBContext context)
     {
         var hasChanges = false;
 
@@ -171,6 +171,34 @@ public static class ScopeModule
         {
             existingRecord.Reference = data.Reference;
             hasChanges = true;
+        }
+
+        if (data.Tags != null && data.Tags != existingRecord.Tags)
+        {
+            existingRecord.Tags = data.Tags;
+            hasChanges = true;
+        }
+
+        foreach (MultilanguageText multilanguageText in data.Titles)
+        {
+            var existingTitle = existingRecord.Titles.FirstOrDefault(t => t.Language == multilanguageText.Language);
+
+            if (existingTitle == null)
+            {
+                existingRecord.Titles!.Add(ObjectMapper.Mapper.Map<Translation>(multilanguageText));
+                var existingTitle2 = existingRecord.Titles!.FirstOrDefault(t => t.Language == multilanguageText.Language);
+                context.Add(existingTitle2);
+
+                hasChanges = true;
+            }
+            else
+            {
+                if (existingTitle.Label != multilanguageText.Label)
+                {
+                    existingTitle.Label = multilanguageText.Label;
+                    hasChanges = true;
+                }
+            }
         }
 
         if (hasChanges)
