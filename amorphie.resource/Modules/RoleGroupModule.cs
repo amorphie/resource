@@ -120,7 +120,7 @@ public static class RoleGroupModule
         }
         else
         {
-            existingRecord = context?.RoleGroups!.FirstOrDefault(t => t.Id == data.Id);
+            existingRecord = context?.RoleGroups!.Include(t => t.Titles).FirstOrDefault(t => t.Id == data.Id);
         }
 
         if (existingRecord == null)
