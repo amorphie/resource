@@ -246,7 +246,10 @@ public static class ResourceModule
      [FromRoute(Name = "resourceId")] Guid resourceId,
      [FromServices] ResourceDBContext context)
     {
-        var existingRecord = context?.Resources?.FirstOrDefault(t => t.Id == resourceId);
+        var  existingRecord = context?.Resources!
+            .Include(t => t.DisplayNames)
+            .Include(t => t.Descriptions)
+            .FirstOrDefault(t => t.Id == resourceId);
 
         if (existingRecord == null)
         {

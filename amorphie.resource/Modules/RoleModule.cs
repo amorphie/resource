@@ -211,7 +211,7 @@ public static class RoleModule
     [FromRoute(Name = "roleId")] Guid roleId,
     [FromServices] ResourceDBContext context)
     {
-        var existingRecord = context?.Roles?.FirstOrDefault(t => t.Id == roleId);
+        var existingRecord = context?.Roles!.Include(t => t.Titles).FirstOrDefault(t => t.Id == roleId);
 
         if (existingRecord == null)
         {
