@@ -216,7 +216,7 @@ public static class ScopeModule
     [FromRoute(Name = "scopeId")] Guid scopeId,
     [FromServices] ResourceDBContext context)
     {
-        var existingRecord = context?.Scopes?.FirstOrDefault(t => t.Id == scopeId);
+        var existingRecord = context?.Scopes!.Include(t => t.Titles).FirstOrDefault(t => t.Id == scopeId);
 
         if (existingRecord == null)
         {

@@ -210,7 +210,7 @@ public static class RoleGroupModule
      [FromRoute(Name = "roleGroupId")] Guid roleGroupId,
      [FromServices] ResourceDBContext context)
     {
-        var existingRecord = context?.RoleGroups?.FirstOrDefault(t => t.Id == roleGroupId);
+        var existingRecord = context?.RoleGroups!.Include(t => t.Titles).FirstOrDefault(t => t.Id == roleGroupId);
 
         if (existingRecord == null)
         {
