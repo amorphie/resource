@@ -120,7 +120,7 @@ public static class ScopeModule
         }
         else
         {
-            existingRecord = context?.Scopes!.FirstOrDefault(t => t.Id == data.Id);
+            existingRecord = context?.Scopes!.Include(t => t.Titles).FirstOrDefault(t => t.Id == data.Id);
         }
 
         if (existingRecord == null)
