@@ -5,6 +5,4 @@ public class DtoPrivilege : DtoBase
     public string? Url { get; set; }
     public int? Ttl { get; set; }
     public string? Status { get; set; }
-
-
 }
