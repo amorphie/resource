@@ -1,7 +1,7 @@
 using amorphie.core.Base;
 using AutoMapper;
 
-class ResourceMapper : Profile
+public class ResourceMapper : Profile
 {
     public ResourceMapper()
     {
