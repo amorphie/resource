@@ -1,0 +1,19 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: amorphie-secretstore
+  namespace: amorphie-resource
+spec:
+  type: secretstores.hashicorp.vault
+  version: v1
+  metadata:
+  - name: vaultAddr
+    value: "vault-address"
+  - name: vaultToken
+    value : "amorphie-resource-vaulttoken"
+  - name: skipVerify
+    value: true
+  - name: enginePath
+    value: "amorphie-resource"
+  - name: vaultKVUsePrefix
+    value: false

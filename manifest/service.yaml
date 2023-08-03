@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: amorphie-resource
+  namespace: amorphie-resource
+spec:
+  selector:
+    app: amorphie-resource
+  ports:
+    - port: 5000
+      targetPort: 5000

@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: amorphie-resource
+  namespace: amorphie-resource
+spec:
+  selector:
+    matchLabels:
+      app: amorphie-resource
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: amorphie-resource
+      annotations:
+        dapr.io/app-id: amorphie-resource
+        dapr.io/enabled: 'true'
+    spec:
+      serviceAccountName: amorphie-resource
+      containers:
+        - name: amorphie-resource
+          image: burganbank/amorphie.resource:latest
+          ports:
+            - containerPort: 5000
+          env:
+          - name: ASPNETCORE_ENVIRONMENT
+            value: "Test"
+          - name: EnableApm
+            value: "true"
+          - name: TZ
+            value: Europe/Istanbul
+          resources:
+            limits:
+              cpu: "1"
+              memory: "4096Mi"
+            requests:
+              cpu: "0.1"
+              memory: "256Mi"
