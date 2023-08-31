@@ -1,6 +1,5 @@
-using amorphie.resource;
-
-public class ResourceRateLimitModule : BaseResourceRateLimitModule<DtoResourceRateLimit, ResourceRateLimit, ResourceRateLimitValidator>
+using amorphie.core.Module.minimal_api;
+public class ResourceRateLimitModule : BaseBBTRoute<DtoResourceRateLimit, ResourceRateLimit, ResourceDBContext>
 {
     public ResourceRateLimitModule(WebApplication app) : base(app)
     {

@@ -1,6 +1,7 @@
+using amorphie.core.Module.minimal_api;
 using amorphie.resource;
 
-public class ResourceRoleModule : BaseResourceRoleModule<DtoResourceRole, ResourceRole, ResourceRoleValidator>
+public class ResourceRoleModule : BaseBBTRoute<DtoResourceRole, ResourceRole, ResourceDBContext>
 {
     public ResourceRoleModule(WebApplication app) : base(app)
     {

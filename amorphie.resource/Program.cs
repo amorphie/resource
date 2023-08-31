@@ -1,26 +1,28 @@
 using System.Reflection;
 using amorphie.core.Extension;
 using amorphie.core.Identity;
-using amorphie.core.Repository;
 using amorphie.core.security;
-using amorphie.core.security.Extensions;
+using amorphie.core.Swagger;
 using FluentValidation;
 
 var builder = WebApplication.CreateBuilder(args);
 
 await builder.Configuration.AddVaultSecrets("amorphie-secretstore", new string[] { "amorphie-secretstore" });
 var postgreSql = builder.Configuration["PostgreSql"];
-// var postgreSql = "Host=localhost:5432;Database=resources;Username=postgres;Password=postgres";
+//  var postgreSql = "Host=localhost:5432;Database=resources;Username=postgres;Password=postgres";
 
 builder.Logging.ClearProviders();
 builder.Logging.AddJsonConsole();
 
 builder.Services.AddDaprClient();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+
+builder.Services.AddSwaggerGen(options=>
+{
+    options.OperationFilter<AddSwaggerParameterFilter>();
+});
 
 builder.Services.AddScoped<IBBTIdentity, FakeIdentity>();
-builder.Services.AddScoped(typeof(IBBTRepository<,>), typeof(BBTRepository<,>));
 
 var assemblies = new Assembly[]
                 {
