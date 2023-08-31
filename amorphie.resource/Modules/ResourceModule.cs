@@ -1,9 +1,9 @@
-using amorphie.resource;
-using amorphie.resource.data;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using amorphie.core.Module.minimal_api;
+using amorphie.core.Swagger;
 using AutoMapper;
-public class ResourceModule : BaseResourceModule<DtoResource, Resource, ResourceValidator>
+using Microsoft.OpenApi.Models;
+
+public class ResourceModule : BaseBBTRoute<DtoResource, Resource, ResourceDBContext>
 {
     public ResourceModule(WebApplication app) : base(app)
     {
@@ -18,41 +18,90 @@ public class ResourceModule : BaseResourceModule<DtoResource, Resource, Resource
         base.AddRoutes(routeGroupBuilder);
         routeGroupBuilder.MapPost("workflowStatus", saveResourceWithWorkflow);
     }
-    public async   ValueTask<IResult> saveResourceWithWorkflow(
+
+    [AddSwaggerParameter("Language", ParameterLocation.Header, false)]
+    protected override async ValueTask<IResult> GetMethod(
+       [FromServices] ResourceDBContext context,
+       [FromServices] IMapper mapper,
+       [FromRoute(Name = "id")] Guid id,
+       HttpContext httpContext,
+       CancellationToken token
+       )
+    {
+        var resource = await context.Resources!.AsNoTracking()
+         .Include(t => t.DisplayNames.Where(t => t.Language == httpContext.GetHeaderLanguage()))
+         .Include(t => t.Descriptions.Where(t => t.Language == httpContext.GetHeaderLanguage()))
+         .FirstOrDefaultAsync(t => t.Id == id, token);
+
+        if (resource is Resource)
+        {
+            return TypedResults.Ok(ObjectMapper.Mapper.Map<DtoResource>(resource));
+        }
+        else
+        {
+            return Results.Problem(detail: "Resource Not Found", title: "Flow Exception", statusCode: 460);
+        }
+    }
+
+    [AddSwaggerParameter("Language", ParameterLocation.Header, false)]
+    protected override async ValueTask<IResult> GetAllMethod(
+                [FromServices] ResourceDBContext context,
+                [FromServices] IMapper mapper,
+                [FromQuery][Range(0, 100)] int page,
+                [FromQuery][Range(5, 100)] int pageSize,
+                HttpContext httpContext,
+                CancellationToken token
+                )
+    {
+        var resultList = await context!.Resources!.AsNoTracking()
+         .Include(t => t.DisplayNames.Where(t => t.Language == httpContext.GetHeaderLanguage()))
+         .Include(t => t.Descriptions.Where(t => t.Language == httpContext.GetHeaderLanguage()))
+       .Skip(page * pageSize)
+       .Take(pageSize)
+       .ToListAsync(token);
+
+        if (resultList != null && resultList.Count() > 0)
+        {
+            var response = resultList.Select(x => ObjectMapper.Mapper.Map<DtoResource>(x)).ToList();
+
+            return Results.Ok(response);
+        }
+
+        return Results.NoContent();
+    }
+    public async ValueTask<IResult> saveResourceWithWorkflow(
         [FromBody] DtoPostWorkflow data,
         [FromServices] ResourceDBContext context,
         CancellationToken cancellationToken
         )
     {
-
-        var existingRecord = await context!.Resources!.Include(i=>i.DisplayNames)
-        .Include(i=>i.Descriptions).FirstOrDefaultAsync(t => t.Id == data.recordId);
-
+        var existingRecord = await context!.Resources!.Include(i => i.DisplayNames)
+        .Include(i => i.Descriptions).FirstOrDefaultAsync(t => t.Id == data.recordId);
 
         if (existingRecord == null)
         {
             var resource = ObjectMapper.Mapper.Map<Resource>(data.entityData!);
-            resource.Id= data.recordId;
+            resource.Id = data.recordId;
             context!.Resources!.Add(resource);
             await context.SaveChangesAsync(cancellationToken);
             return Results.Ok(resource);
-            
+
         }
         else
         {
             //Apply update to only changed fields.
-            if (SaveResourceUpdate(data.entityData!, existingRecord,context))
+            if (SaveResourceUpdate(data.entityData!, existingRecord, context))
             {
-               await context!.SaveChangesAsync(cancellationToken);
-                
+                await context!.SaveChangesAsync(cancellationToken);
+
 
             }
             return Results.Ok();
 
-           
+
         }
     }
-    private static bool SaveResourceUpdate(DtoResource data, Resource existingRecord,ResourceDBContext context)
+    private static bool SaveResourceUpdate(DtoResource data, Resource existingRecord, ResourceDBContext context)
     {
         var hasChanges = false;
         // Apply update to only changed fields.
@@ -76,48 +125,50 @@ public class ResourceModule : BaseResourceModule<DtoResource, Resource, Resource
             existingRecord.Tags = data.Tags;
             hasChanges = true;
         }
-          if (data.DisplayNames!=null&&data.DisplayNames.Count>0)
+        if (data.DisplayNames != null && data.DisplayNames.Count > 0)
         {
             foreach (var name in data.DisplayNames)
             {
-                amorphie.core.Base.Translation? translation =  existingRecord.DisplayNames.FirstOrDefault(f=>f.Language==name.Language);
-                if (translation!=null&&translation.Label!=name.Label)
+                amorphie.core.Base.Translation? translation = existingRecord.DisplayNames.FirstOrDefault(f => f.Language == name.Language);
+                if (translation != null && translation.Label != name.Label)
                 {
-                    translation.Label=name.Label;
-                     hasChanges = true;
+                    translation.Label = name.Label;
+                    hasChanges = true;
                 }
-                if(translation==null)
+                if (translation == null)
                 {
-                    existingRecord.DisplayNames.Add(new amorphie.core.Base.Translation(){
-                        Label=name.Label,
-                        Language=name.Language
+                    existingRecord.DisplayNames.Add(new amorphie.core.Base.Translation()
+                    {
+                        Label = name.Label,
+                        Language = name.Language
                     });
-                     hasChanges = true;
+                    hasChanges = true;
                 }
             }
         }
-        if (data.Descriptions!=null&&data.Descriptions.Count>0)
+        if (data.Descriptions != null && data.Descriptions.Count > 0)
         {
             foreach (var name in data.Descriptions)
             {
-                amorphie.core.Base.Translation? translation =  existingRecord.Descriptions.FirstOrDefault(f=>f.Language==name.Language);
-                if (translation!=null&&translation.Label!=name.Label)
+                amorphie.core.Base.Translation? translation = existingRecord.Descriptions.FirstOrDefault(f => f.Language == name.Language);
+                if (translation != null && translation.Label != name.Label)
                 {
-                    translation.Label=name.Label;
-                     hasChanges = true;
+                    translation.Label = name.Label;
+                    hasChanges = true;
                 }
-                if(translation==null)
+                if (translation == null)
                 {
-                    existingRecord.Descriptions.Add(new amorphie.core.Base.Translation(){
-                        Label=name.Label,
-                        Language=name.Language
+                    existingRecord.Descriptions.Add(new amorphie.core.Base.Translation()
+                    {
+                        Label = name.Label,
+                        Language = name.Language
                     });
-                     hasChanges = true;
+                    hasChanges = true;
                 }
             }
         }
         return hasChanges;
     }
 
-  
+
 }

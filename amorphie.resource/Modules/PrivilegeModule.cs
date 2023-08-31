@@ -1,6 +1,7 @@
+using amorphie.core.Module.minimal_api;
 using amorphie.resource;
 
-public class PrivilegeModule : BasePrivilegeModule<DtoPrivilege, Privilege, PrivilegeValidator>
+public class PrivilegeModule : BaseBBTRoute<DtoPrivilege, Privilege, ResourceDBContext>
 {
     public PrivilegeModule(WebApplication app) : base(app)
     {
