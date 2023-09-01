@@ -14,5 +14,59 @@ public class PrivilegeModule : BaseBBTRoute<DtoPrivilege, Privilege, ResourceDBC
     public override void AddRoutes(RouteGroupBuilder routeGroupBuilder)
     {
         base.AddRoutes(routeGroupBuilder);
+
+        routeGroupBuilder.MapPost("workflowStatus", saveWithWorkflow);
+    }
+
+    public async ValueTask<IResult> saveWithWorkflow(
+      [FromBody] DtoPrivilegeWorkflow data,
+      [FromServices] ResourceDBContext context,
+      CancellationToken cancellationToken
+      )
+    {
+        var existingRecord = await context!.Privileges!.FirstOrDefaultAsync(t => t.Id == data.recordId);
+
+        if (existingRecord == null)
+        {
+            var privilege = ObjectMapper.Mapper.Map<Privilege>(data.entityData!);
+            privilege.Id = data.recordId;
+            context!.Privileges!.Add(privilege);
+            await context.SaveChangesAsync(cancellationToken);
+            return Results.Ok(privilege);
+        }
+        else
+        {
+            if (SavePrivilegeUpdate(data.entityData!, existingRecord, context))
+            {
+                await context!.SaveChangesAsync(cancellationToken);
+            }
+
+            return Results.Ok();
+        }
+    }
+
+    private static bool SavePrivilegeUpdate(DtoPrivilege data, Privilege existingRecord, ResourceDBContext context)
+    {
+        var hasChanges = false;
+
+        if (data.Status != null && data.Status != existingRecord.Status)
+        {
+            existingRecord.Status = data.Status;
+            hasChanges = true;
+        }
+
+        if (data.Url != null && data.Url != existingRecord.Url)
+        {
+            existingRecord.Url = data.Url;
+            hasChanges = true;
+        }
+
+        if (data.Ttl != null && data.Ttl != existingRecord.Ttl)
+        {
+            existingRecord.Ttl = data.Ttl;
+            hasChanges = true;
+        }
+
+        return hasChanges;
     }
 }

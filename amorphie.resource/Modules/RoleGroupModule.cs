@@ -17,6 +17,8 @@ public class RoleGroupModule : BaseBBTRoute<DtoRoleGroup, RoleGroup, ResourceDBC
     public override void AddRoutes(RouteGroupBuilder routeGroupBuilder)
     {
         base.AddRoutes(routeGroupBuilder);
+
+        routeGroupBuilder.MapPost("workflowStatus", saveWithWorkflow);
     }
 
     [AddSwaggerParameter("Language", ParameterLocation.Header, false)]
@@ -66,5 +68,50 @@ public class RoleGroupModule : BaseBBTRoute<DtoRoleGroup, RoleGroup, ResourceDBC
         }
 
         return Results.NoContent();
+    }
+
+    public async ValueTask<IResult> saveWithWorkflow(
+       [FromBody] DtoRoleGroupWorkflow data,
+       [FromServices] ResourceDBContext context,
+       CancellationToken cancellationToken
+       )
+    {
+        var existingRecord = await context!.RoleGroups!.FirstOrDefaultAsync(t => t.Id == data.recordId);
+
+        if (existingRecord == null)
+        {
+            var roleGroup = ObjectMapper.Mapper.Map<RoleGroup>(data.entityData!);
+            roleGroup.Id = data.recordId;
+            context!.RoleGroups!.Add(roleGroup);
+            await context.SaveChangesAsync(cancellationToken);
+            return Results.Ok(roleGroup);
+        }
+        else
+        {
+            if (SaveRoleGroupUpdate(data.entityData!, existingRecord, context))
+            {
+                await context!.SaveChangesAsync(cancellationToken);
+            }
+
+            return Results.Ok();
+        }
+    }
+
+    private static bool SaveRoleGroupUpdate(DtoRoleGroup data, RoleGroup existingRecord, ResourceDBContext context)
+    {
+        var hasChanges = false;
+
+        if (data.Status != null && data.Status != existingRecord.Status)
+        {
+            existingRecord.Status = data.Status;
+            hasChanges = true;
+        }
+        if (data.Tags != null && data.Tags != existingRecord.Tags)
+        {
+            existingRecord.Tags = data.Tags;
+            hasChanges = true;
+        }
+
+        return hasChanges;
     }
 }
