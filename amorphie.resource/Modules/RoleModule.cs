@@ -1,3 +1,4 @@
+using amorphie.core.Identity;
 using amorphie.core.Module.minimal_api;
 using amorphie.core.Swagger;
 using amorphie.resource;
@@ -17,6 +18,8 @@ public class RoleModule : BaseBBTRoute<DtoRole, Role, ResourceDBContext>
     public override void AddRoutes(RouteGroupBuilder routeGroupBuilder)
     {
         base.AddRoutes(routeGroupBuilder);
+
+        routeGroupBuilder.MapPost("workflowStatus", saveWithWorkflow);
     }
 
     [AddSwaggerParameter("Language", ParameterLocation.Header, false)]
@@ -66,5 +69,50 @@ public class RoleModule : BaseBBTRoute<DtoRole, Role, ResourceDBContext>
         }
 
         return Results.NoContent();
+    }
+
+    public async ValueTask<IResult> saveWithWorkflow(
+       [FromBody] DtoRoleWorkflow data,
+       [FromServices] ResourceDBContext context,
+       CancellationToken cancellationToken
+       )
+    {
+        var existingRecord = await context!.Roles!.FirstOrDefaultAsync(t => t.Id == data.recordId);
+
+        if (existingRecord == null)
+        {
+            var role = ObjectMapper.Mapper.Map<Role>(data.entityData!);
+            role.Id = data.recordId;
+            context!.Roles!.Add(role);
+            await context.SaveChangesAsync(cancellationToken);
+            return Results.Ok(role);
+        }
+        else
+        {
+            if (SaveRoleUpdate(data.entityData!, existingRecord, context))
+            {
+                await context!.SaveChangesAsync(cancellationToken);
+            }
+
+            return Results.Ok();
+        }
+    }
+
+    private static bool SaveRoleUpdate(DtoRole data, Role existingRecord, ResourceDBContext context)
+    {
+        var hasChanges = false;
+
+        if (data.Status != null && data.Status != existingRecord.Status)
+        {
+            existingRecord.Status = data.Status;
+            hasChanges = true;
+        }
+        if (data.Tags != null && data.Tags != existingRecord.Tags)
+        {
+            existingRecord.Tags = data.Tags;
+            hasChanges = true;
+        }
+
+        return hasChanges;
     }
 }
