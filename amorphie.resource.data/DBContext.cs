@@ -28,6 +28,7 @@ public class ResourceDBContext : DbContext
     public DbSet<ResourceRateLimit>? ResourceRateLimits { get; set; }
     public DbSet<Translation>? Translations { get; set; }
     public DbSet<Scope>? Scopes { get; set; }
+    public DbSet<ResourcePrivilege>? ResourcePrivileges { get; set; }
     public ResourceDBContext(DbContextOptions options) : base(options) { AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true); }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -58,6 +59,9 @@ public class ResourceDBContext : DbContext
 
         modelBuilder.Entity<Translation>()
        .HasKey(r => r.Id);
+
+        modelBuilder.Entity<ResourcePrivilege>()
+        .HasKey(r => r.Id);
 
         // Translation Relations
         modelBuilder.Entity<Translation>().Property<Guid?>("ResourceId_DisplayName");
@@ -93,131 +97,5 @@ public class ResourceDBContext : DbContext
         .HasMany<Translation>(t => t.Titles)
         .WithOne()
         .HasForeignKey("ScopeId_Title");
-
-        var ResourceId = Guid.NewGuid();
-        var RoleId = Guid.NewGuid();
-        var RoleGroupId = Guid.NewGuid();
-        var PrivilegeId = Guid.NewGuid();
-        var UserId = Guid.NewGuid();
-
-        var tags = new string[] { "tag1", "tag2" };
-
-        modelBuilder.Entity<Resource>().HasData(
-          new
-          {
-              Id = ResourceId,
-              RowId = ResourceId,
-              Type = HttpMethodType.CONNECT,
-              Url = "urlsample",
-              Tags = tags,
-              Status = "A",
-              CreatedAt = DateTime.Now,
-              ModifiedAt = DateTime.Now,
-              CreatedBy = UserId,
-              ModifiedBy = UserId,
-              CreatedByBehalfOf = UserId,
-              ModifiedByBehalfOf = UserId,
-          });
-
-        modelBuilder.Entity<Role>().HasData(
-        new
-        {
-            Id = RoleId,
-            Tags = tags,
-            Status = "A",
-            CreatedAt = DateTime.Now,
-            ModifiedAt = DateTime.Now,
-            CreatedBy = UserId,
-            ModifiedBy = UserId,
-            CreatedByBehalfOf = UserId,
-            ModifiedByBehalfOf = UserId
-        });
-
-        modelBuilder.Entity<RoleGroup>().HasData(
-        new
-        {
-            Id = RoleGroupId,
-            Tags = tags,
-            Status = "A",
-            CreatedAt = DateTime.Now,
-            ModifiedAt = DateTime.Now,
-            CreatedBy = UserId,
-            ModifiedBy = UserId,
-            CreatedByBehalfOf = UserId,
-            ModifiedByBehalfOf = UserId
-        });
-
-        modelBuilder.Entity<Translation>().HasData(
-         new
-         {
-             Id = Guid.NewGuid(),
-             Language = "tr",
-             Label = "Açıklama",
-             Status = "A",
-             CreatedAt = DateTime.Now,
-             ModifiedAt = DateTime.Now,
-             CreatedBy = UserId,
-             ModifiedBy = UserId,
-             CreatedByBehalfOf = UserId,
-             ModifiedByBehalfOf = UserId,
-             ResourceId_Description = ResourceId
-         },
-           new
-           {
-               Id = Guid.NewGuid(),
-               Language = "en",
-               Label = "Description",
-               Status = "A",
-               CreatedAt = DateTime.Now,
-               ModifiedAt = DateTime.Now,
-               CreatedBy = UserId,
-               ModifiedBy = UserId,
-               CreatedByBehalfOf = UserId,
-               ModifiedByBehalfOf = UserId,
-               ResourceId_Description = ResourceId
-           },
-            new
-            {
-                Id = Guid.NewGuid(),
-                Language = "tr",
-                Label = "Başlık",
-                Status = "A",
-                CreatedAt = DateTime.Now,
-                ModifiedAt = DateTime.Now,
-                CreatedBy = UserId,
-                ModifiedBy = UserId,
-                CreatedByBehalfOf = UserId,
-                ModifiedByBehalfOf = UserId,
-                ResourceId_DisplayName = ResourceId
-            },
-            new
-            {
-                Id = Guid.NewGuid(),
-                Language = "tr",
-                Label = "Rol Başlık",
-                Status = "A",
-                CreatedAt = DateTime.Now,
-                ModifiedAt = DateTime.Now,
-                CreatedBy = UserId,
-                ModifiedBy = UserId,
-                CreatedByBehalfOf = UserId,
-                ModifiedByBehalfOf = UserId,
-                RoleId_Title = RoleId
-            },
-            new
-            {
-                Id = Guid.NewGuid(),
-                Language = "tr",
-                Label = "Rol Grup Başlık",
-                Status = "A",
-                CreatedAt = DateTime.Now,
-                ModifiedAt = DateTime.Now,
-                CreatedBy = UserId,
-                ModifiedBy = UserId,
-                CreatedByBehalfOf = UserId,
-                ModifiedByBehalfOf = UserId,
-                RoleGroupId_Title = RoleGroupId
-            }
-         );
     }
 }

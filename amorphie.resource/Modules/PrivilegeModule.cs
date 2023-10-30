@@ -49,23 +49,11 @@ public class PrivilegeModule : BaseBBTRoute<DtoPrivilege, Privilege, ResourceDBC
     {
         var hasChanges = false;
 
-        if (data.Status != null && data.Status != existingRecord.Status)
-        {
-            existingRecord.Status = data.Status;
-            hasChanges = true;
-        }
-
         if (data.Url != null && data.Url != existingRecord.Url)
         {
             existingRecord.Url = data.Url;
             hasChanges = true;
-        }
-
-        if (data.Ttl != null && data.Ttl != existingRecord.Ttl)
-        {
-            existingRecord.Ttl = data.Ttl;
-            hasChanges = true;
-        }
+        }       
 
         return hasChanges;
     }
