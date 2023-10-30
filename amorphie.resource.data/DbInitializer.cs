@@ -498,7 +498,7 @@ public static class DbInitializer
                 ModifiedAt = DateTime.Now,
                 ModifiedBy = Guid.NewGuid(),
                 ModifiedByBehalfOf = null,
-                Url = "http://localhost:3000/fora/DigitalServices/AccountService.svc/accounts/match/{header.customerId}/{header.ibanNumber}",                
+                Url = "http://localhost:3000/fora/DigitalServices/AccountService.svc/accounts/match/{header.customerId}/{header.ibanNumber}",
                 }
             };
 
@@ -507,7 +507,7 @@ public static class DbInitializer
             context!.Privileges!.Add(r);
         }
 
-            var resourcePrivileges = new ResourcePrivilege[]{
+        var resourcePrivileges = new ResourcePrivilege[]{
             new ResourcePrivilege{
                 CreatedAt = DateTime.Now,
                 CreatedBy = Guid.NewGuid(),
@@ -519,7 +519,7 @@ public static class DbInitializer
                 Status = "A",
                 Ttl = 1000,
                 PrivilegeId = privilegeId,
-                ResourceId = resourceId1                
+                ResourceId = resourceId1
                 },
                   new ResourcePrivilege{
                 CreatedAt = DateTime.Now,
@@ -532,7 +532,7 @@ public static class DbInitializer
                 Status = "A",
                 Ttl = 1000,
                 PrivilegeId = privilegeId,
-                ResourceId = resourceId2                
+                ResourceId = resourceId2
                 },
                   new ResourcePrivilege{
                 CreatedAt = DateTime.Now,
@@ -545,7 +545,7 @@ public static class DbInitializer
                 Status = "A",
                 Ttl = 1000,
                 PrivilegeId = privilegeId,
-                ResourceId = resourceId3                
+                ResourceId = resourceId3
                 },
                   new ResourcePrivilege{
                 CreatedAt = DateTime.Now,
@@ -558,7 +558,7 @@ public static class DbInitializer
                 Status = "A",
                 Ttl = 1000,
                 PrivilegeId = privilegeId,
-                ResourceId = resourceId4                
+                ResourceId = resourceId4
                 },
                   new ResourcePrivilege{
                 CreatedAt = DateTime.Now,
@@ -571,7 +571,7 @@ public static class DbInitializer
                 Status = "A",
                 Ttl = 1000,
                 PrivilegeId = privilegeId,
-                ResourceId = resourceId5                
+                ResourceId = resourceId5
                 },
             };
 

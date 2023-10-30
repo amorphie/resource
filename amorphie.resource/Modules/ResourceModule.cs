@@ -211,7 +211,7 @@ public class ResourceModule : BaseBBTRoute<DtoResource, Resource, ResourceDBCont
                     foreach (var variable in parameterList)
                     {
                         privilegeUrl = privilegeUrl.Replace(variable.Key, variable.Value);
-                    }                 
+                    }
 
                 }
 

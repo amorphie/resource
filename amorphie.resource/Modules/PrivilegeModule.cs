@@ -53,7 +53,7 @@ public class PrivilegeModule : BaseBBTRoute<DtoPrivilege, Privilege, ResourceDBC
         {
             existingRecord.Url = data.Url;
             hasChanges = true;
-        }       
+        }
 
         return hasChanges;
     }
