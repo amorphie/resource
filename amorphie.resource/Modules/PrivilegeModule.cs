@@ -55,5 +55,5 @@ public class PrivilegeModule : BaseBBTRoute<DtoPrivilege, Privilege, ResourceDBC
         }
 
         return hasChanges;
-    }    
+    }
 }

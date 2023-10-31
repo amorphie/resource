@@ -1,7 +1,7 @@
 using System.Text.RegularExpressions;
 using amorphie.core.Module.minimal_api;
 
-public class ResourcePrivilegeModule: BaseBBTRoute<DtoResourcePrivilege, ResourcePrivilege, ResourceDBContext>
+public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, ResourcePrivilege, ResourceDBContext>
 {
     public ResourcePrivilegeModule(WebApplication app) : base(app)
     {
@@ -14,7 +14,7 @@ public class ResourcePrivilegeModule: BaseBBTRoute<DtoResourcePrivilege, Resourc
     public override void AddRoutes(RouteGroupBuilder routeGroupBuilder)
     {
         base.AddRoutes(routeGroupBuilder);
-        
+
         routeGroupBuilder.MapPost("checkAuthorize", CheckAuthorize);
     }
 
@@ -48,15 +48,15 @@ public class ResourcePrivilegeModule: BaseBBTRoute<DtoResourcePrivilege, Resourc
 
         if (privilegeUrl != null)
         {
-            foreach (var variable in parameterList)            
-                privilegeUrl = privilegeUrl.Replace(variable.Key, variable.Value);            
+            foreach (var variable in parameterList)
+                privilegeUrl = privilegeUrl.Replace(variable.Key, variable.Value);
 
             var apiClient = new HttpClient();
 
             var response = await apiClient.GetAsync(privilegeUrl);
 
-            if (response.IsSuccessStatusCode)            
-                return Results.Ok();            
+            if (response.IsSuccessStatusCode)
+                return Results.Ok();
         }
 
         return Results.Unauthorized();
