@@ -1,4 +1,3 @@
-using System.Text.RegularExpressions;
 using amorphie.core.Module.minimal_api;
 using amorphie.core.Swagger;
 using AutoMapper;
@@ -18,7 +17,6 @@ public class ResourceModule : BaseBBTRoute<DtoResource, Resource, ResourceDBCont
     {
         base.AddRoutes(routeGroupBuilder);
         routeGroupBuilder.MapPost("workflowStatus", saveResourceWithWorkflow);
-        routeGroupBuilder.MapPost("checkAuthorize", CheckAuthorize);
     }
 
     [AddSwaggerParameter("Language", ParameterLocation.Header, false)]
@@ -87,7 +85,6 @@ public class ResourceModule : BaseBBTRoute<DtoResource, Resource, ResourceDBCont
             context!.Resources!.Add(resource);
             await context.SaveChangesAsync(cancellationToken);
             return Results.Ok(resource);
-
         }
         else
         {
@@ -95,12 +92,9 @@ public class ResourceModule : BaseBBTRoute<DtoResource, Resource, ResourceDBCont
             if (SaveResourceUpdate(data.entityData!, existingRecord, context))
             {
                 await context!.SaveChangesAsync(cancellationToken);
-
-
             }
+
             return Results.Ok();
-
-
         }
     }
     private static bool SaveResourceUpdate(DtoResource data, Resource existingRecord, ResourceDBContext context)
@@ -171,55 +165,4 @@ public class ResourceModule : BaseBBTRoute<DtoResource, Resource, ResourceDBCont
         }
         return hasChanges;
     }
-
-    public async ValueTask<IResult> CheckAuthorize(
-         [FromBody] string url,
-         [FromServices] ResourceDBContext context,
-         HttpContext httpContext,
-         CancellationToken cancellationToken
-         )
-    {
-        var resource = await context!.Resources!.AsNoTracking().FirstOrDefaultAsync(c => Regex.IsMatch(url, c.Url), cancellationToken);
-
-        if (resource == null)
-        {
-            return Results.Ok();
-        }
-        else
-        {
-            var resourcePrivilege = await context!.ResourcePrivileges!.Include(i => i.Privilege)
-                            .AsNoTracking().FirstOrDefaultAsync(x => x.ResourceId.Equals(resource.Id));
-
-            if (resourcePrivilege != null)
-            {
-                Dictionary<string, string> parameterList = new Dictionary<string, string>();
-
-                foreach (var header in httpContext.Request.Headers)
-                {
-                    parameterList.Add($"{{header.{header.Key}}}", header.Value);
-                }
-
-                foreach (var query in httpContext.Request.Query)
-                {
-                    parameterList.Add($"{{query.{query.Key}}}", query.Value);
-                }
-
-                var privilegeUrl = resourcePrivilege.Privilege.Url;
-
-                if (privilegeUrl != null)
-                {
-                    foreach (var variable in parameterList)
-                    {
-                        privilegeUrl = privilegeUrl.Replace(variable.Key, variable.Value);
-                    }                 
-
-                }
-
-                return Results.Unauthorized();
-            }
-            return Results.Ok();
-        }
-    }
-
-
 }
