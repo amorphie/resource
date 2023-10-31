@@ -85,7 +85,6 @@ public class ResourceModule : BaseBBTRoute<DtoResource, Resource, ResourceDBCont
             context!.Resources!.Add(resource);
             await context.SaveChangesAsync(cancellationToken);
             return Results.Ok(resource);
-
         }
         else
         {
@@ -93,12 +92,9 @@ public class ResourceModule : BaseBBTRoute<DtoResource, Resource, ResourceDBCont
             if (SaveResourceUpdate(data.entityData!, existingRecord, context))
             {
                 await context!.SaveChangesAsync(cancellationToken);
-
-
             }
+
             return Results.Ok();
-
-
         }
     }
     private static bool SaveResourceUpdate(DtoResource data, Resource existingRecord, ResourceDBContext context)
@@ -169,6 +165,5 @@ public class ResourceModule : BaseBBTRoute<DtoResource, Resource, ResourceDBCont
         }
         return hasChanges;
     }
-
 
 }

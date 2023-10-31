@@ -1,5 +1,4 @@
 using amorphie.core.Module.minimal_api;
-using amorphie.resource;
 
 public class PrivilegeModule : BaseBBTRoute<DtoPrivilege, Privilege, ResourceDBContext>
 {
@@ -7,7 +6,7 @@ public class PrivilegeModule : BaseBBTRoute<DtoPrivilege, Privilege, ResourceDBC
     {
     }
 
-    public override string[]? PropertyCheckList => new string[] { "Ttl", "Url", "Status" };
+    public override string[]? PropertyCheckList => new string[] { "Url" };
 
     public override string? UrlFragment => "privilege";
 
@@ -49,21 +48,9 @@ public class PrivilegeModule : BaseBBTRoute<DtoPrivilege, Privilege, ResourceDBC
     {
         var hasChanges = false;
 
-        if (data.Status != null && data.Status != existingRecord.Status)
-        {
-            existingRecord.Status = data.Status;
-            hasChanges = true;
-        }
-
         if (data.Url != null && data.Url != existingRecord.Url)
         {
             existingRecord.Url = data.Url;
-            hasChanges = true;
-        }
-
-        if (data.Ttl != null && data.Ttl != existingRecord.Ttl)
-        {
-            existingRecord.Ttl = data.Ttl;
             hasChanges = true;
         }
 
