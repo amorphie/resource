@@ -9,5 +9,5 @@ public class ResourceRateLimit : EntityBase
     public string? Condition { get; set; }
     public string? Cron { get; set; }
     public int? Limit { get; set; }
-    public string? Status { get; set; }  
+    public string? Status { get; set; }
 }

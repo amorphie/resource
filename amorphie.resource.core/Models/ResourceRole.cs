@@ -8,6 +8,6 @@ public class ResourceRole : EntityBase
 
     [ForeignKey("Role")]
     public Guid RoleId { get; set; }
-    
-    public string? Status { get; set; }   
+
+    public string? Status { get; set; }
 }
