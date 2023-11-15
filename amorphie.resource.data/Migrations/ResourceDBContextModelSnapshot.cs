@@ -132,6 +132,8 @@ namespace amorphie.resource.data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("PrivilegeId");
+
                     b.ToTable("ResourcePrivileges");
                 });
 
@@ -218,6 +220,93 @@ namespace amorphie.resource.data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("ResourceRoles");
+                });
+
+            modelBuilder.Entity("ResponseTransformation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string[]>("Audience")
+                        .HasColumnType("text[]");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("CreatedByBehalfOf")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("DisplayMode")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Filter")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<Guid>("ModifiedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("ModifiedByBehalfOf")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ResponseCode")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ResponseTransformations");
+                });
+
+            modelBuilder.Entity("ResponseTransformationMessage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("CreatedByBehalfOf")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Icon")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Language")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<Guid>("ModifiedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("ModifiedByBehalfOf")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ResponseTransformationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string[]>("Subtitle")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ResponseTransformationId");
+
+                    b.ToTable("ResponseTransformationMessages");
                 });
 
             modelBuilder.Entity("Role", b =>
@@ -431,6 +520,26 @@ namespace amorphie.resource.data.Migrations
                     b.ToTable("Translations");
                 });
 
+            modelBuilder.Entity("ResourcePrivilege", b =>
+                {
+                    b.HasOne("Privilege", "Privilege")
+                        .WithMany()
+                        .HasForeignKey("PrivilegeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Privilege");
+                });
+
+            modelBuilder.Entity("ResponseTransformationMessage", b =>
+                {
+                    b.HasOne("ResponseTransformation", null)
+                        .WithMany("ResponseTransformationMessages")
+                        .HasForeignKey("ResponseTransformationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("amorphie.core.Base.Translation", b =>
                 {
                     b.HasOne("Resource", null)
@@ -459,6 +568,11 @@ namespace amorphie.resource.data.Migrations
                     b.Navigation("Descriptions");
 
                     b.Navigation("DisplayNames");
+                });
+
+            modelBuilder.Entity("ResponseTransformation", b =>
+                {
+                    b.Navigation("ResponseTransformationMessages");
                 });
 
             modelBuilder.Entity("Role", b =>

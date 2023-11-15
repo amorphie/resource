@@ -29,6 +29,8 @@ public class ResourceDBContext : DbContext
     public DbSet<Translation>? Translations { get; set; }
     public DbSet<Scope>? Scopes { get; set; }
     public DbSet<ResourcePrivilege>? ResourcePrivileges { get; set; }
+    public DbSet<ResponseTransformation>? ResponseTransformations { get; set; }
+    public DbSet<ResponseTransformationMessage>? ResponseTransformationMessages { get; set; }
     public ResourceDBContext(DbContextOptions options) : base(options) { AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true); }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -62,6 +64,12 @@ public class ResourceDBContext : DbContext
 
         modelBuilder.Entity<ResourcePrivilege>()
         .HasKey(r => r.Id);
+
+        modelBuilder.Entity<ResponseTransformation>()
+       .HasKey(r => r.Id);
+
+        modelBuilder.Entity<ResponseTransformationMessage>()
+      .HasKey(r => r.Id);
 
         // Translation Relations
         modelBuilder.Entity<Translation>().Property<Guid?>("ResourceId_DisplayName");
