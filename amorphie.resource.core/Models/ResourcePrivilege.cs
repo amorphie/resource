@@ -11,6 +11,7 @@ public class ResourcePrivilege : EntityBase
 
     public int? Ttl { get; set; }
     public string? Status { get; set; }
+    public int? Priority { get; set; }
 
     public Privilege Privilege { get; set; } = default!;
 }

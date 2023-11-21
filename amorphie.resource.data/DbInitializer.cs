@@ -519,7 +519,8 @@ public static class DbInitializer
                 Status = "A",
                 Ttl = 1000,
                 PrivilegeId = privilegeId,
-                ResourceId = resourceId1
+                ResourceId = resourceId1,
+                Priority = 1
                 },
                   new ResourcePrivilege{
                 CreatedAt = DateTime.Now,
@@ -532,7 +533,8 @@ public static class DbInitializer
                 Status = "A",
                 Ttl = 1000,
                 PrivilegeId = privilegeId,
-                ResourceId = resourceId2
+                ResourceId = resourceId2,
+                Priority = 1
                 },
                   new ResourcePrivilege{
                 CreatedAt = DateTime.Now,
@@ -545,7 +547,8 @@ public static class DbInitializer
                 Status = "A",
                 Ttl = 1000,
                 PrivilegeId = privilegeId,
-                ResourceId = resourceId3
+                ResourceId = resourceId3,
+                Priority = 1
                 },
                   new ResourcePrivilege{
                 CreatedAt = DateTime.Now,
@@ -558,7 +561,8 @@ public static class DbInitializer
                 Status = "A",
                 Ttl = 1000,
                 PrivilegeId = privilegeId,
-                ResourceId = resourceId4
+                ResourceId = resourceId4,
+                Priority = 1
                 },
                   new ResourcePrivilege{
                 CreatedAt = DateTime.Now,
@@ -571,7 +575,8 @@ public static class DbInitializer
                 Status = "A",
                 Ttl = 1000,
                 PrivilegeId = privilegeId,
-                ResourceId = resourceId5
+                ResourceId = resourceId5,
+                Priority = 1
                 },
             };
 

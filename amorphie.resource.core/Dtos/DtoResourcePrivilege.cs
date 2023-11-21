@@ -6,4 +6,5 @@ public class DtoResourcePrivilege : DtoBase
     public Guid PrivilegeId { get; set; }
     public int? Ttl { get; set; }
     public string? Status { get; set; }
+    public int? Priority { get; set; }
 }
