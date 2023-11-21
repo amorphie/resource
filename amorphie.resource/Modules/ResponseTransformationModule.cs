@@ -1,4 +1,5 @@
 using amorphie.core.Module.minimal_api;
+using Newtonsoft.Json.Linq;
 
 public class ResponseTransformationModule : BaseBBTRoute<DtoResponseTransformation, ResponseTransformation, ResourceDBContext>
 {
@@ -17,21 +18,47 @@ public class ResponseTransformationModule : BaseBBTRoute<DtoResponseTransformati
     }
 
     async ValueTask<IResult> transform(
-        [FromBody] string responseCode,
+        [FromBody] DtoGetResponseTransformationRequest request,
         [FromServices] ResourceDBContext context,
         HttpContext httpContext,
         CancellationToken token
         )
     {
-        var responseTransformation = await context!.ResponseTransformations!.AsNoTracking()
-         .Include(t => t.ResponseTransformationMessages)
-          .FirstOrDefaultAsync(t => t.ResponseCode == responseCode, token);
+        var responseTransformationList = await context!.ResponseTransformations!.AsNoTracking()
+         .Include(t => t.ResponseTransformationMessages.Where(t => t.Language == request.Language))
+          .Where(t => t.ResponseCode == request.ResponseCode && t.Audience!.Contains(request.Audience)
+                                ).ToListAsync(token); ;
 
-        if (responseTransformation == null)
+        // var hasRecord = false;
+
+        if (responseTransformationList != null && responseTransformationList.Count > 0)
         {
-            return Results.Problem(detail: "Invalid Response Code", title: "Flow Exception", statusCode: 461);
-        }
+            foreach (ResponseTransformation responseTransformation in responseTransformationList)
+            {
+                var filter = responseTransformation.Filter;
 
-        return Results.Ok(ObjectMapper.Mapper.Map<DtoGetResponseTransformation>(responseTransformation));
+                if (filter != null && filter.Contains("=="))
+                {
+                    var tmp = filter.Split("==");
+
+                    var filterJsonPath = tmp[0];
+                    var filterValue = tmp[1];
+
+                    JObject o = JObject.Parse(request.Body!);
+
+                    JToken? bodyFilteredValue = o.SelectToken(filterJsonPath);
+
+                    if (bodyFilteredValue != null && bodyFilteredValue.ToObject<string>()!.Trim() == filterValue.Trim())
+                    {
+                        return Results.Ok(ObjectMapper.Mapper.Map<DtoGetResponseTransformation>(responseTransformation));
+                    }
+                }
+
+            }
+        }
+        return Results.Problem(detail: "Invalid Response", title: "Flow Exception", statusCode: 461);
+
+
+
     }
 }
