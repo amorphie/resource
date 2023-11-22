@@ -20,10 +20,12 @@ class ResourceDbContextFactory : IDesignTimeDbContextFactory<ResourceDBContext>
 public class ResourceDBContext : DbContext
 {
     public DbSet<Resource>? Resources { get; set; }
+    public DbSet<ResourceGroup>? ResourceGroups { get; set; }
+    public DbSet<ResourceGroupResource>? ResourceGroupResources { get; set; }
     public DbSet<Role>? Roles { get; set; }
     public DbSet<RoleGroup>? RoleGroups { get; set; }
     public DbSet<RoleGroupRole>? RoleGroupRoles { get; set; }
-    public DbSet<ResourceRole>? ResourceRoles { get; set; }
+    public DbSet<ResourceGroupRole>? ResourceGroupRoles { get; set; }
     public DbSet<Privilege>? Privileges { get; set; }
     public DbSet<ResourceRateLimit>? ResourceRateLimits { get; set; }
     public DbSet<Translation>? Translations { get; set; }
@@ -38,6 +40,12 @@ public class ResourceDBContext : DbContext
         modelBuilder.Entity<Resource>()
        .HasKey(r => r.Id);
 
+        modelBuilder.Entity<ResourceGroup>()
+       .HasKey(r => r.Id);
+
+        modelBuilder.Entity<ResourceGroupResource>()
+        .HasKey(r => r.Id);
+
         modelBuilder.Entity<Role>()
         .HasKey(r => r.Id);
 
@@ -47,7 +55,7 @@ public class ResourceDBContext : DbContext
         modelBuilder.Entity<RoleGroupRole>()
        .HasKey(r => r.Id);
 
-        modelBuilder.Entity<ResourceRole>()
+        modelBuilder.Entity<ResourceGroupRole>()
        .HasKey(r => r.Id);
 
         modelBuilder.Entity<Privilege>()
@@ -81,6 +89,8 @@ public class ResourceDBContext : DbContext
 
         modelBuilder.Entity<Translation>().Property<Guid?>("ScopeId_Title");
 
+        modelBuilder.Entity<Translation>().Property<Guid?>("ResourceGroupId_Title");
+
         modelBuilder.Entity<Resource>()
            .HasMany<Translation>(t => t.DisplayNames)
            .WithOne()
@@ -105,5 +115,10 @@ public class ResourceDBContext : DbContext
         .HasMany<Translation>(t => t.Titles)
         .WithOne()
         .HasForeignKey("ScopeId_Title");
+
+         modelBuilder.Entity<ResourceGroup>()
+        .HasMany<Translation>(t => t.Titles)
+        .WithOne()
+        .HasForeignKey("ResourceGroupId_Title");
     }
 }

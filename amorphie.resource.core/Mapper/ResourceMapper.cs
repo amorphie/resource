@@ -13,7 +13,7 @@ public class ResourceMapper : Profile
 
         CreateMap<ResourceRateLimit, DtoResourceRateLimit>().ReverseMap();
 
-        CreateMap<ResourceRole, DtoResourceRole>().ReverseMap();
+        CreateMap<ResourceGroupRole, DtoResourceGroupRole>().ReverseMap();
 
         CreateMap<Role, DtoRole>().ReverseMap();
 
@@ -30,5 +30,9 @@ public class ResourceMapper : Profile
 
         CreateMap<ResponseTransformationMessage, DtoResponseTransformationMessage>().ReverseMap();
         CreateMap<ResponseTransformationMessage, DtoGetResponseTransformationMessage>();
+
+        CreateMap<ResourceGroup, DtoResourceGroup>().ReverseMap();
+
+        CreateMap<ResourceGroupResource, DtoResourceGroupResource>().ReverseMap();
     }
 }
