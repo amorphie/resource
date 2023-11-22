@@ -1,15 +1,15 @@
 using amorphie.core.Module.minimal_api;
 using amorphie.resource;
 
-public class ResourceRoleModule : BaseBBTRoute<DtoResourceRole, ResourceRole, ResourceDBContext>
+public class ResourceGroupRoleModule : BaseBBTRoute<DtoResourceGroupRole, ResourceGroupRole, ResourceDBContext>
 {
-    public ResourceRoleModule(WebApplication app) : base(app)
+    public ResourceGroupRoleModule(WebApplication app) : base(app)
     {
     }
 
     public override string[]? PropertyCheckList => new string[] { "Status" };
 
-    public override string? UrlFragment => "resourceRole";
+    public override string? UrlFragment => "resourceGroupRole";
 
     public override void AddRoutes(RouteGroupBuilder routeGroupBuilder)
     {

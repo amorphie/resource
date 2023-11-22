@@ -222,6 +222,19 @@ public static class DbInitializer
             ModifiedByBehalfOf = null,
         };
 
+        var translationResourceGroupTitle = new Translation
+        {
+            CreatedAt = DateTime.Now,
+            CreatedBy = Guid.NewGuid(),
+            CreatedByBehalfOf = null,
+            Id = Guid.NewGuid(),
+            Label = "Resource Group 1",
+            Language = "tr-TR",
+            ModifiedAt = DateTime.Now,
+            ModifiedBy = Guid.NewGuid(),
+            ModifiedByBehalfOf = null,
+        };
+
         var resources = new Resource[]{
             new Resource{
                 CreatedAt = DateTime.Now,
@@ -419,72 +432,46 @@ public static class DbInitializer
             context!.RoleGroupRoles!.Add(r);
         }
 
-        var resourceRoles = new ResourceRole[]{
-            new ResourceRole{
+        var resourceGroupId1 = Guid.NewGuid();
+
+        var resourceGroups = new ResourceGroup[]{
+            new ResourceGroup{
                 CreatedAt = DateTime.Now,
                 CreatedBy = Guid.NewGuid(),
                 CreatedByBehalfOf = null,
-                Id = Guid.NewGuid(),
+                Id = roleGroupId1,
                 ModifiedAt = DateTime.Now,
                 ModifiedBy = Guid.NewGuid(),
                 Status = "A",
                 ModifiedByBehalfOf = null,
-                ResourceId =resourceId1,
-                RoleId = hesapRoleId
-                },
-                new ResourceRole{
-                CreatedAt = DateTime.Now,
-                CreatedBy = Guid.NewGuid(),
-                CreatedByBehalfOf = null,
-                Id = Guid.NewGuid(),
-                ModifiedAt = DateTime.Now,
-                ModifiedBy = Guid.NewGuid(),
-                Status = "A",
-                ModifiedByBehalfOf = null,
-                ResourceId = resourceId2,
-                RoleId = hesapRoleId
-                },
-                new ResourceRole{
-                CreatedAt = DateTime.Now,
-                CreatedBy = Guid.NewGuid(),
-                CreatedByBehalfOf = null,
-                Id = Guid.NewGuid(),
-                ModifiedAt = DateTime.Now,
-                ModifiedBy = Guid.NewGuid(),
-                Status = "A",
-                ModifiedByBehalfOf = null,
-                ResourceId = resourceId3,
-                RoleId = bakiyeRoleId
-                },
-                new ResourceRole{
-                CreatedAt = DateTime.Now,
-                CreatedBy = Guid.NewGuid(),
-                CreatedByBehalfOf = null,
-                Id = Guid.NewGuid(),
-                ModifiedAt = DateTime.Now,
-                ModifiedBy = Guid.NewGuid(),
-                Status = "A",
-                ModifiedByBehalfOf = null,
-                ResourceId = resourceId4,
-                RoleId = bakiyeRoleId
-                },
-                new ResourceRole{
-                CreatedAt = DateTime.Now,
-                CreatedBy = Guid.NewGuid(),
-                CreatedByBehalfOf = null,
-                Id = Guid.NewGuid(),
-                ModifiedAt = DateTime.Now,
-                ModifiedBy = Guid.NewGuid(),
-                Status = "A",
-                ModifiedByBehalfOf = null,
-                ResourceId = resourceId5,
-                RoleId = hesapHareketRoleId
+                Tags = tags.ToArray(),
+                Titles = new List<Translation>{translationResourceGroupTitle}.ToArray(),
                 }
             };
 
-        foreach (ResourceRole r in resourceRoles)
+        foreach (ResourceGroup r in resourceGroups)
         {
-            context!.ResourceRoles!.Add(r);
+            context!.ResourceGroups!.Add(r);
+        }
+
+        var resourceGroupRoles = new ResourceGroupRole[]{
+            new ResourceGroupRole{
+                CreatedAt = DateTime.Now,
+                CreatedBy = Guid.NewGuid(),
+                CreatedByBehalfOf = null,
+                Id = Guid.NewGuid(),
+                ModifiedAt = DateTime.Now,
+                ModifiedBy = Guid.NewGuid(),
+                Status = "A",
+                ModifiedByBehalfOf = null,
+                ResourceGroupId = resourceGroupId1,
+                RoleId = hesapRoleId
+                }
+            };
+
+        foreach (ResourceGroupRole r in resourceGroupRoles)
+        {
+            context!.ResourceGroupRoles!.Add(r);
         }
 
         var privilegeId = Guid.NewGuid();

@@ -1,13 +1,13 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using amorphie.core.Base;
 
-public class ResourceGroupRole : EntityBase
+public class ResourceGroupResource : EntityBase
 {
     [ForeignKey("ResourceGroup")]
     public Guid ResourceGroupId { get; set; }
 
-    [ForeignKey("Role")]
-    public Guid RoleId { get; set; }
+    [ForeignKey("Resource")]
+    public Guid ResourceId { get; set; }
 
     public string? Status { get; set; }
 }
