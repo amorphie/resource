@@ -48,30 +48,30 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
             parameterList.Add($"{{query.{query.Key}}}", query.Value);
 
 
-            Match match = Regex.Match(url, resource.Url);
-            if (match.Success)
+        Match match = Regex.Match(url, resource.Url);
+        if (match.Success)
+        {
+            foreach (Group pathVariable in match.Groups)
             {
-                foreach (Group pathVariable in match.Groups)
-                {
-                    parameterList.Add($"{{path.var{pathVariable.Name}}}", pathVariable.Value);
-                }
-            }
-
-            var privilegeUrl = resourcePrivilege.Privilege.Url;
-
-            if (privilegeUrl != null)
-            {
-                foreach (var variable in parameterList)
-                    privilegeUrl = privilegeUrl.Replace(variable.Key, variable.Value);
-
-                var apiClient = new HttpClient();
-
-                var response = await apiClient.GetAsync(privilegeUrl);
-
-                if (!response.IsSuccessStatusCode)
-                    return Results.Unauthorized();
+                parameterList.Add($"{{path.var{pathVariable.Name}}}", pathVariable.Value);
             }
         }
+
+        var privilegeUrl = resourcePrivilege.Privilege.Url;
+
+        if (privilegeUrl != null)
+        {
+            foreach (var variable in parameterList)
+                privilegeUrl = privilegeUrl.Replace(variable.Key, variable.Value);
+
+            var apiClient = new HttpClient();
+
+            var response = await apiClient.GetAsync(privilegeUrl);
+
+            if (!response.IsSuccessStatusCode)
+                return Results.Unauthorized();
+        }
+    }
 
         return Results.Ok();
     }
