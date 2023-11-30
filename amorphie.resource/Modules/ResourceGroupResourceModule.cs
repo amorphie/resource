@@ -1,6 +1,6 @@
 using amorphie.core.Module.minimal_api;
 
-public class ResourceGroupResourceModule: BaseBBTRoute<DtoResourceGroupResource, ResourceGroupResource, ResourceDBContext>
+public class ResourceGroupResourceModule : BaseBBTRoute<DtoResourceGroupResource, ResourceGroupResource, ResourceDBContext>
 {
     public ResourceGroupResourceModule(WebApplication app) : base(app)
     {

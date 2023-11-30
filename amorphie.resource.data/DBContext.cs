@@ -116,9 +116,9 @@ public class ResourceDBContext : DbContext
         .WithOne()
         .HasForeignKey("ScopeId_Title");
 
-         modelBuilder.Entity<ResourceGroup>()
-        .HasMany<Translation>(t => t.Titles)
-        .WithOne()
-        .HasForeignKey("ResourceGroupId_Title");
+        modelBuilder.Entity<ResourceGroup>()
+       .HasMany<Translation>(t => t.Titles)
+       .WithOne()
+       .HasForeignKey("ResourceGroupId_Title");
     }
 }
