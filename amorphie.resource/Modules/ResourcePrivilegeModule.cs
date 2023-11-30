@@ -48,6 +48,15 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
             foreach (var query in httpContext.Request.Query)
                 parameterList.Add($"{{query.{query.Key}}}", query.Value);
 
+            Match match = Regex.Match(url, resource.Url);
+            if (match.Success)
+            {
+                foreach (Group pathVariable in match.Groups)
+                {
+                    parameterList.Add($"{{path.var{pathVariable.Name}}}", pathVariable.Value);
+                }
+            }
+
             var privilegeUrl = resourcePrivilege.Privilege.Url;
 
             if (privilegeUrl != null)
