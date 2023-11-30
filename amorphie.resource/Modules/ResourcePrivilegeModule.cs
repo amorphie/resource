@@ -67,6 +67,8 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
 
                 var apiClient = new HttpClient();
 
+Console.WriteLine("privilegeUrl:" + privilegeUrl);
+
                 var response = await apiClient.GetAsync(privilegeUrl);
 
                 if (!response.IsSuccessStatusCode)
