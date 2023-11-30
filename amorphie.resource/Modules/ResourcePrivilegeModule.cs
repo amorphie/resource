@@ -57,23 +57,21 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
             }
         }
 
-        foreach (ResourcePrivilege resourcePrivilege in resourcePrivileges)
+        var privilegeUrl = resourcePrivilege.Privilege.Url;
+
+        if (privilegeUrl != null)
         {
-            var privilegeUrl = resourcePrivilege.Privilege.Url;
+            foreach (var variable in parameterList)
+                privilegeUrl = privilegeUrl.Replace(variable.Key, variable.Value);
 
-            if (privilegeUrl != null)
-            {
-                foreach (var variable in parameterList)
-                    privilegeUrl = privilegeUrl.Replace(variable.Key, variable.Value);
+            var apiClient = new HttpClient();
 
-                var apiClient = new HttpClient();
+            var response = await apiClient.GetAsync(privilegeUrl);
 
-                var response = await apiClient.GetAsync(privilegeUrl);
-
-                if (!response.IsSuccessStatusCode)
-                    return Results.Unauthorized();
-            }
+            if (!response.IsSuccessStatusCode)
+                return Results.Unauthorized();
         }
+    }
 
         return Results.Ok();
     }
