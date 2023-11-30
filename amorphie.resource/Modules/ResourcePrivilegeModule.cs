@@ -43,8 +43,11 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
         {
             Dictionary<string, string> parameterList = new Dictionary<string, string>();
 
-            foreach (var header in httpContext.Request.Headers)
+            foreach (var header in httpContext.Request.Headers){
                 parameterList.Add($"{{header.{header.Key}}}", header.Value);
+                Console.WriteLine($"{{header.{header.Key}}}" + header.Value);   
+            }
+               
 
             foreach (var query in httpContext.Request.Query)
                 parameterList.Add($"{{query.{query.Key}}}", query.Value);
