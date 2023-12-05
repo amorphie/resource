@@ -1,6 +1,5 @@
 using System.Text.RegularExpressions;
 using amorphie.core.Module.minimal_api;
-using System.Text.RegularExpressions;
 
 public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, ResourcePrivilege, ResourceDBContext>
 {
@@ -43,16 +42,16 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
         {
             Dictionary<string, string> parameterList = new Dictionary<string, string>();
 
-            foreach (var header in httpContext.Request.Headers){
+            foreach (var header in httpContext.Request.Headers)
+            {
                 parameterList.Add($"{{header.{header.Key}}}", header.Value);
-                Console.WriteLine($"{{header.{header.Key}}}" + header.Value);   
             }
-               
 
             foreach (var query in httpContext.Request.Query)
                 parameterList.Add($"{{query.{query.Key}}}", query.Value);
 
             Match match = Regex.Match(url, resource.Url);
+
             if (match.Success)
             {
                 foreach (Group pathVariable in match.Groups)
@@ -69,8 +68,6 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
                     privilegeUrl = privilegeUrl.Replace(variable.Key, variable.Value);
 
                 var apiClient = new HttpClient();
-
-Console.WriteLine("privilegeUrl:" + privilegeUrl);
 
                 var response = await apiClient.GetAsync(privilegeUrl);
 

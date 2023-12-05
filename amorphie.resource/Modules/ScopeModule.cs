@@ -1,6 +1,6 @@
+using amorphie.core.Extension;
 using amorphie.core.Module.minimal_api;
 using amorphie.core.Swagger;
-using amorphie.resource;
 using AutoMapper;
 using Microsoft.OpenApi.Models;
 
@@ -49,22 +49,28 @@ public class ScopeModule : BaseBBTRoute<DtoScope, Scope, ResourceDBContext>
                 [FromQuery][Range(0, 100)] int page,
                 [FromQuery][Range(5, 100)] int pageSize,
                 HttpContext httpContext,
-                CancellationToken token
+                CancellationToken token,
+                [FromQuery] string? sortColumn,
+                [FromQuery] SortDirectionEnum sortDirection = SortDirectionEnum.Asc
                 )
     {
-        var resultList = await context!.Scopes!.AsNoTracking()
-       .Include(t => t.Titles.Where(t => t.Language == httpContext.GetHeaderLanguage()))
-       .Skip(page * pageSize)
-       .Take(pageSize)
-       .ToListAsync(token);
+         IQueryable<Scope> query = context
+             .Set<Scope>()
+             .AsNoTracking();
 
-        if (resultList != null && resultList.Count() > 0)
+        if (!string.IsNullOrEmpty(sortColumn))
         {
-            var response = resultList.Select(x => ObjectMapper.Mapper.Map<DtoScope>(x)).ToList();
-
-            return Results.Ok(response);
+            query = await query.Sort(sortColumn, sortDirection);
         }
 
-        return Results.NoContent();
+        IList<Scope> resultList = await query
+            .Include(t => t.Titles.Where(t => t.Language == httpContext.GetHeaderLanguage()))
+             .Skip(page)
+             .Take(pageSize)
+             .ToListAsync(token);
+
+        return (resultList != null && resultList.Count > 0)
+                ? Results.Ok(mapper.Map<IList<DtoScope>>(resultList))
+                : Results.NoContent();
     }
 }
