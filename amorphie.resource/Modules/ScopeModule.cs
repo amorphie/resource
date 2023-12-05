@@ -54,9 +54,9 @@ public class ScopeModule : BaseBBTRoute<DtoScope, Scope, ResourceDBContext>
                 [FromQuery] SortDirectionEnum sortDirection = SortDirectionEnum.Asc
                 )
     {
-         IQueryable<Scope> query = context
-             .Set<Scope>()
-             .AsNoTracking();
+        IQueryable<Scope> query = context
+            .Set<Scope>()
+            .AsNoTracking();
 
         if (!string.IsNullOrEmpty(sortColumn))
         {

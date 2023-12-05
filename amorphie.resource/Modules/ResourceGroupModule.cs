@@ -63,11 +63,11 @@ public class ResourceGroupModule : BaseBBTRoute<DtoResourceGroup, ResourceGroup,
             query = await query.Sort(sortColumn, sortDirection);
         }
 
-         IList<ResourceGroup> resultList = await query
-            .Include(t => t.Titles.Where(t => t.Language == httpContext.GetHeaderLanguage()))
-            .Skip(page)
-            .Take(pageSize)
-            .ToListAsync(token);
+        IList<ResourceGroup> resultList = await query
+           .Include(t => t.Titles.Where(t => t.Language == httpContext.GetHeaderLanguage()))
+           .Skip(page)
+           .Take(pageSize)
+           .ToListAsync(token);
 
         return (resultList != null && resultList.Count > 0)
                 ? Results.Ok(mapper.Map<IList<DtoResourceGroup>>(resultList))
