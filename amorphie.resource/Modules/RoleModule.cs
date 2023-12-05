@@ -1,7 +1,6 @@
-using amorphie.core.Identity;
+using amorphie.core.Extension;
 using amorphie.core.Module.minimal_api;
 using amorphie.core.Swagger;
-using amorphie.resource;
 using AutoMapper;
 using Microsoft.OpenApi.Models;
 
@@ -52,23 +51,29 @@ public class RoleModule : BaseBBTRoute<DtoRole, Role, ResourceDBContext>
                 [FromQuery][Range(0, 100)] int page,
                 [FromQuery][Range(5, 100)] int pageSize,
                 HttpContext httpContext,
-                CancellationToken token
+                CancellationToken token,
+                [FromQuery] string? sortColumn,
+                [FromQuery] SortDirectionEnum sortDirection = SortDirectionEnum.Asc
                 )
     {
-        var resultList = await context!.Roles!.AsNoTracking()
-       .Include(t => t.Titles.Where(t => t.Language == httpContext.GetHeaderLanguage()))
-       .Skip(page * pageSize)
-       .Take(pageSize)
-       .ToListAsync(token);
+        IQueryable<Role> query = context
+              .Set<Role>()
+              .AsNoTracking();
 
-        if (resultList != null && resultList.Count() > 0)
+        if (!string.IsNullOrEmpty(sortColumn))
         {
-            var response = resultList.Select(x => ObjectMapper.Mapper.Map<DtoRole>(x)).ToList();
-
-            return Results.Ok(response);
+            query = await query.Sort(sortColumn, sortDirection);
         }
 
-        return Results.NoContent();
+        IList<Role> resultList = await query
+            .Include(t => t.Titles.Where(t => t.Language == httpContext.GetHeaderLanguage()))
+             .Skip(page)
+             .Take(pageSize)
+             .ToListAsync(token);
+
+        return (resultList != null && resultList.Count > 0)
+                ? Results.Ok(mapper.Map<IList<DtoRole>>(resultList))
+                : Results.NoContent();
     }
 
     public async ValueTask<IResult> saveWithWorkflow(

@@ -1,3 +1,4 @@
+using amorphie.core.Extension;
 using amorphie.core.Module.minimal_api;
 using amorphie.core.Swagger;
 using AutoMapper;
@@ -50,24 +51,30 @@ public class ResourceModule : BaseBBTRoute<DtoResource, Resource, ResourceDBCont
                 [FromQuery][Range(0, 100)] int page,
                 [FromQuery][Range(5, 100)] int pageSize,
                 HttpContext httpContext,
-                CancellationToken token
+                CancellationToken token,
+                [FromQuery] string? sortColumn,
+                [FromQuery] SortDirectionEnum sortDirection = SortDirectionEnum.Asc
                 )
     {
-        var resultList = await context!.Resources!.AsNoTracking()
-         .Include(t => t.DisplayNames.Where(t => t.Language == httpContext.GetHeaderLanguage()))
-         .Include(t => t.Descriptions.Where(t => t.Language == httpContext.GetHeaderLanguage()))
-       .Skip(page * pageSize)
-       .Take(pageSize)
-       .ToListAsync(token);
+        IQueryable<Resource> query = context
+             .Set<Resource>()
+             .AsNoTracking();
 
-        if (resultList != null && resultList.Count() > 0)
+        if (!string.IsNullOrEmpty(sortColumn))
         {
-            var response = resultList.Select(x => ObjectMapper.Mapper.Map<DtoResource>(x)).ToList();
-
-            return Results.Ok(response);
+            query = await query.Sort(sortColumn, sortDirection);
         }
 
-        return Results.NoContent();
+        IList<Resource> resultList = await query
+             .Include(t => t.DisplayNames.Where(t => t.Language == httpContext.GetHeaderLanguage()))
+             .Include(t => t.Descriptions.Where(t => t.Language == httpContext.GetHeaderLanguage()))
+             .Skip(page)
+             .Take(pageSize)
+             .ToListAsync(token);
+
+        return (resultList != null && resultList.Count > 0)
+                ? Results.Ok(mapper.Map<IList<DtoResource>>(resultList))
+                : Results.NoContent();
     }
     public async ValueTask<IResult> saveResourceWithWorkflow(
         [FromBody] DtoPostWorkflow data,
