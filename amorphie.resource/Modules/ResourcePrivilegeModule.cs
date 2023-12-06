@@ -25,6 +25,8 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
          CancellationToken cancellationToken
          )
     {
+        Console.WriteLine("url: " + url);
+
         var resource = await context!.Resources!.AsNoTracking().FirstOrDefaultAsync(c => Regex.IsMatch(url, c.Url), cancellationToken);
 
         if (resource == null)
@@ -45,10 +47,14 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
             foreach (var header in httpContext.Request.Headers)
             {
                 parameterList.Add($"{{header.{header.Key}}}", header.Value);
+                Console.WriteLine($"{{header.{header.Key}}}" + " : " + header.Value);
             }
 
             foreach (var query in httpContext.Request.Query)
+            {
                 parameterList.Add($"{{query.{query.Key}}}", query.Value);
+                Console.WriteLine($"{{query.{query.Key}}}" + " : " + query.Value);
+            }
 
             Match match = Regex.Match(url, resource.Url);
 
@@ -57,19 +63,27 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
                 foreach (Group pathVariable in match.Groups)
                 {
                     parameterList.Add($"{{path.var{pathVariable.Name}}}", pathVariable.Value);
+                    Console.WriteLine($"{{path.var{pathVariable.Name}}}" + " : " + pathVariable.Value);
                 }
             }
 
             var privilegeUrl = resourcePrivilege.Privilege.Url;
+
+            Console.WriteLine("privilegeUrl:" + privilegeUrl);
 
             if (privilegeUrl != null)
             {
                 foreach (var variable in parameterList)
                     privilegeUrl = privilegeUrl.Replace(variable.Key, variable.Value);
 
+                Console.WriteLine("privilegeUrl2:" + privilegeUrl);
+
                 var apiClient = new HttpClient();
 
                 var response = await apiClient.GetAsync(privilegeUrl);
+
+                Console.WriteLine("response:" + response.StatusCode);
+                Console.WriteLine("IsSuccessStatusCode:" + response.IsSuccessStatusCode.ToString());
 
                 if (!response.IsSuccessStatusCode)
                     return Results.Unauthorized();
