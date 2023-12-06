@@ -67,7 +67,7 @@ public class RoleModule : BaseBBTRoute<DtoRole, Role, ResourceDBContext>
 
         IList<Role> resultList = await query
             .Include(t => t.Titles.Where(t => t.Language == httpContext.GetHeaderLanguage()))
-             .Skip(page)
+             .Skip(page * pageSize)
              .Take(pageSize)
              .ToListAsync(token);
 

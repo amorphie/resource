@@ -67,7 +67,7 @@ public class RoleGroupModule : BaseBBTRoute<DtoRoleGroup, RoleGroup, ResourceDBC
 
         IList<RoleGroup> resultList = await query
              .Include(t => t.Titles.Where(t => t.Language == httpContext.GetHeaderLanguage()))
-             .Skip(page)
+             .Skip(page * pageSize)
              .Take(pageSize)
              .ToListAsync(token);
 
