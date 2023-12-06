@@ -56,9 +56,9 @@ public class RoleGroupModule : BaseBBTRoute<DtoRoleGroup, RoleGroup, ResourceDBC
                 [FromQuery] SortDirectionEnum sortDirection = SortDirectionEnum.Asc
                 )
     {
-      IQueryable<RoleGroup> query = context
-             .Set<RoleGroup>()
-             .AsNoTracking();
+        IQueryable<RoleGroup> query = context
+               .Set<RoleGroup>()
+               .AsNoTracking();
 
         if (!string.IsNullOrEmpty(sortColumn))
         {

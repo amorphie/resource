@@ -1,6 +1,6 @@
 using amorphie.core.Module.minimal_api;
 
-public class RoleGroupRoleModule: BaseBBTRoute<DtoRoleGroupRole, RoleGroupRole, ResourceDBContext>
+public class RoleGroupRoleModule : BaseBBTRoute<DtoRoleGroupRole, RoleGroupRole, ResourceDBContext>
 {
     public RoleGroupRoleModule(WebApplication app) : base(app)
     {
