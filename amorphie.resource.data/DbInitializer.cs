@@ -504,7 +504,6 @@ public static class DbInitializer
                 ModifiedBy = Guid.NewGuid(),
                 ModifiedByBehalfOf = null,
                 Status = "A",
-                Ttl = 1000,
                 PrivilegeId = privilegeId,
                 ResourceId = resourceId1,
                 Priority = 1
@@ -518,7 +517,6 @@ public static class DbInitializer
                 ModifiedBy = Guid.NewGuid(),
                 ModifiedByBehalfOf = null,
                 Status = "A",
-                Ttl = 1000,
                 PrivilegeId = privilegeId,
                 ResourceId = resourceId2,
                 Priority = 1
@@ -532,7 +530,6 @@ public static class DbInitializer
                 ModifiedBy = Guid.NewGuid(),
                 ModifiedByBehalfOf = null,
                 Status = "A",
-                Ttl = 1000,
                 PrivilegeId = privilegeId,
                 ResourceId = resourceId3,
                 Priority = 1
@@ -546,7 +543,6 @@ public static class DbInitializer
                 ModifiedBy = Guid.NewGuid(),
                 ModifiedByBehalfOf = null,
                 Status = "A",
-                Ttl = 1000,
                 PrivilegeId = privilegeId,
                 ResourceId = resourceId4,
                 Priority = 1
@@ -560,7 +556,6 @@ public static class DbInitializer
                 ModifiedBy = Guid.NewGuid(),
                 ModifiedByBehalfOf = null,
                 Status = "A",
-                Ttl = 1000,
                 PrivilegeId = privilegeId,
                 ResourceId = resourceId5,
                 Priority = 1

@@ -7,7 +7,7 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
     {
     }
 
-    public override string[]? PropertyCheckList => new string[] { "Status", "Ttl" };
+    public override string[]? PropertyCheckList => new string[] { "Status" };
 
     public override string? UrlFragment => "resourcePrivilege";
 
@@ -31,6 +31,29 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
 
         if (resource == null)
             return Results.Ok();
+
+        var resourceClients = await context!.ResourceClients!
+              .AsNoTracking().Where(x => x.ResourceId.Equals(resource.Id) && x.Status == "A")
+              .ToListAsync(cancellationToken);
+
+        if (resourceClients != null && resourceClients.Count != 0)
+        {
+            var hasClient = false;
+
+            var headerClientId = httpContext.Request.Headers["clientId"];
+
+            foreach (ResourceClient resourceClient in resourceClients)
+            {
+                if (resourceClient.ClientId.ToString() == headerClientId.ToString())
+                {
+                    hasClient = true;
+                    break;
+                }
+            }
+
+            if (!hasClient)
+                return Results.Unauthorized();
+        }
 
         var resourcePrivileges = await context!.ResourcePrivileges!.Include(i => i.Privilege)
                         .AsNoTracking().Where(x => x.ResourceId.Equals(resource.Id) && x.Status == "A")
