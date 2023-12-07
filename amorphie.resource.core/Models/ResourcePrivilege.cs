@@ -8,8 +8,6 @@ public class ResourcePrivilege : EntityBase
 
     [ForeignKey("Privilege")]
     public Guid PrivilegeId { get; set; }
-
-    public int? Ttl { get; set; }
     public string? Status { get; set; }
     public int? Priority { get; set; }
 

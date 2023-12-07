@@ -33,6 +33,7 @@ public class ResourceDBContext : DbContext
     public DbSet<ResourcePrivilege>? ResourcePrivileges { get; set; }
     public DbSet<ResponseTransformation>? ResponseTransformations { get; set; }
     public DbSet<ResponseTransformationMessage>? ResponseTransformationMessages { get; set; }
+    public DbSet<ResourceClient>? ResourceClients { get; set; }
     public ResourceDBContext(DbContextOptions options) : base(options) { AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true); }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -78,6 +79,9 @@ public class ResourceDBContext : DbContext
 
         modelBuilder.Entity<ResponseTransformationMessage>()
       .HasKey(r => r.Id);
+
+        modelBuilder.Entity<ResourceClient>()
+       .HasKey(r => r.Id);
 
         // Translation Relations
         modelBuilder.Entity<Translation>().Property<Guid?>("ResourceId_DisplayName");
