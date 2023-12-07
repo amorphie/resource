@@ -21,15 +21,15 @@ public class ResponseTransformationModule : BaseBBTRoute<DtoResponseTransformati
         [FromBody] DtoGetResponseTransformationRequest request,
         [FromServices] ResourceDBContext context,
         HttpContext httpContext,
+         [FromHeader(Name = "clientId")] string headerClientId,
+         [FromHeader(Name = "Accept-Language")] string headerAcceptLanguage,
         CancellationToken token
         )
     {
         var responseTransformationList = await context!.ResponseTransformations!.AsNoTracking()
-         .Include(t => t.ResponseTransformationMessages.Where(t => t.Language == request.Language))
-          .Where(t => t.ResponseCode == request.ResponseCode && t.Audience!.Contains(request.Audience)
-                                ).ToListAsync(token); ;
-
-        // var hasRecord = false;
+         .Include(t => t.ResponseTransformationMessages.Where(t => t.Language == headerAcceptLanguage))
+          .Where(t => t.ResponseCode == request.ResponseCode && t.Audience!.Contains(headerClientId)
+                                ).ToListAsync(token);
 
         if (responseTransformationList != null && responseTransformationList.Count > 0)
         {
@@ -57,8 +57,5 @@ public class ResponseTransformationModule : BaseBBTRoute<DtoResponseTransformati
             }
         }
         return Results.Problem(detail: "Invalid Response", title: "Flow Exception", statusCode: 461);
-
-
-
     }
 }

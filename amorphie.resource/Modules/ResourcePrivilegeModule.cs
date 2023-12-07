@@ -22,6 +22,7 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
          [FromBody] string url,
          [FromServices] ResourceDBContext context,
          HttpContext httpContext,
+         [FromHeader(Name = "clientId")] string headerClientId,
          CancellationToken cancellationToken
          )
     {
@@ -38,8 +39,6 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
 
         if (resourceClients != null && resourceClients.Count != 0)
         {
-            var headerClientId = httpContext.Request.Headers["clientId"];
-
             var resourceClient = resourceClients.FirstOrDefault(t => t.ClientId.ToString() == headerClientId.ToString());
 
             if (resourceClient == null)
