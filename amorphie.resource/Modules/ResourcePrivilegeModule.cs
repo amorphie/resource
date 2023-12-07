@@ -38,20 +38,11 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
 
         if (resourceClients != null && resourceClients.Count != 0)
         {
-            var hasClient = false;
-
             var headerClientId = httpContext.Request.Headers["clientId"];
 
-            foreach (ResourceClient resourceClient in resourceClients)
-            {
-                if (resourceClient.ClientId.ToString() == headerClientId.ToString())
-                {
-                    hasClient = true;
-                    break;
-                }
-            }
+            var resourceClient = resourceClients.FirstOrDefault(t => t.ClientId.ToString() == headerClientId.ToString());
 
-            if (!hasClient)
+            if (resourceClient == null)
                 return Results.Unauthorized();
         }
 
