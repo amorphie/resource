@@ -42,11 +42,11 @@ namespace amorphie.resource.data.Migrations
             migrationBuilder.DropTable(
                 name: "ResourceClients");
 
-                 migrationBuilder.AddColumn<int>(
-                name: "Ttl",
-                table: "ResourcePrivileges",
-                type: "integer",
-                nullable: true);
+            migrationBuilder.AddColumn<int>(
+           name: "Ttl",
+           table: "ResourcePrivileges",
+           type: "integer",
+           nullable: true);
         }
     }
 }
