@@ -61,7 +61,5 @@ public class DtoGetResponseTransformation
 public class DtoGetResponseTransformationRequest
 {
     public string? ResponseCode { get; set; }
-    public string? Audience { get; set; }
-    public string? Language { get; set; }
     public string? Body { get; set; }
 }
