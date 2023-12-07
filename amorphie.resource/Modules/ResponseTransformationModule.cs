@@ -29,7 +29,7 @@ public class ResponseTransformationModule : BaseBBTRoute<DtoResponseTransformati
         var responseTransformationList = await context!.ResponseTransformations!.AsNoTracking()
          .Include(t => t.ResponseTransformationMessages.Where(t => t.Language == headerAcceptLanguage))
           .Where(t => t.ResponseCode == request.ResponseCode && t.Audience!.Contains(headerClientId)
-                                ).ToListAsync(token); 
+                                ).ToListAsync(token);
 
         if (responseTransformationList != null && responseTransformationList.Count > 0)
         {
