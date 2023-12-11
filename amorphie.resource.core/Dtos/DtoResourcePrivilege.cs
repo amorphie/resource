@@ -7,3 +7,9 @@ public class DtoResourcePrivilege : DtoBase
     public string? Status { get; set; }
     public int? Priority { get; set; }
 }
+
+public class CheckAuthorizeRequest
+{
+    public string? Url { get; set; }
+    public string? Data { get; set; }
+}

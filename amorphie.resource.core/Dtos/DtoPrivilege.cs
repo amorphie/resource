@@ -1,8 +1,10 @@
 using System.ComponentModel.DataAnnotations;
 using amorphie.core.Base;
+using amorphie.core.Enums;
 public class DtoPrivilege : DtoBase
 {
     public string? Url { get; set; }
+    public HttpMethodType Type { get; set; }
 }
 
 public class DtoPrivilegeWorkflow

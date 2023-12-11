@@ -1,3 +1,5 @@
+using System.Runtime.InteropServices;
+using System.Text;
 using System.Text.RegularExpressions;
 using amorphie.core.Module.minimal_api;
 
@@ -19,16 +21,16 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
     }
 
     public async ValueTask<IResult> CheckAuthorize(
-         [FromBody] string url,
+         [FromBody] CheckAuthorizeRequest request,
          [FromServices] ResourceDBContext context,
          HttpContext httpContext,
          [FromHeader(Name = "clientId")] string headerClientId,
          CancellationToken cancellationToken
          )
     {
-        Console.WriteLine("url: " + url);
+        Console.WriteLine("url: " + request.Url);
 
-        var resource = await context!.Resources!.AsNoTracking().FirstOrDefaultAsync(c => Regex.IsMatch(url, c.Url), cancellationToken);
+        var resource = await context!.Resources!.AsNoTracking().FirstOrDefaultAsync(c => Regex.IsMatch(request.Url, c.Url), cancellationToken);
 
         if (resource == null)
             return Results.Ok();
@@ -69,7 +71,7 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
                 Console.WriteLine($"{{query.{query.Key}}}" + " : " + query.Value);
             }
 
-            Match match = Regex.Match(url, resource.Url);
+            Match match = Regex.Match(request.Url, resource.Url);
 
             if (match.Success)
             {
@@ -93,7 +95,19 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
 
                 var apiClient = new HttpClient();
 
-                var response = await apiClient.GetAsync(privilegeUrl);
+                HttpResponseMessage response;
+
+                if (resourcePrivilege.Privilege.Type == amorphie.core.Enums.HttpMethodType.POST)
+                {
+                    var data = string.IsNullOrEmpty(request.Data) ? "" : request.Data;
+                    var httpContent = new StringContent(data, Encoding.UTF8, "application/json");
+
+                    response = await apiClient.PostAsync(privilegeUrl, httpContent);
+                }
+                else
+                {
+                    response = await apiClient.GetAsync(privilegeUrl);
+                }
 
                 Console.WriteLine("response:" + response.StatusCode);
                 Console.WriteLine("IsSuccessStatusCode:" + response.IsSuccessStatusCode.ToString());
