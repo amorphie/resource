@@ -6,7 +6,7 @@ public class PrivilegeModule : BaseBBTRoute<DtoPrivilege, Privilege, ResourceDBC
     {
     }
 
-    public override string[]? PropertyCheckList => new string[] { "Url" };
+    public override string[]? PropertyCheckList => new string[] { "Url", "Type" };
 
     public override string? UrlFragment => "privilege";
 
