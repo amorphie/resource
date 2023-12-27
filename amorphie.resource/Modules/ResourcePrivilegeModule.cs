@@ -2,6 +2,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using amorphie.core.Module.minimal_api;
+using System.Web;
 
 public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, ResourcePrivilege, ResourceDBContext>
 {
@@ -65,10 +66,14 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
                 Console.WriteLine($"{{header.{header.Key}}}" + " : " + header.Value);
             }
 
-            foreach (var query in httpContext.Request.Query)
+            Uri myUri = new Uri(request.Url);
+            var queryList = HttpUtility.ParseQueryString(myUri.Query);
+            var keyList = queryList.AllKeys;
+
+            foreach (var key in keyList)
             {
-                parameterList.Add($"{{query.{query.Key}}}", query.Value);
-                Console.WriteLine($"{{query.{query.Key}}}" + " : " + query.Value);
+                parameterList.Add($"{{query.{key}}}", queryList[key]);
+                Console.WriteLine($"{{query.{key}}}" + " : " + queryList[key]);
             }
 
             Match match = Regex.Match(request.Url, resource.Url);
