@@ -66,8 +66,8 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
                 Console.WriteLine($"{{header.{header.Key}}}" + " : " + header.Value);
             }
 
-            Uri myUri = new Uri(request.Url);
-            var queryList = HttpUtility.ParseQueryString(myUri.Query);
+            var queryString = string.Join(string.Empty, request.Url.Split('?').Skip(1));
+            var queryList = HttpUtility.ParseQueryString(queryString);
             var keyList = queryList.AllKeys;
 
             foreach (var key in keyList)
