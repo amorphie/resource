@@ -64,17 +64,7 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
             {
                 parameterList.Add($"{{header.{header.Key}}}", header.Value);
                 Console.WriteLine($"{{header.{header.Key}}}" + " : " + header.Value);
-            }
-
-            var queryString = string.Join(string.Empty, request.Url.Split('?').Skip(1));
-            var queryList = HttpUtility.ParseQueryString(queryString);
-            var keyList = queryList.AllKeys;
-
-            foreach (var key in keyList)
-            {
-                parameterList.Add($"{{query.{key}}}", queryList[key]);
-                Console.WriteLine($"{{query.{key}}}" + " : " + queryList[key]);
-            }
+            }         
 
             Match match = Regex.Match(request.Url, resource.Url);
 
