@@ -64,7 +64,7 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
             {
                 parameterList.Add($"{{header.{header.Key}}}", header.Value);
                 Console.WriteLine($"{{header.{header.Key}}}" + " : " + header.Value);
-            }         
+            }
 
             Match match = Regex.Match(request.Url, resource.Url);
 
