@@ -3,6 +3,8 @@ using System.Text;
 using System.Text.RegularExpressions;
 using amorphie.core.Module.minimal_api;
 using System.Web;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, ResourcePrivilege, ResourceDBContext>
 {
@@ -77,6 +79,13 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
                 }
             }
 
+            if (!string.IsNullOrEmpty(request.Data))
+            {
+                JObject jsonObject = JsonConvert.DeserializeObject<JObject>(request.Data);
+
+                RecursiveJsonLoop(jsonObject, parameterList, "body");
+            }
+
             var privilegeUrl = resourcePrivilege.Privilege.Url;
 
             Console.WriteLine("privilegeUrl:" + privilegeUrl);
@@ -113,5 +122,30 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
         }
 
         return Results.Ok();
+    }
+
+    void RecursiveJsonLoop(JObject jsonObject, Dictionary<string, string> keyValuePairs, string currentPath)
+    {
+        foreach (var property in jsonObject.Properties())
+        {
+            string newPath = currentPath == "" ? property.Name : $"{currentPath}.{property.Name}";
+
+            if (property.Value.Type == JTokenType.Object)
+            {
+                RecursiveJsonLoop((JObject)property.Value, keyValuePairs, newPath);
+            }
+
+            else if (property.Value.Type == JTokenType.Array)
+            {
+                for (int i = 0; i < ((JArray)property.Value).Count; i++)
+                {
+                    RecursiveJsonLoop((JObject)((JArray)property.Value)[i], keyValuePairs, $"{newPath}[{i}]");
+                }
+            }
+            else
+            {
+                keyValuePairs.Add(newPath, property.Value.ToString());
+            }
+        }
     }
 }
