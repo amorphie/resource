@@ -152,7 +152,7 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
             }
             else
             {
-                keyValuePairs.Add(newPath, property.Value.ToString());
+                keyValuePairs.Add($"{{{newPath}}}", property.Value.ToString());
             }
         }
     }
