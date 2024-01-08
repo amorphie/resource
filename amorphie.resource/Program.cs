@@ -5,6 +5,7 @@ using amorphie.core.security;
 using amorphie.core.Swagger;
 using amorphie.resource.data;
 using FluentValidation;
+using Elastic.Apm.NetCoreAll;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,6 +49,9 @@ builder.Services.AddDbContext<ResourceDBContext>
     (options => options.UseNpgsql(postgreSql, b => b.MigrationsAssembly("amorphie.resource.data")));
 
 var app = builder.Build();
+
+app.UseAllElasticApm(app.Configuration);
+
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 using var scope = app.Services.CreateScope();
