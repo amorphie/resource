@@ -11,8 +11,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace amorphie.resource.data.Migrations
 {
     [DbContext(typeof(ResourceDBContext))]
-    [Migration("20231206141837_v4")]
-    partial class v4
+    [Migration("20240111135941_MigrationToProdv1")]
+    partial class MigrationToProdv1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -47,6 +47,9 @@ namespace amorphie.resource.data.Migrations
 
                     b.Property<Guid?>("ModifiedByBehalfOf")
                         .HasColumnType("uuid");
+
+                    b.Property<byte>("Type")
+                        .HasColumnType("smallint");
 
                     b.Property<string>("Url")
                         .HasColumnType("text");
