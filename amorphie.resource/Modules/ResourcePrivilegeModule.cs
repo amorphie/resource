@@ -77,7 +77,7 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
 
         if (!string.IsNullOrEmpty(request.Data))
         {
-            JObject jsonObject = JsonConvert.DeserializeObject<JObject>(request.Data);
+            JObject jsonObject =System.Text.Json.JsonSerializer.Deserialize<JObject>(request.Data);
 
             RecursiveJsonLoop(jsonObject, parameterList, "body");
         }
