@@ -6,7 +6,7 @@ USER amorphie-resource
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
-
+ENV DOTNET_NUGET_SIGNATURE_VERIFICATION=false
 COPY ["/amorphie.resource/amorphie.resource.csproj", "."]
 COPY ["/amorphie.resource.data/amorphie.resource.data.csproj", "."]
 RUN dotnet restore "./amorphie.resource.csproj"
