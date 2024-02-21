@@ -74,7 +74,12 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
                 parameterList.Add($"{{path.var{pathVariable.Name}}}", pathVariable.Value);
             }
         }
+        Console.WriteLine("parameterList:");
 
+        foreach (KeyValuePair<string, string> kvp in parameterList)
+        {
+            Console.WriteLine(kvp.Key + ":" + kvp.Value);
+        }
         if (!string.IsNullOrEmpty(request.Data))
         {
             Console.WriteLine("requested Data :"+request.Data);
