@@ -156,7 +156,7 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
                     if(((JArray)property.Value)[i].Type == JTokenType.Object)
                         RecursiveJsonLoop((JObject)((JArray)property.Value)[i], keyValuePairs, $"{newPath}[{i}]");
                     else
-                        keyValuePairs.Add($"{{{newPath}}}", property.Value.ToString());
+                        keyValuePairs.Add($"{newPath}[{i}]", property.Value.ToString());
                 }
             }
             else
