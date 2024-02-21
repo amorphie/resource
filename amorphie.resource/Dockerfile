@@ -1,10 +1,10 @@
-FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:7.0.16 AS base
 WORKDIR /app
 
 RUN adduser -u 5786 --disabled-password --gecos "" amorphie-resource && chown -R amorphie-resource:amorphie-resource /app
 USER amorphie-resource
 
-FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:7.0.16 AS build
 WORKDIR /src
 
 COPY ["/amorphie.resource/amorphie.resource.csproj", "."]
