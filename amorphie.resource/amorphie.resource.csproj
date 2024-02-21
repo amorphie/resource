@@ -19,7 +19,7 @@
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.4" />
     <PackageReference Include="amorphie.core" Version="1.1.14" />
     <PackageReference Include="amorphie.core.security" Version="1.0.0" />
-    <PackageReference Include="Elastic.Apm.NetCoreAll" Version="1.22.0" />
+    <PackageReference Include="Elastic.Apm.NetCoreAll" Version="1.25.0" />
   </ItemGroup>
 
   <ItemGroup>
