@@ -74,10 +74,16 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
                 parameterList.Add($"{{path.var{pathVariable.Name}}}", pathVariable.Value);
             }
         }
+        Console.WriteLine("parameterList:");
 
+        foreach (KeyValuePair<string, string> kvp in parameterList)
+        {
+            Console.WriteLine(kvp.Key + ":" + kvp.Value);
+        }
         if (!string.IsNullOrEmpty(request.Data))
         {
-            JObject jsonObject = System.Text.Json.JsonSerializer.Deserialize<JObject>(request.Data);
+            Console.WriteLine("requested Data :" + request.Data);
+            JObject jsonObject = JsonConvert.DeserializeObject<JObject>(request.Data);
 
             RecursiveJsonLoop(jsonObject, parameterList, "body");
         }
@@ -147,7 +153,10 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
             {
                 for (int i = 0; i < ((JArray)property.Value).Count; i++)
                 {
-                    RecursiveJsonLoop((JObject)((JArray)property.Value)[i], keyValuePairs, $"{newPath}[{i}]");
+                    if (((JArray)property.Value)[i].Type == JTokenType.Object)
+                        RecursiveJsonLoop((JObject)((JArray)property.Value)[i], keyValuePairs, $"{newPath}[{i}]");
+                    else
+                        keyValuePairs.Add($"{newPath}[{i}]", property.Value.ToString());
                 }
             }
             else
