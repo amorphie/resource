@@ -82,7 +82,7 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
         }
         if (!string.IsNullOrEmpty(request.Data))
         {
-            Console.WriteLine("requested Data :"+request.Data);
+            Console.WriteLine("requested Data :" + request.Data);
             JObject jsonObject = JsonConvert.DeserializeObject<JObject>(request.Data);
 
             RecursiveJsonLoop(jsonObject, parameterList, "body");
@@ -153,7 +153,7 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
             {
                 for (int i = 0; i < ((JArray)property.Value).Count; i++)
                 {
-                    if(((JArray)property.Value)[i].Type == JTokenType.Object)
+                    if (((JArray)property.Value)[i].Type == JTokenType.Object)
                         RecursiveJsonLoop((JObject)((JArray)property.Value)[i], keyValuePairs, $"{newPath}[{i}]");
                     else
                         keyValuePairs.Add($"{newPath}[{i}]", property.Value.ToString());
