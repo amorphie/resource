@@ -83,9 +83,16 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
         if (!string.IsNullOrEmpty(request.Data))
         {
             Console.WriteLine("requested Data :" + request.Data);
-            JObject jsonObject = JsonConvert.DeserializeObject<JObject>(request.Data);
-
-            RecursiveJsonLoop(jsonObject, parameterList, "body");
+            try
+            {
+                JObject jsonObject = JsonConvert.DeserializeObject<JObject>(request.Data);
+                RecursiveJsonLoop(jsonObject, parameterList, "body");
+            }
+            catch (Exception)
+            {
+                JArray jsonObject = JsonConvert.DeserializeObject<JArray>(request.Data);
+                RecursiveJsonLoop(jsonObject, parameterList, "body");
+            }
         }
 
         Console.WriteLine("parameterList:");
@@ -163,6 +170,15 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
             {
                 keyValuePairs.Add($"{{{newPath}}}", property.Value.ToString());
             }
+        }
+    }
+
+    void RecursiveJsonLoop(JArray jArray, Dictionary<string, string> keyValuePairs, string currentPath)
+    {
+        int i = 0;
+        foreach (var property in jArray)
+        {
+            RecursiveJsonLoop(property.ToObject<JObject>(),keyValuePairs,$"[{i}]");
         }
     }
 }
