@@ -32,7 +32,7 @@ var assemblies = new Assembly[]
                      typeof(ResourceValidator).Assembly, typeof(ResourceMapper).Assembly
                 };
 builder.Services.AddHttpLogging(o => {
-    o.LoggingFields = HttpLoggingFields.RequestBody | HttpLoggingFields.RequestHeaders
+    o.LoggingFields = HttpLoggingFields.RequestBody | HttpLoggingFields.RequestHeaders;
  });
 
 builder.Services.AddValidatorsFromAssemblies(assemblies);
