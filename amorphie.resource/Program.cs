@@ -6,6 +6,7 @@ using amorphie.core.Swagger;
 using amorphie.resource.data;
 using FluentValidation;
 using Elastic.Apm.NetCoreAll;
+using Microsoft.AspNetCore.HttpLogging;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,7 +31,9 @@ var assemblies = new Assembly[]
                 {
                      typeof(ResourceValidator).Assembly, typeof(ResourceMapper).Assembly
                 };
-builder.Services.AddHttpLogging(o => { });
+builder.Services.AddHttpLogging(o => {
+    o.LoggingFields = HttpLoggingFields.RequestBody | HttpLoggingFields.RequestHeaders
+ });
 
 builder.Services.AddValidatorsFromAssemblies(assemblies);
 builder.Services.AddAutoMapper(assemblies);
