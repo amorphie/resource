@@ -30,6 +30,7 @@ var assemblies = new Assembly[]
                 {
                      typeof(ResourceValidator).Assembly, typeof(ResourceMapper).Assembly
                 };
+builder.Services.AddHttpLogging(o => { });
 
 builder.Services.AddValidatorsFromAssemblies(assemblies);
 builder.Services.AddAutoMapper(assemblies);
@@ -51,7 +52,7 @@ builder.Services.AddDbContext<ResourceDBContext>
 var app = builder.Build();
 
 app.UseAllElasticApm(app.Configuration);
-
+app.UseHttpLogging();
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 using var scope = app.Services.CreateScope();
