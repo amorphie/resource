@@ -34,7 +34,7 @@ var assemblies = new Assembly[]
 builder.Services.AddHttpLogging(o => {
     o.LoggingFields = HttpLoggingFields.RequestBody | HttpLoggingFields.RequestHeaders;
  });
-
+builder.Logging.AddConsole();
 builder.Services.AddValidatorsFromAssemblies(assemblies);
 builder.Services.AddAutoMapper(assemblies);
 
