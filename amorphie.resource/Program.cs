@@ -7,6 +7,7 @@ using amorphie.resource.data;
 using FluentValidation;
 using Elastic.Apm.NetCoreAll;
 using Microsoft.AspNetCore.HttpLogging;
+using amorphie.resource;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,10 +32,7 @@ var assemblies = new Assembly[]
                 {
                      typeof(ResourceValidator).Assembly, typeof(ResourceMapper).Assembly
                 };
-builder.Services.AddHttpLogging(o => {
-    o.LoggingFields = HttpLoggingFields.RequestBody | HttpLoggingFields.RequestHeaders;
- });
-builder.Logging.AddConsole();
+
 builder.Services.AddValidatorsFromAssemblies(assemblies);
 builder.Services.AddAutoMapper(assemblies);
 
@@ -55,7 +53,7 @@ builder.Services.AddDbContext<ResourceDBContext>
 var app = builder.Build();
 
 app.UseAllElasticApm(app.Configuration);
-app.UseHttpLogging();
+app.UseMiddleware<HttpMiddleware>();
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 using var scope = app.Services.CreateScope();
