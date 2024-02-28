@@ -53,7 +53,7 @@ builder.Services.AddDbContext<ResourceDBContext>
 var app = builder.Build();
 
 app.UseAllElasticApm(app.Configuration);
-//app.UseMiddleware<HttpMiddleware>();
+app.UseMiddleware<HttpMiddleware>();
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 using var scope = app.Services.CreateScope();
