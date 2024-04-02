@@ -53,7 +53,7 @@ public class ResourceModule : BaseBBTRoute<DtoResource, Resource, ResourceDBCont
                 HttpContext httpContext,
                 CancellationToken token,
                 [FromQuery] string? sortColumn,
-                [FromQuery] SortDirectionEnum sortDirection = SortDirectionEnum.Asc
+                [FromQuery] SortDirectionEnum? sortDirection
                 )
     {
         IQueryable<Resource> query = context

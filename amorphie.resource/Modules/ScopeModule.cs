@@ -51,7 +51,7 @@ public class ScopeModule : BaseBBTRoute<DtoScope, Scope, ResourceDBContext>
                 HttpContext httpContext,
                 CancellationToken token,
                 [FromQuery] string? sortColumn,
-                [FromQuery] SortDirectionEnum sortDirection = SortDirectionEnum.Asc
+                [FromQuery] SortDirectionEnum? sortDirection
                 )
     {
         IQueryable<Scope> query = context
