@@ -1,20 +1,19 @@
 using System.Reflection;
 using amorphie.core.Extension;
 using amorphie.core.Identity;
-using amorphie.core.security;
 using amorphie.core.Swagger;
 using amorphie.resource.data;
 using FluentValidation;
 using Elastic.Apm.NetCoreAll;
+using amorphie.core.Middleware.Logging;
+
 
 var builder = WebApplication.CreateBuilder(args);
-
 await builder.Configuration.AddVaultSecrets("amorphie-secretstore", new string[] { "amorphie-secretstore" });
 var postgreSql = builder.Configuration["PostgreSql"];
 // var postgreSql = "Host=localhost:5432;Database=resources;Username=postgres;Password=postgres";
 
-builder.Logging.ClearProviders();
-builder.Logging.AddJsonConsole();
+builder.AddSeriLogWithHttpLogging<AmorphieLogEnricher>();
 
 builder.Services.AddDaprClient();
 builder.Services.AddEndpointsApiExplorer();
@@ -50,7 +49,11 @@ builder.Services.AddDbContext<ResourceDBContext>
 
 var app = builder.Build();
 
-app.UseAllElasticApm(app.Configuration);
+if (!app.Environment.IsDevelopment())
+{
+    app.UseAllElasticApm(app.Configuration);
+}
+app.UseLoggingHandlerMiddlewares();
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 

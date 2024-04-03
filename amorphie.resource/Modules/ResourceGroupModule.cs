@@ -51,7 +51,7 @@ public class ResourceGroupModule : BaseBBTRoute<DtoResourceGroup, ResourceGroup,
                 HttpContext httpContext,
                 CancellationToken token,
                 [FromQuery] string? sortColumn,
-                [FromQuery] SortDirectionEnum sortDirection = SortDirectionEnum.Asc
+                [FromQuery] SortDirectionEnum? sortDirection
                 )
     {
         IQueryable<ResourceGroup> query = context
