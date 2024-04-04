@@ -53,7 +53,7 @@ public class RoleModule : BaseBBTRoute<DtoRole, Role, ResourceDBContext>
                 HttpContext httpContext,
                 CancellationToken token,
                 [FromQuery] string? sortColumn,
-                [FromQuery] SortDirectionEnum sortDirection = SortDirectionEnum.Asc
+                [FromQuery] SortDirectionEnum? sortDirection
                 )
     {
         IQueryable<Role> query = context
