@@ -1,6 +1,6 @@
 FROM mcr.microsoft.com/dotnet/aspnet:8.0.2 AS base
 WORKDIR /app
-
+ENV DOTNET_NUGET_SIGNATURE_VERIFICATION=false
 RUN adduser -u 5786 --disabled-password --gecos "" amorphie-resource && chown -R amorphie-resource:amorphie-resource /app
 USER amorphie-resource
 
