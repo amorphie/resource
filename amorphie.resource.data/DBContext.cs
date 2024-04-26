@@ -1,9 +1,6 @@
 ﻿using amorphie.core.Base;
-using amorphie.core.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 class ResourceDbContextFactory : IDesignTimeDbContextFactory<ResourceDBContext>
 {
@@ -21,7 +18,6 @@ public class ResourceDBContext : DbContext
 {
     public DbSet<Resource>? Resources { get; set; }
     public DbSet<ResourceGroup>? ResourceGroups { get; set; }
-    public DbSet<ResourceGroupResource>? ResourceGroupResources { get; set; }
     public DbSet<Role>? Roles { get; set; }
     public DbSet<RoleGroup>? RoleGroups { get; set; }
     public DbSet<RoleGroupRole>? RoleGroupRoles { get; set; }
@@ -31,9 +27,10 @@ public class ResourceDBContext : DbContext
     public DbSet<Translation>? Translations { get; set; }
     public DbSet<Scope>? Scopes { get; set; }
     public DbSet<ResourcePrivilege>? ResourcePrivileges { get; set; }
+    public DbSet<ResourceGroupPrivilege>? ResourceGroupPrivileges { get; set; }
     public DbSet<ResponseTransformation>? ResponseTransformations { get; set; }
     public DbSet<ResponseTransformationMessage>? ResponseTransformationMessages { get; set; }
-    public DbSet<ResourceClient>? ResourceClients { get; set; }
+
     public ResourceDBContext(DbContextOptions options) : base(options) { AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true); }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -43,9 +40,6 @@ public class ResourceDBContext : DbContext
 
         modelBuilder.Entity<ResourceGroup>()
        .HasKey(r => r.Id);
-
-        modelBuilder.Entity<ResourceGroupResource>()
-        .HasKey(r => r.Id);
 
         modelBuilder.Entity<Role>()
         .HasKey(r => r.Id);
@@ -74,13 +68,13 @@ public class ResourceDBContext : DbContext
         modelBuilder.Entity<ResourcePrivilege>()
         .HasKey(r => r.Id);
 
+        modelBuilder.Entity<ResourceGroupPrivilege>()
+        .HasKey(r => r.Id);
+
         modelBuilder.Entity<ResponseTransformation>()
        .HasKey(r => r.Id);
 
         modelBuilder.Entity<ResponseTransformationMessage>()
-      .HasKey(r => r.Id);
-
-        modelBuilder.Entity<ResourceClient>()
        .HasKey(r => r.Id);
 
         // Translation Relations

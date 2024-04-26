@@ -24,6 +24,7 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 builder.Services.AddScoped<IBBTIdentity, FakeIdentity>();
+builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 
 var assemblies = new Assembly[]
                 {
@@ -53,6 +54,7 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseAllElasticApm(app.Configuration);
 }
+
 app.UseLoggingHandlerMiddlewares();
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
@@ -78,5 +80,3 @@ catch (Exception ex)
 {
     app.Logger.LogCritical(ex, "Aplication is terminated unexpectedly ");
 }
-
-
