@@ -46,12 +46,24 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
         if (string.IsNullOrEmpty(checkMethod))
             checkMethod = "Resource";
 
+        string allowEmptyPrivilege = configuration["AllowEmptyPrivilege"];
+
         if (checkMethod == "Resource")
         {
             resourcePrivileges = await context!.ResourcePrivileges!.Include(i => i.Privilege)
                             .AsNoTracking().Where(x => x.ResourceId.Equals(resource.Id) && x.Status == "A")
                             .OrderBy(x => x.Priority)
                             .ToListAsync(cancellationToken);
+
+            if (resourcePrivileges == null || resourcePrivileges.Count == 0)
+            {
+                if (string.IsNullOrEmpty(allowEmptyPrivilege) || allowEmptyPrivilege == "True")
+                {
+                    return Results.Ok();
+                }
+
+                return Results.Unauthorized();
+            }
         }
         else
         {
@@ -61,18 +73,16 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
                                                        && x.Status == "A")
                             .OrderBy(x => x.Priority)
                             .ToListAsync(cancellationToken);
-        }
 
-        if (resourcePrivileges == null || resourcePrivileges.Count == 0)
-        {
-            string allowEmptyPrivilege = configuration["AllowEmptyPrivilege"];
-
-            if (string.IsNullOrEmpty(allowEmptyPrivilege) || allowEmptyPrivilege == "True")
+            if (resourceGroupPrivileges == null || resourceGroupPrivileges.Count == 0)
             {
-                return Results.Ok();
-            }
+                if (string.IsNullOrEmpty(allowEmptyPrivilege) || allowEmptyPrivilege == "True")
+                {
+                    return Results.Ok();
+                }
 
-            return Results.Unauthorized();
+                return Results.Unauthorized();
+            }
         }
 
         Dictionary<string, string> parameterList = new Dictionary<string, string>();
