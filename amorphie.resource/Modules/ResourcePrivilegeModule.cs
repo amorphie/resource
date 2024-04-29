@@ -1,10 +1,9 @@
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using amorphie.core.Module.minimal_api;
-using System.Web;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
+using System.Linq;
 
 public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, ResourcePrivilege, ResourceDBContext>
 {
@@ -28,6 +27,7 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
          [FromServices] ResourceDBContext context,
          HttpContext httpContext,
          [FromHeader(Name = "clientId")] string headerClientId,
+         [FromServices] IConfiguration configuration,
          CancellationToken cancellationToken
          )
     {
@@ -38,25 +38,52 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
         if (resource == null)
             return Results.Ok();
 
-        var resourceClients = await context!.ResourceClients!
-              .AsNoTracking().Where(x => x.ResourceId.Equals(resource.Id) && x.Status == "A")
-              .ToListAsync(cancellationToken);
+        var resourcePrivileges = new List<ResourcePrivilege>();
+        var resourceGroupPrivileges = new List<ResourceGroupPrivilege>();
 
-        if (resourceClients != null && resourceClients.Count != 0)
+        string checkMethod = configuration["CheckAuthMethod"];
+
+        if (string.IsNullOrEmpty(checkMethod))
+            checkMethod = "Resource";
+
+        string allowEmptyPrivilege = configuration["AllowEmptyPrivilege"];
+
+        if (checkMethod == "Resource")
         {
-            var resourceClient = resourceClients.FirstOrDefault(t => t.ClientId.ToString() == headerClientId.ToString());
+            resourcePrivileges = await context!.ResourcePrivileges!.Include(i => i.Privilege)
+                            .AsNoTracking().Where(x => x.ResourceId.Equals(resource.Id) && x.Status == "A")
+                            .OrderBy(x => x.Priority)
+                            .ToListAsync(cancellationToken);
 
-            if (resourceClient == null)
+            if (resourcePrivileges == null || resourcePrivileges.Count == 0)
+            {
+                if (string.IsNullOrEmpty(allowEmptyPrivilege) || allowEmptyPrivilege == "True")
+                {
+                    return Results.Ok();
+                }
+
                 return Results.Unauthorized();
+            }
         }
+        else
+        {
+            resourceGroupPrivileges = await context!.ResourceGroupPrivileges!.Include(i => i.Privilege)
+                            .AsNoTracking().Where(x => x.ResourceGroupId == resource.ResourceGroupId
+                                                       && (x.ClientId == null || x.ClientId.ToString() == headerClientId)
+                                                       && x.Status == "A")
+                            .OrderBy(x => x.Priority)
+                            .ToListAsync(cancellationToken);
 
-        var resourcePrivileges = await context!.ResourcePrivileges!.Include(i => i.Privilege)
-                        .AsNoTracking().Where(x => x.ResourceId.Equals(resource.Id) && x.Status == "A")
-                        .OrderBy(x => x.Priority)
-                        .ToListAsync(cancellationToken);
+            if (resourceGroupPrivileges == null || resourceGroupPrivileges.Count == 0)
+            {
+                if (string.IsNullOrEmpty(allowEmptyPrivilege) || allowEmptyPrivilege == "True")
+                {
+                    return Results.Ok();
+                }
 
-        if (resourcePrivileges == null || resourcePrivileges.Count == 0)
-            return Results.Ok();
+                return Results.Unauthorized();
+            }
+        }
 
         Dictionary<string, string> parameterList = new Dictionary<string, string>();
 
@@ -88,7 +115,7 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
             RecursiveJsonLoop(jsonObject, parameterList, "body");
         }
 
-        Console.WriteLine("parameterList:");
+        Console.WriteLine("parameterList2:");
 
         foreach (KeyValuePair<string, string> kvp in parameterList)
         {
@@ -98,9 +125,20 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
         Console.WriteLine("request.Data: " + request.Data);
         Console.WriteLine("request.Url: " + request.Url);
 
-        foreach (ResourcePrivilege resourcePrivilege in resourcePrivileges)
+        var privileges = new List<Privilege>();
+
+        if (checkMethod == "Resource")
         {
-            var privilegeUrl = resourcePrivilege.Privilege.Url;
+            privileges.AddRange(resourcePrivileges.Select(resourcePrivilege => resourcePrivilege.Privilege));
+        }
+        else
+        {
+            privileges.AddRange(resourceGroupPrivileges.Select(resourceGroupPrivilege => resourceGroupPrivilege.Privilege));
+        }
+
+        foreach (Privilege privilege in privileges)
+        {
+            var privilegeUrl = privilege.Url;
 
             Console.WriteLine("privilegeUrl:" + privilegeUrl);
 
@@ -115,7 +153,7 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
 
                 HttpResponseMessage response;
 
-                if (resourcePrivilege.Privilege.Type == amorphie.core.Enums.HttpMethodType.POST)
+                if (privilege.Type == amorphie.core.Enums.HttpMethodType.POST)
                 {
                     var data = string.IsNullOrEmpty(request.Data) ? "" : request.Data;
                     var httpContent = new StringContent(data, Encoding.UTF8, "application/json");

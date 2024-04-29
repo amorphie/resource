@@ -127,6 +127,11 @@ public class ResourceModule : BaseBBTRoute<DtoResource, Resource, ResourceDBCont
         {
             existingRecord.Tags = data.Tags;
             hasChanges = true;
+        }       
+        if (data.ResourceGroupId != null && data.ResourceGroupId != existingRecord.ResourceGroupId)
+        {
+            existingRecord.ResourceGroupId = data.ResourceGroupId;
+            hasChanges = true;
         }
         if (data.DisplayNames != null && data.DisplayNames.Count > 0)
         {
