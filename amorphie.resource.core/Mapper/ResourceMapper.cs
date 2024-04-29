@@ -24,6 +24,7 @@ public class ResourceMapper : Profile
         CreateMap<Scope, DtoScope>().ReverseMap();
 
         CreateMap<ResourcePrivilege, DtoResourcePrivilege>().ReverseMap();
+        CreateMap<ResourceGroupPrivilege, DtoResourceGroupPrivilege>().ReverseMap();
 
         CreateMap<ResponseTransformation, DtoResponseTransformation>().ReverseMap();
         CreateMap<ResponseTransformation, DtoGetResponseTransformation>();
@@ -32,9 +33,5 @@ public class ResourceMapper : Profile
         CreateMap<ResponseTransformationMessage, DtoGetResponseTransformationMessage>();
 
         CreateMap<ResourceGroup, DtoResourceGroup>().ReverseMap();
-
-        CreateMap<ResourceGroupResource, DtoResourceGroupResource>().ReverseMap();
-
-        CreateMap<ResourceClient, DtoResourceClient>().ReverseMap();
     }
 }
