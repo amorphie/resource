@@ -24,7 +24,6 @@ public class ResourceMapper : Profile
         CreateMap<Scope, DtoScope>().ReverseMap();
 
         CreateMap<ResourcePrivilege, DtoResourcePrivilege>().ReverseMap();
-        CreateMap<ResourceGroupPrivilege, DtoResourceGroupPrivilege>().ReverseMap();
 
         CreateMap<ResponseTransformation, DtoResponseTransformation>().ReverseMap();
         CreateMap<ResponseTransformation, DtoGetResponseTransformation>();
