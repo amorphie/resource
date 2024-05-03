@@ -33,66 +33,37 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
     {
         Console.WriteLine("url: " + request.Url);
 
-        var resource = await context!.Resources!.AsNoTracking().FirstOrDefaultAsync(c => Regex.IsMatch(request.Url, c.Url), cancellationToken);
+        var resource = await context!.Resources!.AsNoTracking()
+                            .FirstOrDefaultAsync(c => Regex.IsMatch(request.Url, c.Url), cancellationToken);
 
         if (resource == null)
             return Results.Ok();
 
-        var resourcePrivileges = new List<ResourcePrivilege>();
-        var resourceGroupPrivileges = new List<ResourceGroupPrivilege>();
-
-        string checkMethod = configuration["CheckAuthMethod"];
-
-        if (string.IsNullOrEmpty(checkMethod))
-            checkMethod = "Resource";
-
         string allowEmptyPrivilege = configuration["AllowEmptyPrivilege"];
 
-        if (checkMethod == "Resource")
+        var resourcePrivileges = await context!.ResourcePrivileges!.Include(i => i.Privilege)
+                        .AsNoTracking().Where(x => (x.ResourceId == resource.Id || x.ResourceGroupId == resource.ResourceGroupId)
+                                                   && (x.ClientId == null || x.ClientId.ToString() == headerClientId)
+                                                   && x.Status == "A")
+                        .OrderBy(x => x.Priority)
+                        .ToListAsync(cancellationToken);
+
+        if (resourcePrivileges == null || resourcePrivileges.Count == 0)
         {
-            resourcePrivileges = await context!.ResourcePrivileges!.Include(i => i.Privilege)
-                            .AsNoTracking().Where(x => x.ResourceId.Equals(resource.Id) && x.Status == "A")
-                            .OrderBy(x => x.Priority)
-                            .ToListAsync(cancellationToken);
+            if (string.IsNullOrEmpty(allowEmptyPrivilege) || allowEmptyPrivilege == "True")
+                return Results.Ok();
 
-            if (resourcePrivileges == null || resourcePrivileges.Count == 0)
-            {
-                if (string.IsNullOrEmpty(allowEmptyPrivilege) || allowEmptyPrivilege == "True")
-                {
-                    return Results.Ok();
-                }
-
-                return Results.Unauthorized();
-            }
-        }
-        else
-        {
-            resourceGroupPrivileges = await context!.ResourceGroupPrivileges!.Include(i => i.Privilege)
-                            .AsNoTracking().Where(x => x.ResourceGroupId == resource.ResourceGroupId
-                                                       && (x.ClientId == null || x.ClientId.ToString() == headerClientId)
-                                                       && x.Status == "A")
-                            .OrderBy(x => x.Priority)
-                            .ToListAsync(cancellationToken);
-
-            if (resourceGroupPrivileges == null || resourceGroupPrivileges.Count == 0)
-            {
-                if (string.IsNullOrEmpty(allowEmptyPrivilege) || allowEmptyPrivilege == "True")
-                {
-                    return Results.Ok();
-                }
-
-                return Results.Unauthorized();
-            }
+            return Results.Unauthorized();
         }
 
-        Dictionary<string, string> parameterList = new Dictionary<string, string>();
+        var parameterList = new Dictionary<string, string>();
 
         foreach (var header in httpContext.Request.Headers)
         {
             parameterList.Add($"{{header.{header.Key}}}", header.Value);
         }
 
-        Match match = Regex.Match(request.Url, resource.Url);
+        var match = Regex.Match(request.Url, resource.Url);
 
         if (match.Success)
         {
@@ -101,12 +72,14 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
                 parameterList.Add($"{{path.var{pathVariable.Name}}}", pathVariable.Value);
             }
         }
+
         Console.WriteLine("parameterList:");
 
         foreach (KeyValuePair<string, string> kvp in parameterList)
         {
             Console.WriteLine(kvp.Key + ":" + kvp.Value);
         }
+
         if (!string.IsNullOrEmpty(request.Data))
         {
             Console.WriteLine("requested Data :" + request.Data);
@@ -125,20 +98,9 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
         Console.WriteLine("request.Data: " + request.Data);
         Console.WriteLine("request.Url: " + request.Url);
 
-        var privileges = new List<Privilege>();
-
-        if (checkMethod == "Resource")
+        foreach (ResourcePrivilege resourcePrivilege in resourcePrivileges)
         {
-            privileges.AddRange(resourcePrivileges.Select(resourcePrivilege => resourcePrivilege.Privilege));
-        }
-        else
-        {
-            privileges.AddRange(resourceGroupPrivileges.Select(resourceGroupPrivilege => resourceGroupPrivilege.Privilege));
-        }
-
-        foreach (Privilege privilege in privileges)
-        {
-            var privilegeUrl = privilege.Url;
+            var privilegeUrl = resourcePrivilege.Privilege.Url;
 
             Console.WriteLine("privilegeUrl:" + privilegeUrl);
 
@@ -153,7 +115,7 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
 
                 HttpResponseMessage response;
 
-                if (privilege.Type == amorphie.core.Enums.HttpMethodType.POST)
+                if (resourcePrivilege.Privilege.Type == amorphie.core.Enums.HttpMethodType.POST)
                 {
                     var data = string.IsNullOrEmpty(request.Data) ? "" : request.Data;
                     var httpContent = new StringContent(data, Encoding.UTF8, "application/json");
