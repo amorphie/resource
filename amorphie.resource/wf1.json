@@ -3,7 +3,7 @@
   "Rules": [
     {
       "RuleName": "CheckRole",
-      "Expression": "Utils.CallPostApi(body, parameters, \"https://test-entegrasyon-customerapi.burgan.com.tr/CustomerSearch?api-version=1\") == true"
+      "Expression": "Utils.GetHeader(header, \"testHeader\") == \"helloHeader\" "
     }
   ]
 }

@@ -3,9 +3,7 @@ using System.Text.RegularExpressions;
 using amorphie.core.Module.minimal_api;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
-using System.Linq;
 using RulesEngine.Models;
-using System.Dynamic;
 
 public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, ResourcePrivilege, ResourceDBContext>
 {
@@ -53,49 +51,13 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
                 return Results.Unauthorized();
             }
 
-            var parameterList = new Dictionary<string, string>();
+            var apiParams = new Dictionary<string, string>();
+            var ruleParams = new List<RuleParameter>();
 
-            foreach (var header in httpContext.Request.Headers)
-            {
-                parameterList.Add($"{{header.{header.Key}}}", header.Value);
-            }
+            SetApiParameterList(apiParams, httpContext, request, resource.Url);
+            SetRuleParameterList(ruleParams, httpContext, request, resource.Url, apiParams);
 
-            var match = Regex.Match(request.Url, resource.Url);
-
-            if (match.Success)
-            {
-                foreach (Group pathVariable in match.Groups)
-                {
-                    parameterList.Add($"{{path.var{pathVariable.Name}}}", pathVariable.Value);
-                }
-            }
-
-            if (!string.IsNullOrEmpty(request.Data))
-            {
-                Console.WriteLine("requested Data :" + request.Data);
-                JObject jsonObject = JsonConvert.DeserializeObject<JObject>(request.Data);
-
-                RecursiveJsonLoop(jsonObject, parameterList, "body");
-            }
-
-            var ruleParameters = new List<RuleParameter>();
-
-            var ruleParamHeaders = new RuleParameter("header", httpContext);
-            ruleParameters.Add(ruleParamHeaders);
-
-            var ruleParamPaths = new RuleParameter("path", new string[] { request.Url, resource.Url });
-            ruleParameters.Add(ruleParamPaths);
-
-            if (!string.IsNullOrEmpty(request.Data))
-            {
-                var ruleParamBody = new RuleParameter("body", request.Data);
-                ruleParameters.Add(ruleParamBody);
-            }
-
-            var ruleParamApiParams = new RuleParameter("parameters", parameterList);
-            ruleParameters.Add(ruleParamApiParams);
-
-            var resultList = await ExecuteRules(ruleParameters);
+            var resultList = await ExecuteRules(ruleParams);
 
             foreach (RuleResultTree ruleResult in resultList)
             {
@@ -109,6 +71,60 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
         {
             return Results.Problem(ex.Message);
         }
+    }
+
+    private void SetApiParameterList(
+        Dictionary<string, string> apiParams,
+        HttpContext httpContext,
+        CheckAuthorizeRequest request,
+        string? resourceUrl
+        )
+    {
+        foreach (var header in httpContext.Request.Headers)
+        {
+            apiParams.Add($"{{header.{header.Key}}}", header.Value);
+        }
+
+        var match = Regex.Match(request.Url, resourceUrl);
+
+        if (match.Success)
+        {
+            foreach (Group pathVariable in match.Groups)
+            {
+                apiParams.Add($"{{path.var{pathVariable.Name}}}", pathVariable.Value);
+            }
+        }
+
+        if (!string.IsNullOrEmpty(request.Data))
+        {
+            var jsonObject = JsonConvert.DeserializeObject<JObject>(request.Data);
+
+            RecursiveJsonLoop(jsonObject, apiParams, "body");
+        }
+    }
+
+    private void SetRuleParameterList(
+       List<RuleParameter> ruleParams,
+       HttpContext httpContext,
+       CheckAuthorizeRequest request,
+       string? resourceUrl,
+       Dictionary<string, string> apiParams
+       )
+    {
+        var ruleParamHeaders = new RuleParameter("header", httpContext.Request.Headers);
+        ruleParams.Add(ruleParamHeaders);
+
+        var ruleParamPaths = new RuleParameter("path", new string[] { request.Url, resourceUrl });
+        ruleParams.Add(ruleParamPaths);
+
+        if (!string.IsNullOrEmpty(request.Data))
+        {
+            var ruleParamBody = new RuleParameter("body", request.Data);
+            ruleParams.Add(ruleParamBody);
+        }
+
+        var ruleParamApiParams = new RuleParameter("parameter", apiParams);
+        ruleParams.Add(ruleParamApiParams);
     }
 
     private async Task<Resource?> GetResource(
@@ -302,5 +318,5 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
         }
     }
 
-    
+
 }

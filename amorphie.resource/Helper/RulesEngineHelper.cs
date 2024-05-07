@@ -41,9 +41,9 @@ public static class Utils
         return response.IsSuccessStatusCode;
     }
 
-    public static string GetHeader(HttpContext headers, string name)
+    public static string GetHeader(IHeaderDictionary headers, string name)
     {
-        return headers.Request.Headers[name];
+        return headers[name];
     }
 
     public static string GetPath(string[] paths, string name)
