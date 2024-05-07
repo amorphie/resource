@@ -1,0 +1,9 @@
+﻿{
+  "WorkflowName": "UserRoles",
+  "Rules": [
+    {
+      "RuleName": "CheckRole",
+      "Expression": "{{header.hello}} == \"hello\""
+    }
+  ]
+}
