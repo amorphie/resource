@@ -6,7 +6,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "dapr-debug-amorphie-resource",
-            "program": "${workspaceFolder}/amorphie.resource/bin/Debug/net7.0/amorphie.resource.dll",
+            "program": "${workspaceFolder}/amorphie.resource/bin/Debug/net8.0/amorphie.resource.dll",
             "args": [],
             "cwd": "${workspaceFolder}/amorphie.resource",
             "stopAtEntry": false,

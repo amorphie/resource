@@ -32,9 +32,5 @@ public class ResourceMapper : Profile
         CreateMap<ResponseTransformationMessage, DtoGetResponseTransformationMessage>();
 
         CreateMap<ResourceGroup, DtoResourceGroup>().ReverseMap();
-
-        CreateMap<ResourceGroupResource, DtoResourceGroupResource>().ReverseMap();
-
-        CreateMap<ResourceClient, DtoResourceClient>().ReverseMap();
     }
 }

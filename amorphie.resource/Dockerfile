@@ -4,7 +4,7 @@ WORKDIR /app
 RUN adduser -u 5786 --disabled-password --gecos "" amorphie-resource && chown -R amorphie-resource:amorphie-resource /app
 USER amorphie-resource
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:8.0.200 AS build
 WORKDIR /src
 ENV DOTNET_NUGET_SIGNATURE_VERIFICATION=false
 COPY ["/amorphie.resource/amorphie.resource.csproj", "."]

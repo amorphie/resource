@@ -53,7 +53,7 @@ public class ResourceModule : BaseBBTRoute<DtoResource, Resource, ResourceDBCont
                 HttpContext httpContext,
                 CancellationToken token,
                 [FromQuery] string? sortColumn,
-                [FromQuery] SortDirectionEnum sortDirection = SortDirectionEnum.Asc
+                [FromQuery] SortDirectionEnum? sortDirection
                 )
     {
         IQueryable<Resource> query = context
@@ -126,6 +126,11 @@ public class ResourceModule : BaseBBTRoute<DtoResource, Resource, ResourceDBCont
         if (data.Tags != null && data.Tags != existingRecord.Tags)
         {
             existingRecord.Tags = data.Tags;
+            hasChanges = true;
+        }       
+        if (data.ResourceGroupId != null && data.ResourceGroupId != existingRecord.ResourceGroupId)
+        {
+            existingRecord.ResourceGroupId = data.ResourceGroupId;
             hasChanges = true;
         }
         if (data.DisplayNames != null && data.DisplayNames.Count > 0)

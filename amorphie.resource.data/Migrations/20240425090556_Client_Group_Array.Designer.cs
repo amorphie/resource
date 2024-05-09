@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -10,9 +11,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace amorphie.resource.data.Migrations
 {
     [DbContext(typeof(ResourceDBContext))]
-    partial class ResourceDBContextModelSnapshot : ModelSnapshot
+    [Migration("20240425090556_Client_Group_Array")]
+    partial class Client_Group_Array
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -62,6 +65,9 @@ namespace amorphie.resource.data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<Guid[]>("Clients")
+                        .HasColumnType("uuid[]");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp without time zone");
 
@@ -71,6 +77,9 @@ namespace amorphie.resource.data.Migrations
                     b.Property<Guid?>("CreatedByBehalfOf")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid[]>("Groups")
+                        .HasColumnType("uuid[]");
+
                     b.Property<DateTime>("ModifiedAt")
                         .HasColumnType("timestamp without time zone");
 
@@ -78,9 +87,6 @@ namespace amorphie.resource.data.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<Guid?>("ModifiedByBehalfOf")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("ResourceGroupId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Status")
@@ -179,9 +185,6 @@ namespace amorphie.resource.data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("ClientId")
-                        .HasColumnType("uuid");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp without time zone");
 
@@ -206,10 +209,7 @@ namespace amorphie.resource.data.Migrations
                     b.Property<Guid>("PrivilegeId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("ResourceGroupId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("ResourceId")
+                    b.Property<Guid>("ResourceId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Status")

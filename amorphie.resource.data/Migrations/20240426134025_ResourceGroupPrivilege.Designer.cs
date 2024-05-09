@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -10,9 +11,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace amorphie.resource.data.Migrations
 {
     [DbContext(typeof(ResourceDBContext))]
-    partial class ResourceDBContextModelSnapshot : ModelSnapshot
+    [Migration("20240426134025_ResourceGroupPrivilege")]
+    partial class ResourceGroupPrivilege
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -135,6 +138,52 @@ namespace amorphie.resource.data.Migrations
                     b.ToTable("ResourceGroups");
                 });
 
+            modelBuilder.Entity("ResourceGroupPrivilege", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("ClientId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("CreatedByBehalfOf")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<Guid>("ModifiedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("ModifiedByBehalfOf")
+                        .HasColumnType("uuid");
+
+                    b.Property<int?>("Priority")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("PrivilegeId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ResourceGroupId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Status")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PrivilegeId");
+
+                    b.ToTable("ResourceGroupPrivileges");
+                });
+
             modelBuilder.Entity("ResourceGroupRole", b =>
                 {
                     b.Property<Guid>("Id")
@@ -179,9 +228,6 @@ namespace amorphie.resource.data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("ClientId")
-                        .HasColumnType("uuid");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp without time zone");
 
@@ -206,10 +252,7 @@ namespace amorphie.resource.data.Migrations
                     b.Property<Guid>("PrivilegeId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("ResourceGroupId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("ResourceId")
+                    b.Property<Guid>("ResourceId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Status")
@@ -570,6 +613,17 @@ namespace amorphie.resource.data.Migrations
                     b.HasIndex("ScopeId_Title");
 
                     b.ToTable("Translations");
+                });
+
+            modelBuilder.Entity("ResourceGroupPrivilege", b =>
+                {
+                    b.HasOne("Privilege", "Privilege")
+                        .WithMany()
+                        .HasForeignKey("PrivilegeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Privilege");
                 });
 
             modelBuilder.Entity("ResourcePrivilege", b =>
