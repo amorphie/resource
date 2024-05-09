@@ -3,7 +3,15 @@
   "Rules": [
     {
       "RuleName": "CheckRole",
-      "Expression": "Utils.GetHeader(header, \"testHeader\") == \"helloHeader\" "
+      "Expression": "header.testHeader == \"helloHeader\""
+    },
+	{
+      "RuleName": "CheckRole1",
+      "Expression": "body.name == 143283"
+    },
+	{
+      "RuleName": "CheckRole2",
+      "Expression": "path.var1 == \"hes1\""
     }
   ]
 }

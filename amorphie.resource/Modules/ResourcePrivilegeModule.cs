@@ -4,6 +4,7 @@ using amorphie.core.Module.minimal_api;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using RulesEngine.Models;
+using System.Dynamic;
 
 public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, ResourcePrivilege, ResourceDBContext>
 {
@@ -51,11 +52,9 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
                 return Results.Unauthorized();
             }
 
-            var apiParams = new Dictionary<string, string>();
             var ruleParams = new List<RuleParameter>();
 
-            SetApiParameterList(apiParams, httpContext, request, resource.Url);
-            SetRuleParameterList(ruleParams, httpContext, request, resource.Url, apiParams);
+            SetRuleParameterList(ruleParams, httpContext, request, resource.Url);
 
             var resultList = await ExecuteRules(ruleParams);
 
@@ -73,58 +72,83 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
         }
     }
 
-    private void SetApiParameterList(
-        Dictionary<string, string> apiParams,
-        HttpContext httpContext,
-        CheckAuthorizeRequest request,
-        string? resourceUrl
-        )
+    private void SetRuleParameterList(
+       List<RuleParameter> ruleParams,
+       HttpContext httpContext,
+       CheckAuthorizeRequest request,
+       string? resourceUrl
+       )
     {
-        foreach (var header in httpContext.Request.Headers)
+        dynamic header = new ExpandoObject();
+
+        foreach (var requestHeader in httpContext.Request.Headers)
         {
-            apiParams.Add($"{{header.{header.Key}}}", header.Value);
+            ((IDictionary<string, object>)header).Add(requestHeader.Key, requestHeader.Value.ToString());
         }
 
-        var match = Regex.Match(request.Url, resourceUrl);
+        var ruleParamHeader = new RuleParameter("header", header);
+        ruleParams.Add(ruleParamHeader);
 
+        dynamic path = new ExpandoObject();
+        var match = Regex.Match(request.Url, resourceUrl);
         if (match.Success)
         {
             foreach (Group pathVariable in match.Groups)
             {
-                apiParams.Add($"{{path.var{pathVariable.Name}}}", pathVariable.Value);
+                ((IDictionary<string, object>)path).Add($"var{pathVariable.Name}", pathVariable.Value.ToString());
             }
         }
+        var ruleParamPath = new RuleParameter("path", path);
+        ruleParams.Add(ruleParamPath);
+
+        var apiParams = new Dictionary<string, object>();
 
         if (!string.IsNullOrEmpty(request.Data))
         {
             var jsonObject = JsonConvert.DeserializeObject<JObject>(request.Data);
 
-            RecursiveJsonLoop(jsonObject, apiParams, "body");
+            RecursiveJsonLoop(jsonObject, apiParams, "");
         }
+
+        dynamic bodyObject = CreateExpandoObject(apiParams);
+
+        var ruleParamBody = new RuleParameter("body", bodyObject);
+
+        ruleParams.Add(ruleParamBody);
     }
 
-    private void SetRuleParameterList(
-       List<RuleParameter> ruleParams,
-       HttpContext httpContext,
-       CheckAuthorizeRequest request,
-       string? resourceUrl,
-       Dictionary<string, string> apiParams
-       )
+    dynamic CreateExpandoObject(Dictionary<string, object> properties)
     {
-        var ruleParamHeaders = new RuleParameter("header", httpContext.Request.Headers);
-        ruleParams.Add(ruleParamHeaders);
+        ExpandoObject expando = new ExpandoObject();
+        IDictionary<string, object> dictionary = expando;
 
-        var ruleParamPaths = new RuleParameter("path", new string[] { request.Url, resourceUrl });
-        ruleParams.Add(ruleParamPaths);
-
-        if (!string.IsNullOrEmpty(request.Data))
+        foreach (var property in properties)
         {
-            var ruleParamBody = new RuleParameter("body", request.Data);
-            ruleParams.Add(ruleParamBody);
+            string propertyName = property.Key;
+            object value = property.Value;
+
+            string[] parts = propertyName.Split('.');
+            CreateExpandoNestedObjects(dictionary, parts, value);
         }
 
-        var ruleParamApiParams = new RuleParameter("parameter", apiParams);
-        ruleParams.Add(ruleParamApiParams);
+        return expando;
+    }
+
+    void CreateExpandoNestedObjects(IDictionary<string, object> dictionary, string[] parts, object value)
+    {
+        IDictionary<string, object> currentDictionary = dictionary;
+
+        for (int i = 0; i < parts.Length - 1; i++)
+        {
+            if (!currentDictionary.ContainsKey(parts[i]))
+            {
+                currentDictionary[parts[i]] = new ExpandoObject();
+            }
+
+            currentDictionary = (IDictionary<string, object>)currentDictionary[parts[i]];
+        }
+
+        currentDictionary[parts[^1]] = value; // Assign value to the last property
     }
 
     private async Task<Resource?> GetResource(
@@ -208,7 +232,7 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
             return Results.Unauthorized();
         }
 
-        var parameterList = new Dictionary<string, string>();
+        var parameterList = new Dictionary<string, object>();
 
         foreach (var header in httpContext.Request.Headers)
         {
@@ -227,7 +251,7 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
 
         Console.WriteLine("parameterList:");
 
-        foreach (KeyValuePair<string, string> kvp in parameterList)
+        foreach (KeyValuePair<string, object> kvp in parameterList)
         {
             Console.WriteLine(kvp.Key + ":" + kvp.Value);
         }
@@ -242,7 +266,7 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
 
         Console.WriteLine("parameterList2:");
 
-        foreach (KeyValuePair<string, string> kvp in parameterList)
+        foreach (KeyValuePair<string, object> kvp in parameterList)
         {
             Console.WriteLine(kvp.Key + ":" + kvp.Value);
         }
@@ -259,7 +283,7 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
             if (privilegeUrl != null)
             {
                 foreach (var variable in parameterList)
-                    privilegeUrl = privilegeUrl.Replace(variable.Key, variable.Value);
+                    privilegeUrl = privilegeUrl.Replace(variable.Key, variable.Value.ToString());
 
                 Console.WriteLine("privilegeUrl2:" + privilegeUrl);
 
@@ -290,7 +314,7 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
         return Results.Ok();
     }
 
-    void RecursiveJsonLoop(JObject jsonObject, Dictionary<string, string> keyValuePairs, string currentPath)
+    void RecursiveJsonLoop(JObject jsonObject, Dictionary<string, object> keyValuePairs, string currentPath)
     {
         foreach (var property in jsonObject.Properties())
         {
