@@ -179,8 +179,8 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
         foreach (var property in jArray)
         {
             var jObject = property.ToObject<JObject>();
-            string newPath = $"{currentPath}.[{i}]";;
-            RecursiveJsonLoop(jObject,keyValuePairs,newPath);
+            string newPath = $"{currentPath}.[{i}]"; ;
+            RecursiveJsonLoop(jObject, keyValuePairs, newPath);
             i++;
         }
     }

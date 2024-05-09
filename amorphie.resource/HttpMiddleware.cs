@@ -27,9 +27,9 @@ namespace amorphie.resource
                 var body = ReadStreamInChunks(requestStream);
                 context.Request.Body.Position = 0;
 
-                Console.WriteLine("Http Request Body : "+body);
+                Console.WriteLine("Http Request Body : " + body);
                 Console.WriteLine("----Headers----");
-                foreach(var h in context.Request.Headers)
+                foreach (var h in context.Request.Headers)
                 {
                     Console.WriteLine($"  Key:{h.Key} || Val:{h.Value}");
                 }
@@ -39,7 +39,7 @@ namespace amorphie.resource
             {
                 Console.WriteLine(ex.ToString());
             }
-            
+
 
         }
 
@@ -60,6 +60,6 @@ namespace amorphie.resource
             } while (readChunkLength > 0);
             return textWriter.ToString();
         }
-           
+
     }
 }
