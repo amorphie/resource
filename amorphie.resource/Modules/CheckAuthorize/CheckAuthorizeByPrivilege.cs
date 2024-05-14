@@ -3,9 +3,9 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-public class CheckAuthorizeByPrivilege : CheckAuthorizeBase
+public class CheckAuthorizeByPrivilege : CheckAuthorizeBase, ICheckAuthorize
 {
-    public override async ValueTask<IResult> Check(
+    public async ValueTask<IResult> Check(
                                     CheckAuthorizeRequest request,
                                     ResourceDBContext context,
                                     HttpContext httpContext,

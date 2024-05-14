@@ -23,12 +23,11 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
          HttpContext httpContext,
          [FromHeader(Name = "clientId")] string headerClientId,
          [FromServices] IConfiguration configuration,
+         [FromQuery] string? checkAuthMethod,
          CancellationToken cancellationToken
          )
     {
-        string checkAuthMethod = configuration["CheckAuthMethod"];
-
-        CheckAuthorizeBase checkAuthorize;
+        ICheckAuthorize checkAuthorize;
 
         if (checkAuthMethod == "Rule")
         {

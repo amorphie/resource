@@ -3,16 +3,6 @@ using Newtonsoft.Json.Linq;
 
 public abstract class CheckAuthorizeBase
 {
-    public abstract ValueTask<IResult> Check(
-                                    CheckAuthorizeRequest request,
-                                    ResourceDBContext context,
-                                    HttpContext httpContext,
-                                    string headerClientId,
-                                    IConfiguration configuration,
-                                    CancellationToken cancellationToken
-                             );
-
-
     protected async Task<Resource?> GetResource(
     ResourceDBContext context,
     CheckAuthorizeRequest request,

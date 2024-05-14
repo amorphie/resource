@@ -4,9 +4,9 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RulesEngine.Models;
 
-public class CheckAuthorizeByRule : CheckAuthorizeBase
+public class CheckAuthorizeByRule : CheckAuthorizeBase, ICheckAuthorize
 {
-    public override async ValueTask<IResult> Check(
+    public async ValueTask<IResult> Check(
              CheckAuthorizeRequest request,
              ResourceDBContext context,
              HttpContext httpContext,
