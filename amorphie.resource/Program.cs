@@ -5,6 +5,8 @@ using amorphie.core.Swagger;
 using amorphie.resource.data;
 using FluentValidation;
 using Elastic.Apm.NetCoreAll;
+using Microsoft.AspNetCore.HttpLogging;
+using amorphie.resource;
 using amorphie.core.Middleware.Logging;
 
 
@@ -49,6 +51,8 @@ builder.Services.AddDbContext<ResourceDBContext>
     (options => options.UseNpgsql(postgreSql, b => b.MigrationsAssembly("amorphie.resource.data")));
 
 var app = builder.Build();
+
+app.UseMiddleware<HttpMiddleware>();
 
 if (!app.Environment.IsDevelopment())
 {
