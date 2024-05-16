@@ -1,0 +1,33 @@
+﻿{
+  "WorkflowName": "UserRoles",
+  "Rules": [
+    {
+      "RuleName": "CheckRole",
+      "Expression": "header.testHeader == \"helloHeader\""
+    },
+    {
+      "RuleName": "CheckRole2",
+      "Expression": "path.var1 == \"hes1\""
+    },
+    {
+      "RuleName": "CheckRole3",
+      "Expression": "Utils.CallApi(\"https://test-entegrasyon-customerapi.burgan.com.tr/customer?keyword=143283&page=1&pageSize=1&api-version=3\") == true"
+    },
+    {
+      "RuleName": "CheckRole4",
+      "Expression": "Utils.CallApi(\"https://test-entegrasyon-customerapi.burgan.com.tr/customer?keyword=143283&page=1&pageSize=1&api-version=3\", body) == true"
+    },
+    {
+      "RuleName": "CheckRole5",
+      "Expression": "body.name == \"emre\""
+    },
+    {
+      "RuleName": "CheckRole1",
+      "Expression": "body.no == 11"
+    },
+    {
+      "RuleName": "CheckRole6",
+      "Expression": "body.gon[0].hspNo ==  \"some_value\""
+    }
+  ]
+}

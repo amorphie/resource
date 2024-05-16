@@ -27,6 +27,8 @@ public class ResourceDBContext : DbContext
     public DbSet<Translation>? Translations { get; set; }
     public DbSet<Scope>? Scopes { get; set; }
     public DbSet<ResourcePrivilege>? ResourcePrivileges { get; set; }
+    public DbSet<Rule>? Rules { get; set; }
+    public DbSet<ResourceRule>? ResourceRules { get; set; }
     public DbSet<ResponseTransformation>? ResponseTransformations { get; set; }
     public DbSet<ResponseTransformationMessage>? ResponseTransformationMessages { get; set; }
 
@@ -65,6 +67,12 @@ public class ResourceDBContext : DbContext
        .HasKey(r => r.Id);
 
         modelBuilder.Entity<ResourcePrivilege>()
+        .HasKey(r => r.Id);
+
+        modelBuilder.Entity<Rule>()
+        .HasKey(r => r.Id);
+
+        modelBuilder.Entity<ResourceRule>()
         .HasKey(r => r.Id);
 
         modelBuilder.Entity<ResponseTransformation>()
