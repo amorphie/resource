@@ -8,5 +8,6 @@ public class DtoResource : DtoBase
     public string? Url { get; set; }
     public ICollection<MultilanguageText> Descriptions { get; set; } = default!;
     public string[]? Tags { get; set; }
+    public Guid? ResourceGroupId { get; set; }
     public string? Status { get; set; }
 }

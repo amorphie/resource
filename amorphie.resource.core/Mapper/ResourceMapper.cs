@@ -33,8 +33,8 @@ public class ResourceMapper : Profile
 
         CreateMap<ResourceGroup, DtoResourceGroup>().ReverseMap();
 
-        CreateMap<ResourceGroupResource, DtoResourceGroupResource>().ReverseMap();
+        CreateMap<Rule, DtoRule>().ReverseMap();
 
-        CreateMap<ResourceClient, DtoResourceClient>().ReverseMap();
+        CreateMap<ResourceRule, DtoResourceRule>().ReverseMap();
     }
 }
