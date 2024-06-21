@@ -5,6 +5,8 @@ using amorphie.core.Swagger;
 using amorphie.resource.data;
 using FluentValidation;
 using Elastic.Apm.NetCoreAll;
+using Microsoft.AspNetCore.HttpLogging;
+using amorphie.resource;
 using amorphie.core.Middleware.Logging;
 
 
@@ -24,6 +26,7 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 builder.Services.AddScoped<IBBTIdentity, FakeIdentity>();
+builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 
 var assemblies = new Assembly[]
                 {
@@ -51,10 +54,13 @@ builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
+app.UseMiddleware<HttpMiddleware>();
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseAllElasticApm(app.Configuration);
 }
+
 app.UseLoggingHandlerMiddlewares();
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
@@ -80,5 +86,3 @@ catch (Exception ex)
 {
     app.Logger.LogCritical(ex, "Aplication is terminated unexpectedly ");
 }
-
-

@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using amorphie.core.Base;
 using amorphie.core.Enums;
 
@@ -8,5 +9,6 @@ public class Resource : EntityBase
     public string? Url { get; set; }
     public ICollection<Translation> Descriptions { get; set; } = default!;
     public string[]? Tags { get; set; }
+    public Guid? ResourceGroupId { get; set; }
     public string? Status { get; set; }
 }
