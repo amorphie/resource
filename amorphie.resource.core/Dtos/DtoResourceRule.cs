@@ -9,3 +9,10 @@ public class DtoResourceRule : DtoBase
     public string? Status { get; set; }
     public int Priority { get; set; }
 }
+
+public class DtoResourceRuleMapRequest
+{
+    public string Url { get; set; }
+    public string Method { get; set; }
+    public string RuleName { get; set; }
+}
