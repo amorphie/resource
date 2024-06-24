@@ -22,7 +22,11 @@ public class CheckAuthorizeByPrivilege : CheckAuthorizeBase, ICheckAuthorize
         string allowEmptyPrivilege = configuration["AllowEmptyPrivilege"];
 
         var resourcePrivileges = await context!.ResourcePrivileges!.Include(i => i.Privilege)
-                        .AsNoTracking().Where(x => (x.ResourceId == resource.Id || x.ResourceGroupId == resource.ResourceGroupId)
+                        .AsNoTracking().Where(x => (
+                                                (x.ResourceId != null && x.ResourceId == resource.Id)
+                                                || 
+                                                (x.ResourceGroupId != null && x.ResourceGroupId == resource.ResourceGroupId)
+                                                )
                                                    && (x.ClientId == null || x.ClientId.ToString() == headerClientId)
                                                    && x.Status == "A")
                         .OrderBy(x => x.Priority)
