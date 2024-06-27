@@ -29,7 +29,7 @@ public class ResourceRuleModule : BaseBBTRoute<DtoResourceRule, ResourceRule, Re
          )
     {
         var ruleIdList = await GetRuleIdList(request, context);
-        var resourceList = await GetResourceIdList(request, context, bbtIdentity, cancellationToken);
+        var resourceList = await GetResourceList(request, context, bbtIdentity, cancellationToken);
 
         await AddResourceRules(resourceList, ruleIdList, context, bbtIdentity, cancellationToken);
 
@@ -57,7 +57,7 @@ public class ResourceRuleModule : BaseBBTRoute<DtoResourceRule, ResourceRule, Re
         return ruleIdList;
     }
 
-    private async Task<List<Resource>> GetResourceIdList(
+    private async Task<List<Resource>> GetResourceList(
                                     DtoResourceRuleMapRequest request,
                                     ResourceDBContext context,
                                     [FromServices] IBBTIdentity bbtIdentity,
