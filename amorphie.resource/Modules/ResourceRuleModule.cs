@@ -1,3 +1,5 @@
+using System.Linq.Dynamic.Core;
+using System.Linq.Dynamic.Core.Tokenizer;
 using amorphie.core.Enums;
 using amorphie.core.Identity;
 using amorphie.core.Module.minimal_api;
@@ -27,9 +29,9 @@ public class ResourceRuleModule : BaseBBTRoute<DtoResourceRule, ResourceRule, Re
          )
     {
         var ruleIdList = await GetRuleIdList(request, context);
-        var resourceIdList = await GetResourceIdList(request, context, bbtIdentity, cancellationToken);
+        var resourceList = await GetResourceIdList(request, context, bbtIdentity, cancellationToken);
 
-        await AddResourceRules(resourceIdList, ruleIdList, context, bbtIdentity, cancellationToken);
+        await AddResourceRules(resourceList, ruleIdList, context, bbtIdentity, cancellationToken);
 
         return Results.Ok();
     }
@@ -55,69 +57,80 @@ public class ResourceRuleModule : BaseBBTRoute<DtoResourceRule, ResourceRule, Re
         return ruleIdList;
     }
 
-    private async Task<List<Guid>> GetResourceIdList(
+    private async Task<List<Resource>> GetResourceIdList(
                                     DtoResourceRuleMapRequest request,
                                     ResourceDBContext context,
                                     [FromServices] IBBTIdentity bbtIdentity,
                                     CancellationToken cancellationToken
                                    )
     {
-        var resourceIdList = new List<Guid>();
+        var existResourceList = new List<Resource>();
 
-        var resource = await context!.Resources!.FirstOrDefaultAsync(t => t.Url == request.Url && t.Status == "A");
+        var resources = await context!.Resources!.Where(t => t.Url == request.Url && t.Status == "A").ToListAsync(cancellationToken);
+        var methodTypes = request.Method.Split(',');
 
-        if (resource == null)
+        foreach (Resource resource in resources)
         {
-            var methodTypes = request.Method.Split(',');
-
-            foreach (string method in methodTypes)
+            if (methodTypes.Contains(resource.Type.ToString()))
             {
-                HttpMethodType httpMethodType = (HttpMethodType)Enum.Parse(typeof(HttpMethodType), method);
-
-                var newResource = new Resource();
-                newResource.CreatedAt = DateTime.UtcNow;
-                newResource.CreatedBy = bbtIdentity.UserId.Value;
-                newResource.CreatedByBehalfOf = bbtIdentity.BehalfOfId.Value;
-
-                newResource.ModifiedAt = newResource.CreatedAt;
-                newResource.ModifiedBy = newResource.CreatedBy;
-                newResource.ModifiedByBehalfOf = newResource.CreatedByBehalfOf;
-
-                newResource.Id = Guid.NewGuid();
-                newResource.Status = "A";
-                newResource.Type = httpMethodType;
-                newResource.Url = request.Url;
-
-
-                DbSet<Resource> dbSet = context.Set<Resource>();
-                await dbSet.AddAsync(newResource);
-                await context.SaveChangesAsync(cancellationToken);
-
-                resourceIdList.Add(newResource.Id);
+                existResourceList.Add(resource);
+            }
+            else
+            {
+                resource.Status = "P";
+                resource.ModifiedAt = DateTime.UtcNow; ;
+                resource.ModifiedBy = bbtIdentity.UserId.Value;
+                resource.ModifiedByBehalfOf = bbtIdentity.BehalfOfId.Value;
             }
         }
-        else
+
+        foreach (string method in methodTypes)
         {
-            resourceIdList.Add(resource.Id);
+            var httpMethodType = (HttpMethodType)Enum.Parse(typeof(HttpMethodType), method);
+
+            var resource = existResourceList!
+                        .FirstOrDefault(t => t.Url == request.Url && t.Status == "A" && t.Type == httpMethodType);
+
+            if (resource != null)
+                continue;
+
+            var newResource = new Resource();
+            newResource.CreatedAt = DateTime.UtcNow;
+            newResource.CreatedBy = bbtIdentity.UserId.Value;
+            newResource.CreatedByBehalfOf = bbtIdentity.BehalfOfId.Value;
+
+            newResource.ModifiedAt = newResource.CreatedAt;
+            newResource.ModifiedBy = newResource.CreatedBy;
+            newResource.ModifiedByBehalfOf = newResource.CreatedByBehalfOf;
+
+            newResource.Id = Guid.NewGuid();
+            newResource.Status = "A";
+            newResource.Type = httpMethodType;
+            newResource.Url = request.Url;
+
+            DbSet<Resource> dbSet = context.Set<Resource>();
+            await dbSet.AddAsync(newResource);
+            existResourceList.Add(newResource);
         }
 
-        return resourceIdList;
-    }
+        await context.SaveChangesAsync(cancellationToken);
 
+        return existResourceList;
+    }
     private async Task AddResourceRules(
-                                        List<Guid> resourceIdList,
+                                        List<Resource> resourceList,
                                         List<Guid> ruleIdList,
                                         ResourceDBContext context,
                                         [FromServices] IBBTIdentity bbtIdentity,
                                         CancellationToken cancellationToken
                                       )
     {
-        foreach (Guid resourceId in resourceIdList)
+        foreach (Resource resource in resourceList)
         {
             for (int i = 0; i < ruleIdList.Count; i++)
             {
                 var resourceRule = await context!.ResourceRules!
-                    .FirstOrDefaultAsync(t => t.RuleId == ruleIdList[i] && t.ResourceId == resourceId && t.Status == "A");
+                    .FirstOrDefaultAsync(t => t.RuleId == ruleIdList[i] && t.ResourceId == resource.Id && t.Status == "A");
 
                 if (resourceRule == null)
                 {
@@ -133,7 +146,7 @@ public class ResourceRuleModule : BaseBBTRoute<DtoResourceRule, ResourceRule, Re
                     newResourceRule.Id = Guid.NewGuid();
                     newResourceRule.Status = "A";
                     newResourceRule.RuleId = ruleIdList[i];
-                    newResourceRule.ResourceId = resourceId;
+                    newResourceRule.ResourceId = resource.Id;
                     newResourceRule.Priority = i + 1;
 
                     DbSet<ResourceRule> dbSet = context.Set<ResourceRule>();
@@ -141,6 +154,22 @@ public class ResourceRuleModule : BaseBBTRoute<DtoResourceRule, ResourceRule, Re
                     await context.SaveChangesAsync(cancellationToken);
                 }
             }
+
+            var resourceRules = await context!.ResourceRules!
+                    .Where(t => t.ResourceId == resource.Id && t.Status == "A").ToListAsync(cancellationToken);
+
+            foreach (ResourceRule resourceRule1 in resourceRules)
+            {
+                if (ruleIdList.Contains(resourceRule1.RuleId) == false)
+                {
+                    resourceRule1.Status = "P";
+                    resourceRule1.ModifiedAt = DateTime.UtcNow; ;
+                    resourceRule1.ModifiedBy = bbtIdentity.UserId.Value;
+                    resourceRule1.ModifiedByBehalfOf = bbtIdentity.BehalfOfId.Value;
+                }
+            }
+
+            await context.SaveChangesAsync(cancellationToken);
         }
     }
 }
