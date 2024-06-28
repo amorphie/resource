@@ -81,6 +81,17 @@ public class ResourceRuleModule : BaseBBTRoute<DtoResourceRule, ResourceRule, Re
                 resource.ModifiedAt = DateTime.UtcNow; ;
                 resource.ModifiedBy = bbtIdentity.UserId.Value;
                 resource.ModifiedByBehalfOf = bbtIdentity.BehalfOfId.Value;
+
+                var resourceRules = await context!.ResourceRules!
+                    .Where(t => t.ResourceId == resource.Id && t.Status == "A").ToListAsync(cancellationToken);
+
+                foreach (ResourceRule resourceRule1 in resourceRules)
+                {
+                    resourceRule1.Status = "P";
+                    resourceRule1.ModifiedAt = DateTime.UtcNow; ;
+                    resourceRule1.ModifiedBy = bbtIdentity.UserId.Value;
+                    resourceRule1.ModifiedByBehalfOf = bbtIdentity.BehalfOfId.Value;
+                }
             }
         }
 
