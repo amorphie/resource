@@ -322,49 +322,49 @@ public static class DbInitializer
         var bakiyeRoleId = Guid.NewGuid();
         var hesapHareketRoleId = Guid.NewGuid();
 
-        var roles = new Role[]{
-            new Role{
-                CreatedAt = DateTime.Now,
-                CreatedBy = Guid.NewGuid(),
-                CreatedByBehalfOf = null,
-                Id = hesapRoleId,
-                ModifiedAt = DateTime.Now,
-                ModifiedBy = Guid.NewGuid(),
-                Status = "A",
-                ModifiedByBehalfOf = null,
-                Tags = tags.ToArray(),
-                Titles = new List<Translation>{translationRoleTitleHesap}.ToArray(),
-                },
-                new Role{
-                CreatedAt = DateTime.Now,
-                CreatedBy = Guid.NewGuid(),
-                CreatedByBehalfOf = null,
-                Id = bakiyeRoleId,
-                ModifiedAt = DateTime.Now,
-                ModifiedBy = Guid.NewGuid(),
-                Status = "A",
-                ModifiedByBehalfOf = null,
-                Tags = tags.ToArray(),
-                Titles = new List<Translation>{translationRoleTitleBakiye}.ToArray(),
-                },
-                new Role{
-                CreatedAt = DateTime.Now,
-                CreatedBy = Guid.NewGuid(),
-                CreatedByBehalfOf = null,
-                Id = hesapHareketRoleId,
-                ModifiedAt = DateTime.Now,
-                ModifiedBy = Guid.NewGuid(),
-                Status = "A",
-                ModifiedByBehalfOf = null,
-                Tags = tags.ToArray(),
-                Titles = new List<Translation>{translationRoleTitleHesapHareket}.ToArray(),
-                }
-            };
+        // var roles = new Role[]{
+        //     new Role{
+        //         CreatedAt = DateTime.Now,
+        //         CreatedBy = Guid.NewGuid(),
+        //         CreatedByBehalfOf = null,
+        //         Id = hesapRoleId,
+        //         ModifiedAt = DateTime.Now,
+        //         ModifiedBy = Guid.NewGuid(),
+        //         Status = "A",
+        //         ModifiedByBehalfOf = null,
+        //         Tags = tags.ToArray(),
+        //         Titles = new List<Translation>{translationRoleTitleHesap}.ToArray(),
+        //         },
+        //         new Role{
+        //         CreatedAt = DateTime.Now,
+        //         CreatedBy = Guid.NewGuid(),
+        //         CreatedByBehalfOf = null,
+        //         Id = bakiyeRoleId,
+        //         ModifiedAt = DateTime.Now,
+        //         ModifiedBy = Guid.NewGuid(),
+        //         Status = "A",
+        //         ModifiedByBehalfOf = null,
+        //         Tags = tags.ToArray(),
+        //         Titles = new List<Translation>{translationRoleTitleBakiye}.ToArray(),
+        //         },
+        //         new Role{
+        //         CreatedAt = DateTime.Now,
+        //         CreatedBy = Guid.NewGuid(),
+        //         CreatedByBehalfOf = null,
+        //         Id = hesapHareketRoleId,
+        //         ModifiedAt = DateTime.Now,
+        //         ModifiedBy = Guid.NewGuid(),
+        //         Status = "A",
+        //         ModifiedByBehalfOf = null,
+        //         Tags = tags.ToArray(),
+        //         Titles = new List<Translation>{translationRoleTitleHesapHareket}.ToArray(),
+        //         }
+        //     };
 
-        foreach (Role r in roles)
-        {
-            context!.Roles!.Add(r);
-        }
+        // foreach (Role r in roles)
+        // {
+        //     context!.Roles!.Add(r);
+        // }
 
         var roleGroupId1 = Guid.NewGuid();
 
