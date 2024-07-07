@@ -5,30 +5,25 @@
 namespace amorphie.resource.data.Migrations
 {
     /// <inheritdoc />
-    public partial class RoleDefinitionKeyType : Migration
+    public partial class RoleDefinitionKeyAdded : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AlterColumn<int>(
+            migrationBuilder.AddColumn<int>(
                 name: "Key",
                 table: "RoleDefinitions",
-                type: "integer \"Key\"::integer",
+                type: "integer",
                 nullable: false,
-                oldClrType: typeof(string),
-                oldType: "text");
+                defaultValue: 0);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AlterColumn<string>(
+            migrationBuilder.DropColumn(
                 name: "Key",
-                table: "RoleDefinitions",
-                type: "text",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "integer");
+                table: "RoleDefinitions");
         }
     }
 }
