@@ -12,35 +12,37 @@ public class RoleDefinitionModule : BaseBBTRoute<DtoRoleDefinition, RoleDefiniti
 
     protected async ValueTask<IResult> UpsertRoleDefinition(
       [FromServices] ResourceDBContext context,
-      [FromBody] DtoRoleDefinition dtoRoleDefinition,
+      [FromBody] IEnumerable<DtoRoleDefinition> dtoRoleDefinitions,
       HttpContext httpContext,
       CancellationToken token
       )
     {
-        var roleDefinition = await context.RoleDefinitions!.FirstOrDefaultAsync(r => r.Id.Equals(dtoRoleDefinition.Id));
-        if(roleDefinition is {})
+        foreach(var dtoRoleDefinition in dtoRoleDefinitions)
         {
-            roleDefinition.Key = dtoRoleDefinition.Key;
-            roleDefinition.Description = dtoRoleDefinition.Description;
-            roleDefinition.Status = dtoRoleDefinition.Status;
+            var roleDefinition = await context.RoleDefinitions!.FirstOrDefaultAsync(r => r.Id.Equals(dtoRoleDefinition.Id));
+            if(roleDefinition is {})
+            {
+                roleDefinition.Key = dtoRoleDefinition.Key;
+                roleDefinition.Description = dtoRoleDefinition.Description;
+                roleDefinition.Status = dtoRoleDefinition.Status;
+            }
+            else
+            {
+                await context.RoleDefinitions!.AddAsync(new RoleDefinition{
+                    Key = dtoRoleDefinition.Key,
+                    Description = dtoRoleDefinition.Description,
+                    Status = dtoRoleDefinition.Status,
+                    Id = dtoRoleDefinition.Id,
+                    Tags = dtoRoleDefinition.Tags,
+                    CreatedAt = DateTime.Now,
+                    CreatedBy = Guid.Parse("00000000-0000-0000-0000-000000000000"),
+                    CreatedByBehalfOf = Guid.Parse("00000000-0000-0000-0000-000000000000"),
+                    ModifiedAt = DateTime.Now,
+                    ModifiedBy = Guid.Parse("00000000-0000-0000-0000-000000000000"),
+                    ModifiedByBehalfOf = Guid.Parse("00000000-0000-0000-0000-000000000000")
+                });
+            }
         }
-        else
-        {
-            await context.RoleDefinitions!.AddAsync(new RoleDefinition{
-                Key = dtoRoleDefinition.Key,
-                Description = dtoRoleDefinition.Description,
-                Status = dtoRoleDefinition.Status,
-                Id = dtoRoleDefinition.Id,
-                Tags = dtoRoleDefinition.Tags,
-                CreatedAt = DateTime.Now,
-                CreatedBy = Guid.Parse("00000000-0000-0000-0000-000000000000"),
-                CreatedByBehalfOf = Guid.Parse("00000000-0000-0000-0000-000000000000"),
-                ModifiedAt = DateTime.Now,
-                ModifiedBy = Guid.Parse("00000000-0000-0000-0000-000000000000"),
-                ModifiedByBehalfOf = Guid.Parse("00000000-0000-0000-0000-000000000000")
-            });
-        }
-
         await context.SaveChangesAsync();
         return Results.Ok();
     }
