@@ -19,6 +19,7 @@ public class ResourceDBContext : DbContext
     public DbSet<Resource>? Resources { get; set; }
     public DbSet<ResourceGroup>? ResourceGroups { get; set; }
     public DbSet<Role>? Roles { get; set; }
+    public DbSet<RoleDefinition>? RoleDefinitions{ get; set; }
     public DbSet<RoleGroup>? RoleGroups { get; set; }
     public DbSet<RoleGroupRole>? RoleGroupRoles { get; set; }
     public DbSet<ResourceGroupRole>? ResourceGroupRoles { get; set; }
