@@ -4,7 +4,7 @@ using amorphie.core.Base;
 using amorphie.resource.core.Enum;
 
 
-public class RoleDefinition : EntityBase
+public class DtoRoleDefinition : DtoBase
 {
     public ICollection<Translation> Titles { get; set; } = default!;
     public string[]? Tags { get; set; }
