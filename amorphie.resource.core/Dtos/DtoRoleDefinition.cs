@@ -6,7 +6,6 @@ using amorphie.resource.core.Enum;
 
 public class DtoRoleDefinition : DtoBase
 {
-    public ICollection<Translation> Titles { get; set; } = default!;
     public string[]? Tags { get; set; }
     public string? Status { get; set; }
     public string Key { get; set; } = string.Empty;
