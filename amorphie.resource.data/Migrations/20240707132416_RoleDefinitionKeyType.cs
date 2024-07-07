@@ -13,7 +13,7 @@ namespace amorphie.resource.data.Migrations
             migrationBuilder.AlterColumn<int>(
                 name: "Key",
                 table: "RoleDefinitions",
-                type: "integer",
+                type: "integer \"Key\"::integer",
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "text");
