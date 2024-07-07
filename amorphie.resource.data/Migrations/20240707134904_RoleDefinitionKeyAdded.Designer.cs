@@ -11,8 +11,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace amorphie.resource.data.Migrations
 {
     [DbContext(typeof(ResourceDBContext))]
-    [Migration("20240707132416_RoleDefinitionKeyType")]
-    partial class RoleDefinitionKeyType
+    [Migration("20240707134904_RoleDefinitionKeyAdded")]
+    partial class RoleDefinitionKeyAdded
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
