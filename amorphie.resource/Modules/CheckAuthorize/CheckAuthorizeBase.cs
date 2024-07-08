@@ -36,7 +36,7 @@ public abstract class CheckAuthorizeBase
             }
             else
             {
-                keyValuePairs.Add($"{{{newPath}}}", property.Value.ToString());
+                keyValuePairs.Add($"{newPath}", property.Value.ToString());
             }
         }
     }
