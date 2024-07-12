@@ -59,7 +59,11 @@ public class CheckAuthorizeByRule : CheckAuthorizeBase, ICheckAuthorize
     )
     {
         return await context!.ResourceRules!.Include(i => i.Rule)
-                            .AsNoTracking().Where(x => (x.ResourceId == resource.Id || x.ResourceGroupId == resource.ResourceGroupId)
+                            .AsNoTracking().Where(x => (
+                                (x.ResourceId != null && x.ResourceId == resource.Id)
+                                ||
+                             (x.ResourceGroupId != null && x.ResourceGroupId == resource.ResourceGroupId)
+                            )
                                                        && (x.ClientId == null || x.ClientId.ToString() == headerClientId)
                                                        && x.Status == "A")
                             .OrderBy(x => x.Priority)
@@ -114,15 +118,23 @@ public class CheckAuthorizeByRule : CheckAuthorizeBase, ICheckAuthorize
     dynamic CreateExpandoObject(Dictionary<string, object> properties)
     {
         ExpandoObject expando = new ExpandoObject();
-        IDictionary<string, object> dictionary = expando;
 
-        foreach (var property in properties)
+        try
         {
-            string propertyName = property.Key;
-            object value = property.Value;
+            IDictionary<string, object> dictionary = expando;
 
-            string[] parts = propertyName.Split('.');
-            CreateExpandoNestedObjects(dictionary, parts, value);
+            foreach (var property in properties)
+            {
+                string propertyName = property.Key;
+                object value = property.Value;
+
+                string[] parts = propertyName.Split('.');
+                CreateExpandoNestedObjects(dictionary, parts, value);
+            }
+        }
+        catch
+        {
+
         }
 
         return expando;

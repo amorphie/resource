@@ -10,7 +10,7 @@ public abstract class CheckAuthorizeBase
     )
     {
         return await context!.Resources!.AsNoTracking()
-                                .FirstOrDefaultAsync(c => Regex.IsMatch(request.Url, c.Url), cancellationToken);
+                                .FirstOrDefaultAsync(c => Regex.IsMatch(request.Url, c.Url) && c.Status == "A", cancellationToken);
     }
 
     protected void RecursiveJsonLoop(JObject jsonObject, Dictionary<string, object> keyValuePairs, string currentPath)
@@ -36,7 +36,7 @@ public abstract class CheckAuthorizeBase
             }
             else
             {
-                keyValuePairs.Add($"{{{newPath}}}", property.Value.ToString());
+                keyValuePairs.Add($"{newPath}", property.Value.ToString());
             }
         }
     }
