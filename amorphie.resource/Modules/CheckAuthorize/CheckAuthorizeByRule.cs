@@ -1,5 +1,6 @@
 using System.Dynamic;
 using System.Text.RegularExpressions;
+using amorphie.resource.Modules.CheckAuthorize;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RulesEngine.Models;
@@ -7,13 +8,13 @@ using RulesEngine.Models;
 public class CheckAuthorizeByRule : CheckAuthorizeBase, ICheckAuthorize
 {
     public async ValueTask<IResult> Check(
-             CheckAuthorizeRequest request,
-             ResourceDBContext context,
-             HttpContext httpContext,
-             string headerClientId,
-             IConfiguration configuration,
-             CancellationToken cancellationToken
-             )
+        CheckAuthorizeRequest request,
+        ResourceDBContext context,
+        HttpContext httpContext,
+        string headerClientId,
+        IConfiguration configuration,
+        CancellationToken cancellationToken
+    )
     {
         try
         {
@@ -52,30 +53,30 @@ public class CheckAuthorizeByRule : CheckAuthorizeBase, ICheckAuthorize
     }
 
     private async Task<List<ResourceRule>> GetResourceRules(
-    ResourceDBContext context,
-    Resource resource,
-    string headerClientId,
-    CancellationToken cancellationToken
+        ResourceDBContext context,
+        Resource resource,
+        string headerClientId,
+        CancellationToken cancellationToken
     )
     {
         return await context!.ResourceRules!.Include(i => i.Rule)
-                            .AsNoTracking().Where(x => (
-                                (x.ResourceId != null && x.ResourceId == resource.Id)
-                                ||
-                             (x.ResourceGroupId != null && x.ResourceGroupId == resource.ResourceGroupId)
-                            )
-                                                       && (x.ClientId == null || x.ClientId.ToString() == headerClientId)
-                                                       && x.Status == "A")
-                            .OrderBy(x => x.Priority)
-                            .ToListAsync(cancellationToken);
+            .AsNoTracking().Where(x => (
+                                           (x.ResourceId != null && x.ResourceId == resource.Id)
+                                           ||
+                                           (x.ResourceGroupId != null && x.ResourceGroupId == resource.ResourceGroupId)
+                                       )
+                                       && (x.ClientId == null || x.ClientId.ToString() == headerClientId)
+                                       && x.Status == "A")
+            .OrderBy(x => x.Priority)
+            .ToListAsync(cancellationToken);
     }
 
     private void SetRuleParameterList(
-      List<RuleParameter> ruleParams,
-      HttpContext httpContext,
-      CheckAuthorizeRequest request,
-      string? resourceUrl
-      )
+        List<RuleParameter> ruleParams,
+        HttpContext httpContext,
+        CheckAuthorizeRequest request,
+        string? resourceUrl
+    )
     {
         dynamic header = new ExpandoObject();
 
@@ -96,6 +97,7 @@ public class CheckAuthorizeByRule : CheckAuthorizeBase, ICheckAuthorize
                 ((IDictionary<string, object>)path).Add($"var{pathVariable.Name}", pathVariable.Value);
             }
         }
+
         var ruleParamPath = new RuleParameter("path", path);
         ruleParams.Add(ruleParamPath);
 
@@ -104,11 +106,12 @@ public class CheckAuthorizeByRule : CheckAuthorizeBase, ICheckAuthorize
         if (!string.IsNullOrEmpty(request.Data))
         {
             var jsonObject = JsonConvert.DeserializeObject<JObject>(request.Data);
-
-            RecursiveJsonLoop(jsonObject, bodyParamList, "");
+            bodyParamList = MapHelper.ToDictionary(jsonObject);
+            // RecursiveJsonLoop(jsonObject, bodyParamList, "");
         }
 
-        dynamic bodyObject = CreateExpandoObject(bodyParamList);
+        dynamic bodyObject = MapHelper.ToExpandoObject(bodyParamList);
+        // dynamic bodyObject = CreateExpandoObject(bodyParamList);
 
         var ruleParamBody = new RuleParameter("body", bodyObject);
 
@@ -132,9 +135,8 @@ public class CheckAuthorizeByRule : CheckAuthorizeBase, ICheckAuthorize
                 CreateExpandoNestedObjects(dictionary, parts, value);
             }
         }
-        catch
+        catch (Exception ex)
         {
-
         }
 
         return expando;
@@ -210,14 +212,48 @@ public class CheckAuthorizeByRule : CheckAuthorizeBase, ICheckAuthorize
                     {
                         list.Add(null);
                     }
+
                     list[index] = value;
                 }
-                currentDict = (IDictionary<string, object>)currentDict[part];
+
+                if (currentDict[part] is IDictionary<string, object> dict)
+                {
+                    currentDict = dict;
+                }
+                else if (currentDict[part] is List<object> list)
+                {
+                    IDictionary<string, object> newDict = new Dictionary<string, object>();
+
+                    foreach (var item in list)
+                    {
+                        if (item is IDictionary<string, object> itemDict)
+                        {
+                            foreach (var kvp in itemDict)
+                            {
+                                if (!newDict.ContainsKey(kvp.Key))
+                                {
+                                    newDict.Add(kvp.Key, kvp.Value);
+                                }
+                                else
+                                {
+                                    newDict[kvp.Key] = kvp.Value;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            throw new InvalidCastException("List contains non-dictionary elements.");
+                        }
+                    }
+
+                    currentDict = newDict;
+                }
             }
         }
     }
 
-    private async ValueTask<List<RuleResultTree>> ExecuteRules(List<RuleParameter> ruleParameters, List<ResourceRule> resourceRules)
+    private async ValueTask<List<RuleResultTree>> ExecuteRules(List<RuleParameter> ruleParameters,
+        List<ResourceRule> resourceRules)
     {
         var ruleDefinitions = new List<RuleDefinition>();
 
