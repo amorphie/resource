@@ -5,7 +5,7 @@
             "name": "amorphie-resource",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "dapr-debug-amorphie-resource",
+            // "preLaunchTask": "dapr-debug-amorphie-resource",
             "program": "${workspaceFolder}/amorphie.resource/bin/Debug/net8.0/amorphie.resource.dll",
             "args": [],
             "cwd": "${workspaceFolder}/amorphie.resource",
@@ -16,7 +16,7 @@
                 "DAPR_HTTP_PORT": "44010",
                 "DAPR_GRPC_PORT": "44011"
             },
-            "postDebugTask": "daprd-down-amorphie-resource"
+            // "postDebugTask": "daprd-down-amorphie-resource"
         }
        
     ]
