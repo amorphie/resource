@@ -3,6 +3,7 @@ using System.Text.Json;
 using amorphie.core.Enums;
 using amorphie.resource.Helper;
 using Newtonsoft.Json;
+using Serilog;
 
 public static class Utils
 {
@@ -117,6 +118,38 @@ public static class Utils
                 using var httpContent = new StringContent(Convert.ToString(jsonBody), Encoding.UTF8, "application/json");
                 if (header != null)
                 {
+                    try
+                    {
+                        var headerJson = JsonConvert.SerializeObject(header);
+                        Dictionary<string, object> headerDic =
+                            JsonConvert.DeserializeObject<IDictionary<string, object>>(headerJson);
+                        foreach (var item in headerDic)
+                        {
+                            if (CallApiConsts.IgnoreDefaultHeaders.Contains(item.Key) || CallApiConsts.ExcludeHeaders.Contains(item.Key.ToLower()))
+                            {
+                                continue;
+                            }
+                    
+                            if (!httpContent.Headers.Contains(item.Key))
+                            {
+                                httpContent.Headers.TryAddWithoutValidation(item.Key, item.Value.ToString());
+                            }
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Error(e, "headers could not be processed");
+                    }
+                    
+                }
+                response = await apiClient.PostAsync(url, httpContent);
+            }
+            else
+            {
+                using HttpRequestMessage request =
+                    new HttpRequestMessage(HttpMethod.Get, url);
+                try
+                {
                     var headerJson = JsonConvert.SerializeObject(header);
                     Dictionary<string, object> headerDic =
                         JsonConvert.DeserializeObject<IDictionary<string, object>>(headerJson);
@@ -127,33 +160,17 @@ public static class Utils
                             continue;
                         }
                     
-                        if (!httpContent.Headers.Contains(item.Key))
+                        if (!request.Headers.Contains(item.Key))
                         {
-                            httpContent.Headers.TryAddWithoutValidation(item.Key, item.Value.ToString());
+                            request.Headers.TryAddWithoutValidation(item.Key, item.Value.ToString());
                         }
                     }
                 }
-                response = await apiClient.PostAsync(url, httpContent);
-            }
-            else
-            {
-                using HttpRequestMessage request =
-                    new HttpRequestMessage(HttpMethod.Get, url);
-                var headerJson = JsonConvert.SerializeObject(header);
-                Dictionary<string, object> headerDic =
-                    JsonConvert.DeserializeObject<IDictionary<string, object>>(headerJson);
-                foreach (var item in headerDic)
+                catch (Exception e)
                 {
-                    if (CallApiConsts.IgnoreDefaultHeaders.Contains(item.Key) || CallApiConsts.ExcludeHeaders.Contains(item.Key.ToLower()))
-                    {
-                        continue;
-                    }
-                    
-                    if (!request.Headers.Contains(item.Key))
-                    {
-                        request.Headers.TryAddWithoutValidation(item.Key, item.Value.ToString());
-                    }
+                    Log.Error(e, "headers could not be processed");
                 }
+                
                 response = await apiClient.SendAsync(request);
             }
 

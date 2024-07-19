@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using amorphie.resource.Helper;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Serilog;
 
 public class CheckAuthorizeByPrivilege : CheckAuthorizeBase, ICheckAuthorize
 {
@@ -81,18 +82,25 @@ public class CheckAuthorizeByPrivilege : CheckAuthorizeBase, ICheckAuthorize
                 {
                     var data = string.IsNullOrEmpty(request.Data) ? "" : request.Data;
                     using var httpContent = new StringContent(data, Encoding.UTF8, "application/json");
-                    foreach (var item in httpContext.Request.Headers)
+                    try
                     {
-                        if (CallApiConsts.IgnoreDefaultHeaders.Contains(item.Key) ||
-                            CallApiConsts.ExcludeHeaders.Contains(item.Key.ToLower()))
+                        foreach (var item in httpContext.Request.Headers)
                         {
-                            continue;
-                        }
+                            if (CallApiConsts.IgnoreDefaultHeaders.Contains(item.Key) ||
+                                CallApiConsts.ExcludeHeaders.Contains(item.Key.ToLower()))
+                            {
+                                continue;
+                            }
 
-                        if (!httpContent.Headers.Contains(item.Key))
-                        {
-                            httpContent.Headers.TryAddWithoutValidation(item.Key, item.Value.ToString());
+                            if (!httpContent.Headers.Contains(item.Key))
+                            {
+                                httpContent.Headers.TryAddWithoutValidation(item.Key, item.Value.ToString());
+                            }
                         }
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Error(e, "headers could not be processed");
                     }
 
                     response = await apiClient.PostAsync(privilegeUrl, httpContent);
@@ -101,18 +109,25 @@ public class CheckAuthorizeByPrivilege : CheckAuthorizeBase, ICheckAuthorize
                 {
                     using HttpRequestMessage getRequest =
                         new HttpRequestMessage(HttpMethod.Get, privilegeUrl);
-                    foreach (var item in httpContext.Request.Headers)
+                    try
                     {
-                        if (CallApiConsts.IgnoreDefaultHeaders.Contains(item.Key) ||
-                            CallApiConsts.ExcludeHeaders.Contains(item.Key.ToLower()))
+                        foreach (var item in httpContext.Request.Headers)
                         {
-                            continue;
-                        }
+                            if (CallApiConsts.IgnoreDefaultHeaders.Contains(item.Key) ||
+                                CallApiConsts.ExcludeHeaders.Contains(item.Key.ToLower()))
+                            {
+                                continue;
+                            }
 
-                        if (!getRequest.Headers.Contains(item.Key))
-                        {
-                            getRequest.Headers.TryAddWithoutValidation(item.Key, item.Value.ToString());
+                            if (!getRequest.Headers.Contains(item.Key))
+                            {
+                                getRequest.Headers.TryAddWithoutValidation(item.Key, item.Value.ToString());
+                            }
                         }
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Error(e, "headers could not be processed");
                     }
 
                     response = await apiClient.SendAsync(getRequest);
