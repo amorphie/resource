@@ -115,7 +115,8 @@ public static class Utils
 
                 var jsonBody = JsonConvert.SerializeObject(body);
 
-                using var httpContent = new StringContent(Convert.ToString(jsonBody), Encoding.UTF8, "application/json");
+                using var httpContent =
+                    new StringContent(Convert.ToString(jsonBody), Encoding.UTF8, "application/json");
                 if (header != null)
                 {
                     try
@@ -125,11 +126,12 @@ public static class Utils
                             JsonConvert.DeserializeObject<IDictionary<string, object>>(headerJson);
                         foreach (var item in headerDic)
                         {
-                            if (CallApiConsts.IgnoreDefaultHeaders.Contains(item.Key) || CallApiConsts.ExcludeHeaders.Contains(item.Key.ToLower()))
+                            if (CallApiConsts.IgnoreDefaultHeaders.Contains(item.Key) ||
+                                CallApiConsts.ExcludeHeaders.Contains(item.Key.ToLower()))
                             {
                                 continue;
                             }
-                    
+
                             if (!httpContent.Headers.Contains(item.Key))
                             {
                                 httpContent.Headers.TryAddWithoutValidation(item.Key, item.Value.ToString());
@@ -140,37 +142,41 @@ public static class Utils
                     {
                         Log.Error(e, "headers could not be processed");
                     }
-                    
                 }
+
                 response = await apiClient.PostAsync(url, httpContent);
             }
             else
             {
                 using HttpRequestMessage request =
                     new HttpRequestMessage(HttpMethod.Get, url);
-                try
+                if (header != null)
                 {
-                    var headerJson = JsonConvert.SerializeObject(header);
-                    Dictionary<string, object> headerDic =
-                        JsonConvert.DeserializeObject<IDictionary<string, object>>(headerJson);
-                    foreach (var item in headerDic)
+                    try
                     {
-                        if (CallApiConsts.IgnoreDefaultHeaders.Contains(item.Key) || CallApiConsts.ExcludeHeaders.Contains(item.Key.ToLower()))
+                        var headerJson = JsonConvert.SerializeObject(header);
+                        Dictionary<string, object> headerDic =
+                            JsonConvert.DeserializeObject<IDictionary<string, object>>(headerJson);
+                        foreach (var item in headerDic)
                         {
-                            continue;
-                        }
-                    
-                        if (!request.Headers.Contains(item.Key))
-                        {
-                            request.Headers.TryAddWithoutValidation(item.Key, item.Value.ToString());
+                            if (CallApiConsts.IgnoreDefaultHeaders.Contains(item.Key) ||
+                                CallApiConsts.ExcludeHeaders.Contains(item.Key.ToLower()))
+                            {
+                                continue;
+                            }
+
+                            if (!request.Headers.Contains(item.Key))
+                            {
+                                request.Headers.TryAddWithoutValidation(item.Key, item.Value.ToString());
+                            }
                         }
                     }
+                    catch (Exception e)
+                    {
+                        Log.Error(e, "headers could not be processed");
+                    }
                 }
-                catch (Exception e)
-                {
-                    Log.Error(e, "headers could not be processed");
-                }
-                
+
                 response = await apiClient.SendAsync(request);
             }
 
