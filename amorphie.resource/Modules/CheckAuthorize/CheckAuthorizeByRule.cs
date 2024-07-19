@@ -142,7 +142,8 @@ public class CheckAuthorizeByRule : CheckAuthorizeBase, ICheckAuthorize
 
         var reSettings = new ReSettings
         {
-            CustomTypes = new Type[] { typeof(Utils) }
+            CustomTypes = new Type[] { typeof(Utils) },
+            
         };
 
         var rulesEngine = new RulesEngine.RulesEngine(workflowRules, reSettings);
