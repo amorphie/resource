@@ -87,10 +87,20 @@ public static class Utils
         var list = valList.Split(',').ToList();
         return list.Contains(check);
     }
+    
+    public static CallApiResponse CallApiGet(string url)
+    {
+        return CallApi(url, null, HttpMethodType.GET, null);
+    }
 
     public static CallApiResponse CallApiGet(string url, dynamic? header = null)
     {
         return CallApi(url, null, HttpMethodType.GET, header);
+    }
+    
+    public static CallApiResponse CallApiPost(string url, dynamic body)
+    {
+        return CallApi(url, body, HttpMethodType.POST, null);
     }
 
     public static CallApiResponse CallApiPost(string url, dynamic body, dynamic? header = null)
