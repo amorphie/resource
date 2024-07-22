@@ -124,6 +124,7 @@ public static class Utils
             
             var span = transaction.StartSpan($"CallApi-{url}", ApiConstants.TypeUnknown);
             span.SetLabel("CallApi.Url", url);
+            
             try
             {
                 if (httpMethodType == HttpMethodType.POST)
