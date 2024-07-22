@@ -35,6 +35,10 @@
    <ItemGroup>
      <Compile Remove="SerilogMiddleware.cs" />
    </ItemGroup>
+  
+   <ItemGroup>
+     <Folder Include="logs\" />
+   </ItemGroup>
     
 
 </Project>
