@@ -34,19 +34,16 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
         transaction.SetLabel("RequestBody.Url", request.Url);
         transaction.SetLabel("RequestBody.Data", request.Data);
         
-        logger.LogInformation($"ClientId:{headerClientId}");
-        logger.LogInformation($"Request.Url:{request.Url}");
-        logger.LogInformation($"Request.Data:{request.Data}");
         ICheckAuthorize checkAuthorize;
 
         if (checkAuthMethod == "Rule")
         {
-            logger.LogInformation($"Request.CheckAuthMethod:Rule");
+            logger.LogInformation($"Request.CheckAuthMethod:Rule | ClientId:{headerClientId} | Request.Url:{request.Url} | Request.Data:{request.Data}");
             checkAuthorize = new CheckAuthorizeByRule();
         }
         else
         {
-            logger.LogInformation($"Request.CheckAuthMethod:None");
+            logger.LogInformation($"Request.CheckAuthMethod:None | ClientId:{headerClientId} | Request.Url:{request.Url} | Request.Data:{request.Data}");
             checkAuthorize = new CheckAuthorizeByPrivilege();
         }
 
