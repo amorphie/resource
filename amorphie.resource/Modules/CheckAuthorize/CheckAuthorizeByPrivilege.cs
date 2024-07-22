@@ -4,6 +4,7 @@ using amorphie.resource.Helper;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Serilog;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 public class CheckAuthorizeByPrivilege : CheckAuthorizeBase, ICheckAuthorize
 {
@@ -13,6 +14,7 @@ public class CheckAuthorizeByPrivilege : CheckAuthorizeBase, ICheckAuthorize
         HttpContext httpContext,
         string headerClientId,
         IConfiguration configuration,
+        ILogger logger,
         CancellationToken cancellationToken
     )
     {
