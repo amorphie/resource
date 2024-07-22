@@ -38,7 +38,9 @@ List<string> defaultHeadersToBeLogged = new List<string>()
     "X-Token-Id",
     "Transfer-Encoding",
     "X-Forwarded-Host",
-    "X-Forwarded-For"
+    "X-Forwarded-For",
+    "X-Request-Id",
+    "xrequestid"
 };
 builder.Services.AddHttpLogging((Action<HttpLoggingOptions>) (logging =>
 {
@@ -90,7 +92,7 @@ builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
-app.UseMiddleware<HttpMiddleware>();
+// app.UseMiddleware<HttpMiddleware>();
 
 if (!app.Environment.IsDevelopment())
 {
