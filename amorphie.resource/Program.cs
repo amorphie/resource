@@ -8,6 +8,9 @@ using Elastic.Apm.NetCoreAll;
 using Microsoft.AspNetCore.HttpLogging;
 using amorphie.resource;
 using amorphie.core.Middleware.Logging;
+using Serilog;
+using Serilog.Core;
+using Serilog.Formatting.Compact;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,8 +18,41 @@ await builder.Configuration.AddVaultSecrets("amorphie-secretstore", new string[]
 var postgreSql = builder.Configuration["PostgreSql"];
 // var postgreSql = "Host=localhost:5432;Database=resources;Username=postgres;Password=postgres";
 
-builder.AddSeriLogWithHttpLogging<AmorphieLogEnricher>();
+builder.Logging.ClearProviders();
+Log.Logger = new LoggerConfiguration()
+    .Enrich.FromLogContext()
+    .Enrich.WithEnvironmentName()
+    .Enrich.WithMachineName()
+    .WriteTo.Console()
+    .WriteTo.File(new CompactJsonFormatter(), "logs/amorphie-resource-log.json", rollingInterval: RollingInterval.Day)
+    .ReadFrom.Configuration(builder.Configuration)
+    .CreateLogger();
+List<string> defaultHeadersToBeLogged = new List<string>()
+{
+    "Content-Type",
+    "Host",
+    "X-Zeebe-Job-Key",
+    "xdeviceid",
+    "X-Device-Id",
+    "xtokenid",
+    "X-Token-Id",
+    "Transfer-Encoding",
+    "X-Forwarded-Host",
+    "X-Forwarded-For"
+};
+builder.Services.AddHttpLogging((Action<HttpLoggingOptions>) (logging =>
+{
+    bool flag = builder.Environment.IsProd() || builder.Environment.IsProduction();
+    logging.LoggingFields = flag ? HttpLoggingFields.RequestScheme : HttpLoggingFields.RequestScheme | HttpLoggingFields.RequestBody | HttpLoggingFields.ResponseBody;
+    defaultHeadersToBeLogged.ForEach((Action<string>) (p => logging.RequestHeaders.Add(p)));
+    logging.MediaTypeOptions.AddText("application/javascript");
+    logging.RequestBodyLogLimit = 4096;
+    logging.ResponseBodyLogLimit = 4096;
+    logging.CombineLogs = true;
+}));
+builder.Services.AddHttpContextAccessor();
 
+builder.Host.UseSerilog(Log.Logger, true);
 builder.Services.AddDaprClient();
 builder.Services.AddEndpointsApiExplorer();
 
