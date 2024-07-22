@@ -5,12 +5,7 @@ using amorphie.core.Swagger;
 using amorphie.resource.data;
 using FluentValidation;
 using Elastic.Apm.NetCoreAll;
-using Microsoft.AspNetCore.HttpLogging;
 using amorphie.resource;
-using amorphie.core.Middleware.Logging;
-using Serilog;
-using Serilog.Core;
-using Serilog.Formatting.Compact;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,18 +18,15 @@ builder.SerilogConfigure();
 builder.Services.AddDaprClient();
 builder.Services.AddEndpointsApiExplorer();
 
-builder.Services.AddSwaggerGen(options =>
-{
-    options.OperationFilter<AddSwaggerParameterFilter>();
-});
+builder.Services.AddSwaggerGen(options => { options.OperationFilter<AddSwaggerParameterFilter>(); });
 
 builder.Services.AddScoped<IBBTIdentity, FakeIdentity>();
 builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 
 var assemblies = new Assembly[]
-                {
-                     typeof(ResourceValidator).Assembly, typeof(ResourceMapper).Assembly
-                };
+{
+    typeof(ResourceValidator).Assembly, typeof(ResourceMapper).Assembly
+};
 
 builder.Services.AddValidatorsFromAssemblies(assemblies);
 builder.Services.AddAutoMapper(assemblies);
@@ -62,8 +54,11 @@ if (!app.Environment.IsDevelopment())
     app.UseAllElasticApm(app.Configuration);
 }
 
-app.UseMiddleware<HttpMiddleware>();
-app.UseLoggingHandlerMiddlewares();
+// app.UseMiddleware<HttpMiddleware>();
+app.UseMiddleware<ResourceExceptionHandlerMiddleware>();
+app.UseHttpLogging();
+// app.UseLoggingHandlerMiddlewares();
+
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
