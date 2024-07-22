@@ -48,7 +48,6 @@ builder.Services.AddDbContext<ResourceDBContext>
 builder.Services.AddHealthChecks();
 
 var app = builder.Build();
-
 if (!app.Environment.IsDevelopment())
 {
     app.UseAllElasticApm(app.Configuration);

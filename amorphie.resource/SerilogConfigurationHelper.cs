@@ -43,12 +43,13 @@ public static class SerilogConfigurationHelper
             var enricher = serviceProvider.GetRequiredService<HttpRequestAndCorrelationContextEnricher>();
             loggerConfiguration
                 .Enrich.FromLogContext()
-                .Enrich.With(enricher)
                 .Enrich.WithEnvironmentName()
                 .Enrich.WithMachineName()
+                .Enrich.With(enricher)
                 .WriteTo.Console()
                 .WriteTo.File(new CompactJsonFormatter(), "logs/amorphie-resource-log.json",
-                    rollingInterval: RollingInterval.Day);
+                    rollingInterval: RollingInterval.Day)
+                .ReadFrom.Configuration(builder.Configuration);
         });
         
         return builder;
