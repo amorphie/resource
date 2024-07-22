@@ -2,7 +2,6 @@ using System.Dynamic;
 using System.Net;
 using System.Text.RegularExpressions;
 using amorphie.resource.Modules.CheckAuthorize;
-using Elastic.Apm.Api;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RulesEngine.Models;
@@ -27,8 +26,8 @@ public class CheckAuthorizeByRule : CheckAuthorizeBase, ICheckAuthorize
 
             if (resource == null)
             {
-                logger.LogInformation($"StatusCode:{HttpStatusCode.OK}. Reason: Resource not found.");
-                return Results.Ok();
+                // logger.LogInformation($"StatusCode:{HttpStatusCode.OK}. Reason: Resource not found.");
+                return Results.Ok("Reason: Resource not found.");
             }
 
             string allowEmptyPrivilege = configuration["AllowEmptyPrivilege"];
@@ -39,12 +38,13 @@ public class CheckAuthorizeByRule : CheckAuthorizeBase, ICheckAuthorize
             {
                 if (string.IsNullOrEmpty(allowEmptyPrivilege) || allowEmptyPrivilege == "True")
                 {
-                    logger.LogInformation($"StatusCode:{HttpStatusCode.OK}. Reason: Allow empty privilege active.");
-                    return Results.Ok();
+                    // logger.LogInformation($"StatusCode:{HttpStatusCode.OK}. Reason: Allow empty privilege active.");
+                    return Results.Ok("Reason: Allow empty privilege active.");
                 }
 
-                logger.LogWarning($"StatusCode:{HttpStatusCode.Unauthorized}. Reason: Resource rules not found.");
-                return Results.Unauthorized();
+                return Results.Json("Reason: Resource rules not found.", statusCode: 403);
+                // logger.LogWarning($"StatusCode:{HttpStatusCode.Unauthorized}. Reason: Resource rules not found.");
+                // return Results.Unauthorized();
             }
 
             var ruleParams = new List<RuleParameter>();
@@ -55,15 +55,16 @@ public class CheckAuthorizeByRule : CheckAuthorizeBase, ICheckAuthorize
 
             if (resultList.Any(t => t.IsSuccess == false))
             {
-                logger.LogInformation($"StatusCode:{HttpStatusCode.Unauthorized} Reason: FAILED");
-                return Results.Unauthorized();
+                // logger.LogInformation($"StatusCode:{HttpStatusCode.Unauthorized} Reason: FAILED");
+                return Results.Json("Reason: FAILED", statusCode: 403);
             }
 
-            logger.LogInformation($"StatusCode:{HttpStatusCode.OK}. Reason: SUCCESS");
-            return Results.Ok();
+            // logger.LogInformation($"StatusCode:{HttpStatusCode.OK}. Reason: SUCCESS");
+            return Results.Ok("Reason: SUCCESS");
         }
         catch (Exception ex)
         {
+            // throw ex;
             logger.LogError(ex, $"StatusCode: {HttpStatusCode.BadRequest} Reason: Authorize check endpoint failed.");
             return Results.Problem(ex.Message);
         }

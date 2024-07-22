@@ -15,19 +15,19 @@ namespace amorphie.resource
             try
             {
                 context.Request.EnableBuffering();
-                RecyclableMemoryStreamManager _recyclableMemoryStreamManager = new();
-                await using var requestStream = _recyclableMemoryStreamManager.GetStream();
+                // RecyclableMemoryStreamManager _recyclableMemoryStreamManager = new();
+                // await using var requestStream = _recyclableMemoryStreamManager.GetStream();
+                //
+                // await context.Request.Body.CopyToAsync(requestStream);
+                // var body = ReadStreamInChunks(requestStream);
+                // context.Request.Body.Position = 0;
 
-                await context.Request.Body.CopyToAsync(requestStream);
-                var body = ReadStreamInChunks(requestStream);
-                context.Request.Body.Position = 0;
-
-                Console.WriteLine("Http Request Body : " + body);
-                Console.WriteLine("----Headers----");
-                foreach (var h in context.Request.Headers)
-                {
-                    Console.WriteLine($"  Key:{h.Key} || Val:{h.Value}");
-                }
+                // Console.WriteLine("Http Request Body : " + body);
+                // Console.WriteLine("----Headers----");
+                // foreach (var h in context.Request.Headers)
+                // {
+                //     // Console.WriteLine($"  Key:{h.Key} || Val:{h.Value}");
+                // }
                 await _next(context);
             }
             catch (Exception ex)

@@ -35,5 +35,6 @@
    <ItemGroup>
      <Compile Remove="SerilogMiddleware.cs" />
    </ItemGroup>
+    
 
 </Project>
