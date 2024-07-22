@@ -31,5 +31,9 @@
    <ItemGroup>
     <ProjectReference Include="..\amorphie.resource.core\amorphie.resource.core.csproj" />
   </ItemGroup>
+  
+   <ItemGroup>
+     <Compile Remove="SerilogMiddleware.cs" />
+   </ItemGroup>
 
 </Project>

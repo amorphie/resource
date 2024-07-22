@@ -18,43 +18,8 @@ await builder.Configuration.AddVaultSecrets("amorphie-secretstore", new string[]
 var postgreSql = builder.Configuration["PostgreSql"];
 // var postgreSql = "Host=localhost:5432;Database=resources;Username=postgres;Password=postgres";
 
-builder.Logging.ClearProviders();
-Log.Logger = new LoggerConfiguration()
-    .Enrich.FromLogContext()
-    .Enrich.WithEnvironmentName()
-    .Enrich.WithMachineName()
-    .WriteTo.Console()
-    .WriteTo.File(new CompactJsonFormatter(), "logs/amorphie-resource-log.json", rollingInterval: RollingInterval.Day)
-    .ReadFrom.Configuration(builder.Configuration)
-    .CreateLogger();
-List<string> defaultHeadersToBeLogged = new List<string>()
-{
-    "Content-Type",
-    "Host",
-    "X-Zeebe-Job-Key",
-    "xdeviceid",
-    "X-Device-Id",
-    "xtokenid",
-    "X-Token-Id",
-    "Transfer-Encoding",
-    "X-Forwarded-Host",
-    "X-Forwarded-For",
-    "X-Request-Id",
-    "xrequestid"
-};
-builder.Services.AddHttpLogging((Action<HttpLoggingOptions>) (logging =>
-{
-    bool flag = builder.Environment.IsProd() || builder.Environment.IsProduction();
-    logging.LoggingFields = flag ? HttpLoggingFields.RequestScheme : HttpLoggingFields.RequestScheme | HttpLoggingFields.RequestBody | HttpLoggingFields.ResponseBody;
-    defaultHeadersToBeLogged.ForEach((Action<string>) (p => logging.RequestHeaders.Add(p)));
-    logging.MediaTypeOptions.AddText("application/javascript");
-    logging.RequestBodyLogLimit = 4096;
-    logging.ResponseBodyLogLimit = 4096;
-    logging.CombineLogs = true;
-}));
 builder.Services.AddHttpContextAccessor();
-
-builder.Host.UseSerilog(Log.Logger, true);
+builder.SerilogConfigure();
 builder.Services.AddDaprClient();
 builder.Services.AddEndpointsApiExplorer();
 
@@ -92,13 +57,12 @@ builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
-// app.UseMiddleware<HttpMiddleware>();
-
 if (!app.Environment.IsDevelopment())
 {
     app.UseAllElasticApm(app.Configuration);
 }
 
+app.UseMiddleware<HttpMiddleware>();
 app.UseLoggingHandlerMiddlewares();
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
