@@ -90,6 +90,16 @@ services:
     command: server -dev -dev-root-token-id="admin"
     networks:
       - bbt-development
+        
+  vault-prepopulate:
+    image: alpine/curl:latest
+    depends_on:
+      - vault
+    volumes:
+      - ./vault.sh:/etc/vault/prepopulate_vault.sh
+    command: ["sh", "-c", "chmod +x /etc/vault/prepopulate_vault.sh && /etc/vault/prepopulate_vault.sh"]
+    networks:
+      - bbt-development
       
 networks:
   bbt-development:
