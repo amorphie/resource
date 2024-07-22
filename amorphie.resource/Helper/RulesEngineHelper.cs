@@ -2,6 +2,7 @@ using System.Text;
 using System.Text.Json;
 using amorphie.core.Enums;
 using amorphie.resource.Helper;
+using Elastic.Apm.Api;
 using Newtonsoft.Json;
 using Serilog;
 
@@ -87,7 +88,7 @@ public static class Utils
         var list = valList.Split(',').ToList();
         return list.Contains(check);
     }
-    
+
     public static CallApiResponse CallApiGet(string url)
     {
         return CallApi(url, null, HttpMethodType.GET, null);
@@ -97,7 +98,7 @@ public static class Utils
     {
         return CallApi(url, null, HttpMethodType.GET, header);
     }
-    
+
     public static CallApiResponse CallApiPost(string url, dynamic body)
     {
         return CallApi(url, body, HttpMethodType.POST, null);
@@ -118,90 +119,116 @@ public static class Utils
 
         Task.Run(async () =>
         {
-            if (httpMethodType == HttpMethodType.POST)
+            var transaction = Elastic.Apm.Agent.Tracer.CurrentTransaction ??
+                              Elastic.Apm.Agent.Tracer.StartTransaction("CallApi", ApiConstants.TypeUnknown);
+            
+            var span = transaction.StartSpan($"CallApi-{url}", ApiConstants.TypeUnknown);
+            span.SetLabel("CallApi.Url", url);
+            try
             {
-                if (body == null)
-                    body = "";
-
-                var jsonBody = JsonConvert.SerializeObject(body);
-
-                using var httpContent =
-                    new StringContent(Convert.ToString(jsonBody), Encoding.UTF8, "application/json");
-                if (header != null)
+                if (httpMethodType == HttpMethodType.POST)
                 {
-                    try
-                    {
-                        var headerJson = JsonConvert.SerializeObject(header);
-                        Dictionary<string, object> headerDic =
-                            JsonConvert.DeserializeObject<IDictionary<string, object>>(headerJson);
-                        foreach (var item in headerDic)
-                        {
-                            if (CallApiConsts.IgnoreDefaultHeaders.Contains(item.Key) ||
-                                CallApiConsts.ExcludeHeaders.Contains(item.Key.ToLower()))
-                            {
-                                continue;
-                            }
+                    span.SetLabel("CallApi.Method", "POST");
+                    if (body == null)
+                        body = "";
 
-                            if (!httpContent.Headers.Contains(item.Key))
+                    var jsonBody = JsonConvert.SerializeObject(body);
+                    span.SetLabel("CallApi.RequestBody", jsonBody);
+                    using var httpContent =
+                        new StringContent(Convert.ToString(jsonBody), Encoding.UTF8, "application/json");
+                    if (header != null)
+                    {
+                        try
+                        {
+                            var headerJson = JsonConvert.SerializeObject(header);
+                            Dictionary<string, object> headerDic =
+                                JsonConvert.DeserializeObject<IDictionary<string, object>>(headerJson);
+                            foreach (var item in headerDic)
                             {
-                                httpContent.Headers.TryAddWithoutValidation(item.Key, item.Value.ToString());
+                                if (CallApiConsts.IgnoreDefaultHeaders.Contains(item.Key) ||
+                                    CallApiConsts.ExcludeHeaders.Contains(item.Key.ToLower()))
+                                {
+                                    continue;
+                                }
+
+                                if (!httpContent.Headers.Contains(item.Key))
+                                {
+                                    httpContent.Headers.TryAddWithoutValidation(item.Key, item.Value.ToString());
+                                }
                             }
+                            
+                            span.SetLabel("CallApi.Header",
+                                JsonConvert.SerializeObject(httpContent.Headers.Select(s => new { s.Key, s.Value })));
+                        }
+                        catch (Exception e)
+                        {
+                            Log.Error(e, "headers could not be processed");
+                            span.CaptureException(e);
                         }
                     }
-                    catch (Exception e)
-                    {
-                        Log.Error(e, "headers could not be processed");
-                    }
+
+                    response = await apiClient.PostAsync(url, httpContent);
                 }
-
-                response = await apiClient.PostAsync(url, httpContent);
-            }
-            else
-            {
-                using HttpRequestMessage request =
-                    new HttpRequestMessage(HttpMethod.Get, url);
-                if (header != null)
+                else
                 {
-                    try
+                    span.SetLabel("CallApi.Method", "GET");
+                    using HttpRequestMessage request =
+                        new HttpRequestMessage(HttpMethod.Get, url);
+                    if (header != null)
                     {
-                        var headerJson = JsonConvert.SerializeObject(header);
-                        Dictionary<string, object> headerDic =
-                            JsonConvert.DeserializeObject<IDictionary<string, object>>(headerJson);
-                        foreach (var item in headerDic)
+                        try
                         {
-                            if (CallApiConsts.IgnoreDefaultHeaders.Contains(item.Key) ||
-                                CallApiConsts.ExcludeHeaders.Contains(item.Key.ToLower()))
+                            var headerJson = JsonConvert.SerializeObject(header);
+                            Dictionary<string, object> headerDic =
+                                JsonConvert.DeserializeObject<IDictionary<string, object>>(headerJson);
+                            foreach (var item in headerDic)
                             {
-                                continue;
-                            }
+                                if (CallApiConsts.IgnoreDefaultHeaders.Contains(item.Key) ||
+                                    CallApiConsts.ExcludeHeaders.Contains(item.Key.ToLower()))
+                                {
+                                    continue;
+                                }
 
-                            if (!request.Headers.Contains(item.Key))
-                            {
-                                request.Headers.TryAddWithoutValidation(item.Key, item.Value.ToString());
+                                if (!request.Headers.Contains(item.Key))
+                                {
+                                    request.Headers.TryAddWithoutValidation(item.Key, item.Value.ToString());
+                                }
                             }
+                            
+                            span.SetLabel("CallApi.Header",
+                                JsonConvert.SerializeObject(request.Headers.Select(s => new { s.Key, s.Value })));
+                        }
+                        catch (Exception e)
+                        {
+                            Log.Error(e, "headers could not be processed");
+                            span.CaptureException(e);
                         }
                     }
-                    catch (Exception e)
+
+                    response = await apiClient.SendAsync(request);
+                }
+
+                span.SetLabel("CallApi.Response.StatusCode", response.StatusCode.ToString());
+                // Check if the response is successful
+                if (response.IsSuccessStatusCode)
+                {
+                    // Read the response content as a JSON string
+                    string jsonContent = await response.Content.ReadAsStringAsync();
+                    span.SetLabel("CallApi.Response.Body", jsonContent);
+                    using (JsonDocument jsonDocument = JsonDocument.Parse(jsonContent))
                     {
-                        Log.Error(e, "headers could not be processed");
+                        // Convert the JsonDocument to a dynamic object
+                        data = DeserializeJsonDocument(jsonDocument);
                     }
                 }
-
-                response = await apiClient.SendAsync(request);
             }
-
-            // Check if the response is successful
-            if (response.IsSuccessStatusCode)
+            catch (Exception e)
             {
-                // Read the response content as a JSON string
-                string jsonContent = await response.Content.ReadAsStringAsync();
-                ;
-
-                using (JsonDocument jsonDocument = JsonDocument.Parse(jsonContent))
-                {
-                    // Convert the JsonDocument to a dynamic object
-                    data = DeserializeJsonDocument(jsonDocument);
-                }
+                span.CaptureException(e);
+            }
+            finally
+            {
+                span.End();
             }
         }).Wait();
 
