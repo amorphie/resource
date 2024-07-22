@@ -29,6 +29,11 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
          CancellationToken cancellationToken
          )
     {
+        var transaction = Elastic.Apm.Agent.Tracer.CurrentTransaction;
+        transaction.SetLabel("ClientId", headerClientId);
+        transaction.SetLabel("RequestBody.Url", request.Url);
+        transaction.SetLabel("RequestBody.Data", request.Data);
+        
         logger.LogInformation($"ClientId:{headerClientId}");
         logger.LogInformation($"Request.Url:{request.Url}");
         logger.LogInformation($"Request.Data:{request.Data}");
