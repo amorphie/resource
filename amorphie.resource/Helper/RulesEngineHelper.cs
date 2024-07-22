@@ -121,10 +121,10 @@ public static class Utils
         {
             var transaction = Elastic.Apm.Agent.Tracer.CurrentTransaction ??
                               Elastic.Apm.Agent.Tracer.StartTransaction("CallApi", ApiConstants.TypeUnknown);
-            
+
             var span = transaction.StartSpan($"CallApi-{url}", ApiConstants.TypeUnknown);
             span.SetLabel("CallApi.Url", url);
-            
+
             try
             {
                 if (httpMethodType == HttpMethodType.POST)
@@ -157,7 +157,7 @@ public static class Utils
                                     httpContent.Headers.TryAddWithoutValidation(item.Key, item.Value.ToString());
                                 }
                             }
-                            
+
                             span.SetLabel("CallApi.Header",
                                 JsonConvert.SerializeObject(httpContent.Headers.Select(s => new { s.Key, s.Value })));
                         }
@@ -166,6 +166,10 @@ public static class Utils
                             Log.Error(e, "headers could not be processed");
                             span.CaptureException(e);
                         }
+                    }
+                    else
+                    {
+                        span.SetLabel("CallApi.Header", "none");
                     }
 
                     response = await apiClient.PostAsync(url, httpContent);
@@ -195,7 +199,7 @@ public static class Utils
                                     request.Headers.TryAddWithoutValidation(item.Key, item.Value.ToString());
                                 }
                             }
-                            
+
                             span.SetLabel("CallApi.Header",
                                 JsonConvert.SerializeObject(request.Headers.Select(s => new { s.Key, s.Value })));
                         }
@@ -204,6 +208,10 @@ public static class Utils
                             Log.Error(e, "headers could not be processed");
                             span.CaptureException(e);
                         }
+                    }
+                    else
+                    {
+                        span.SetLabel("CallApi.Header", "none");
                     }
 
                     response = await apiClient.SendAsync(request);
