@@ -154,7 +154,7 @@ public static class Utils
 
                                 if (!httpContent.Headers.Contains(item.Key))
                                 {
-                                    httpContent.Headers.TryAddWithoutValidation(item.Key, item.Value.ToString());
+                                    httpContent.Headers.TryAddWithoutValidation(item.Key, item.Value.ToString().ToAscii());
                                 }
                             }
 
@@ -195,7 +195,7 @@ public static class Utils
 
                                 if (!request.Headers.Contains(item.Key))
                                 {
-                                    request.Headers.TryAddWithoutValidation(item.Key, item.Value.ToString());
+                                    request.Headers.TryAddWithoutValidation(item.Key, item.Value.ToString().ToAscii());
                                 }
                             }
 
