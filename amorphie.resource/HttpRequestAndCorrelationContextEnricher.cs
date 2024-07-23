@@ -26,12 +26,35 @@ public class HttpRequestAndCorrelationContextEnricher(IHttpContextAccessor httpC
                     "User-Agent"
                 ]));
 
-            if (httpContext.Request.Headers.TryGetValue("X-Request-Id", out var appCorrelationId)
-                || httpContext.Request.Headers.TryGetValue("xrequestid", out appCorrelationId))
+            if (httpContext.Request.Headers.TryGetValue("X-Request-Id", out var requestId)
+                || httpContext.Request.Headers.TryGetValue("xrequestid", out requestId))
             {
                 logEvent.AddPropertyIfAbsent(propertyFactory.CreateProperty(
                     "X-Request-Id"
-                    , appCorrelationId));
+                    , requestId));
+            }
+            
+            if (httpContext.Request.Headers.TryGetValue("X-Device-Id", out var deviceId)
+                || httpContext.Request.Headers.TryGetValue("xdeviceid", out deviceId))
+            {
+                logEvent.AddPropertyIfAbsent(propertyFactory.CreateProperty(
+                    "X-Device-Id"
+                    , deviceId));
+            }
+            
+            if (httpContext.Request.Headers.TryGetValue("X-Token-Id", out var tokenId)
+                || httpContext.Request.Headers.TryGetValue("xtokenid", out tokenId))
+            {
+                logEvent.AddPropertyIfAbsent(propertyFactory.CreateProperty(
+                    "X-Token-Id"
+                    , tokenId));
+            }
+            
+            if (httpContext.Request.Headers.TryGetValue("user_reference", out var reference))
+            {
+                logEvent.AddPropertyIfAbsent(propertyFactory.CreateProperty(
+                    "user_reference"
+                    , reference));
             }
         }
     }

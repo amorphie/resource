@@ -46,18 +46,15 @@ builder.Services.AddDbContext<ResourceDBContext>
     (options => options.UseNpgsql(postgreSql, b => b.MigrationsAssembly("amorphie.resource.data")));
 
 builder.Services.AddHealthChecks();
+builder.Services.AddExceptionHandler<ResourceExceptionHandler>();
+builder.Services.AddProblemDetails();
+builder.Services.AddTransient<ResourceExceptionHandlerMiddleware>();
 
 var app = builder.Build();
-if (!app.Environment.IsDevelopment())
-{
-    app.UseAllElasticApm(app.Configuration);
-}
+app.UseAllElasticApm(app.Configuration);
 
-// app.UseMiddleware<HttpMiddleware>();
 app.UseMiddleware<ResourceExceptionHandlerMiddleware>();
 app.UseHttpLogging();
-// app.UseLoggingHandlerMiddlewares();
-
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 

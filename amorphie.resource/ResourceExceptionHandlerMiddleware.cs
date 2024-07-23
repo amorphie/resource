@@ -1,60 +1,40 @@
-using System.Runtime.CompilerServices;
-
 namespace amorphie.resource;
 
-public class ResourceExceptionHandlerMiddleware
+public class ResourceExceptionHandlerMiddleware : IMiddleware
 {
-    private readonly RequestDelegate _next;
-    private readonly ILogger _logger;
+    private readonly ILogger<ResourceExceptionHandlerMiddleware> _logger;
 
-    public ResourceExceptionHandlerMiddleware(RequestDelegate next, ILoggerFactory loggerFactory)
+    public ResourceExceptionHandlerMiddleware(ILogger<ResourceExceptionHandlerMiddleware> logger)
     {
-        this._next = next;
-        this._logger = (ILogger)loggerFactory.CreateLogger<ResourceExceptionHandlerMiddleware>();
+        _logger = logger;
     }
 
-    public async Task InvokeAsync(HttpContext context)
+    private void RequestEnableBuffering(HttpContext context)
     {
-        try
+        context.Request.EnableBuffering();
+    }
+
+    private void SetTraceIdentifier(HttpContext context)
+    {
+        if (context.Request.Headers.TryGetValue("X-Request-Id", out var appCorrelationId)
+            || context.Request.Headers.TryGetValue("xrequestid", out appCorrelationId))
         {
-            context.Request.EnableBuffering();
-            
-            if (context.Request.Headers.TryGetValue("X-Request-Id", out var appCorrelationId)
-                || context.Request.Headers.TryGetValue("xrequestid", out appCorrelationId))
+            if (appCorrelationId.Any())
             {
-                if (appCorrelationId.Any())
-                {
-                    context.TraceIdentifier = appCorrelationId;
-                }
-                else
-                {
-                    context.TraceIdentifier = Guid.NewGuid().ToString();
-                }
+                context.TraceIdentifier = appCorrelationId;
             }
-
-            await this._next(context);
-        }
-        catch (Exception ex)
-        {
-            await this.HandleExceptionAsync(context, ex);
+            else
+            {
+                context.TraceIdentifier = Guid.NewGuid().ToString();
+            }
         }
     }
 
-    private async Task HandleExceptionAsync(HttpContext httpContext, Exception ex)
+    public async Task InvokeAsync(HttpContext context, RequestDelegate next)
     {
-        string text = "An error occured and logged with \"" + httpContext.TraceIdentifier + "\" trace identifier id";
-        httpContext.Response.ContentType = "application/json";
-        httpContext.Response.StatusCode =
-            !(ex is BadHttpRequestException requestException) ? 500 : requestException.StatusCode;
-        ILogger logger = this._logger;
-        // DefaultInterpolatedStringHandler interpolatedStringHandler = new DefaultInterpolatedStringHandler(31, 2);
-        // interpolatedStringHandler.AppendLiteral("TraceIdentifier : ");
-        // interpolatedStringHandler.AppendFormatted(httpContext.TraceIdentifier);
-        // interpolatedStringHandler.AppendLiteral(". Exception: ");
-        // interpolatedStringHandler.AppendFormatted<Exception>(ex);
-        // string stringAndClear = interpolatedStringHandler.ToStringAndClear();
-        object[] objArray = Array.Empty<object>();
-        // logger.LogError(stringAndClear, objArray);
-        await httpContext.Response.WriteAsync(text);
+        RequestEnableBuffering(context);
+        SetTraceIdentifier(context);
+
+        await next(context);
     }
 }

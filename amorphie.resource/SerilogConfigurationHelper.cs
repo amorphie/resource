@@ -1,4 +1,3 @@
-using amorphie.core.Extension;
 using Microsoft.AspNetCore.HttpLogging;
 using Serilog;
 using Serilog.Formatting.Compact;
@@ -22,22 +21,29 @@ public static class SerilogConfigurationHelper
         "X-Request-Id",
         "xrequestid"
     ];
-    
+
     public static WebApplicationBuilder SerilogConfigure(this WebApplicationBuilder builder)
     {
         builder.Logging.ClearProviders();
         builder.Services.AddSingleton<HttpRequestAndCorrelationContextEnricher>();
-        builder.Services.AddHttpLogging((Action<HttpLoggingOptions>) (logging =>
+        builder.Services.AddHttpLogging(logging =>
         {
-            bool flag = builder.Environment.IsProd() || builder.Environment.IsProduction();
-            logging.LoggingFields = flag ? HttpLoggingFields.RequestScheme : HttpLoggingFields.RequestScheme | HttpLoggingFields.RequestBody | HttpLoggingFields.ResponseBody;
-            DefaultHeadersToBeLogged.ForEach((Action<string>) (p => logging.RequestHeaders.Add(p)));
+            var isProduction = builder.Environment.IsProduction();
+            logging.LoggingFields = isProduction
+                ? HttpLoggingFields.RequestScheme
+                : HttpLoggingFields.RequestScheme | HttpLoggingFields.RequestBody | HttpLoggingFields.ResponseBody;
+
+            foreach (var header in DefaultHeadersToBeLogged)
+            {
+                logging.RequestHeaders.Add(header);
+            }
+
             logging.MediaTypeOptions.AddText("application/javascript");
             logging.RequestBodyLogLimit = 4096;
             logging.ResponseBodyLogLimit = 4096;
             logging.CombineLogs = true;
-        }));
-        
+        });
+
         builder.Host.UseSerilog((_, serviceProvider, loggerConfiguration) =>
         {
             var enricher = serviceProvider.GetRequiredService<HttpRequestAndCorrelationContextEnricher>();
@@ -46,12 +52,14 @@ public static class SerilogConfigurationHelper
                 .Enrich.WithEnvironmentName()
                 .Enrich.WithMachineName()
                 .Enrich.With(enricher)
+#if DEBUG
                 .WriteTo.Console()
+#endif
                 .WriteTo.File(new CompactJsonFormatter(), "logs/amorphie-resource-log.json",
                     rollingInterval: RollingInterval.Day)
                 .ReadFrom.Configuration(builder.Configuration);
         });
-        
+
         return builder;
     }
 }
