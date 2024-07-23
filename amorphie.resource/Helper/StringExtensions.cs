@@ -12,15 +12,36 @@ public static class StringExtensions
         }
         
         // Create a StringBuilder to store the ASCII converted value
-        var asciiStringBuilder = new StringBuilder();
+        StringBuilder asciiStringBuilder = new StringBuilder();
+
+        // Define a dictionary for Turkish character replacements
+        var turkishCharMap = new Dictionary<char, char>
+        {
+            {'ç', 'c'},
+            {'ğ', 'g'},
+            {'ı', 'i'},
+            {'ö', 'o'},
+            {'ş', 's'},
+            {'ü', 'u'},
+            {'Ç', 'C'},
+            {'Ğ', 'G'},
+            {'İ', 'I'},
+            {'Ö', 'O'},
+            {'Ş', 'S'},
+            {'Ü', 'U'}
+        };
 
         // Loop through each character in the input string
         foreach (char c in value)
         {
-            // Check if the character is an ASCII character
-            if (c <= sbyte.MaxValue)
+            // Check if the character is a Turkish character and replace it
+            if (turkishCharMap.ContainsKey(c))
             {
-                // If it is, append it to the StringBuilder
+                asciiStringBuilder.Append(turkishCharMap[c]);
+            }
+            else if (c <= sbyte.MaxValue)
+            {
+                // If it is an ASCII character, append it as is
                 asciiStringBuilder.Append(c);
             }
             else
