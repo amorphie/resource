@@ -1,9 +1,10 @@
 using System.Text;
 using System.Text.RegularExpressions;
 using amorphie.resource.Helper;
+using amorphie.resource.Modules.CheckAuthorize;
+using Elastic.Apm.Api;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Serilog;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 public class CheckAuthorizeByPrivilege : CheckAuthorizeBase, ICheckAuthorize
@@ -21,7 +22,9 @@ public class CheckAuthorizeByPrivilege : CheckAuthorizeBase, ICheckAuthorize
         var resource = await GetResource(context, request, cancellationToken);
 
         if (resource == null)
-            return Results.Ok();
+        {
+            return Results.Ok(new CheckAuthorizeOutput("Resource not found."));
+        }
 
         string allowEmptyPrivilege = configuration["AllowEmptyPrivilege"];
 
@@ -39,9 +42,11 @@ public class CheckAuthorizeByPrivilege : CheckAuthorizeBase, ICheckAuthorize
         if (resourcePrivileges == null || resourcePrivileges.Count == 0)
         {
             if (string.IsNullOrEmpty(allowEmptyPrivilege) || allowEmptyPrivilege == "True")
-                return Results.Ok();
+            {
+                return Results.Ok(new CheckAuthorizeOutput("Allow empty privilege active."));
+            }
 
-            return Results.Unauthorized();
+            return Results.Json(new CheckAuthorizeOutput("Resource rules not found."), statusCode: 403);
         }
 
         var parameterList = new Dictionary<string, object>();
@@ -68,6 +73,9 @@ public class CheckAuthorizeByPrivilege : CheckAuthorizeBase, ICheckAuthorize
             RecursiveJsonLoop(jsonObject, parameterList, "body");
         }
 
+        var transaction = Elastic.Apm.Agent.Tracer.CurrentTransaction ??
+                          Elastic.Apm.Agent.Tracer.StartTransaction("CallApi", ApiConstants.TypeUnknown);
+
         foreach (ResourcePrivilege resourcePrivilege in resourcePrivileges)
         {
             var privilegeUrl = resourcePrivilege.Privilege.Url;
@@ -79,67 +87,91 @@ public class CheckAuthorizeByPrivilege : CheckAuthorizeBase, ICheckAuthorize
 
                 var apiClient = new HttpClient();
                 HttpResponseMessage response;
+                var span = transaction.StartSpan($"CallApi-{privilegeUrl}", ApiConstants.TypeUnknown);
+                span.SetLabel("CallApi.Url", privilegeUrl);
 
-                if (resourcePrivilege.Privilege.Type == amorphie.core.Enums.HttpMethodType.POST)
+                try
                 {
-                    var data = string.IsNullOrEmpty(request.Data) ? "" : request.Data;
-                    using var httpContent = new StringContent(data, Encoding.UTF8, "application/json");
-                    try
+                    if (resourcePrivilege.Privilege.Type == amorphie.core.Enums.HttpMethodType.POST)
                     {
-                        foreach (var item in httpContext.Request.Headers)
+                        span.SetLabel("CallApi.Method", "POST");
+                        var data = string.IsNullOrEmpty(request.Data) ? "" : request.Data;
+                        span.SetLabel("CallApi.RequestBody", data);
+                        using var httpContent = new StringContent(data, Encoding.UTF8, "application/json");
+                        try
                         {
-                            if (CallApiConsts.IgnoreDefaultHeaders.Contains(item.Key) ||
-                                CallApiConsts.ExcludeHeaders.Contains(item.Key.ToLower()))
+                            foreach (var item in httpContext.Request.Headers)
                             {
-                                continue;
+                                if (CallApiConsts.IgnoreDefaultHeaders.Contains(item.Key) ||
+                                    CallApiConsts.ExcludeHeaders.Contains(item.Key.ToLower()))
+                                {
+                                    continue;
+                                }
+
+                                if (!httpContent.Headers.Contains(item.Key))
+                                {
+                                    httpContent.Headers.TryAddWithoutValidation(item.Key, item.Value.ToString());
+                                }
                             }
 
-                            if (!httpContent.Headers.Contains(item.Key))
-                            {
-                                httpContent.Headers.TryAddWithoutValidation(item.Key, item.Value.ToString());
-                            }
+                            span.SetLabel("CallApi.Header",
+                                JsonConvert.SerializeObject(httpContent.Headers.Select(s => new { s.Key, s.Value })));
                         }
+                        catch (Exception e)
+                        {
+                            span.CaptureException(e);
+                        }
+
+                        response = await apiClient.PostAsync(privilegeUrl, httpContent);
                     }
-                    catch (Exception e)
+                    else
                     {
-                        Log.Error(e, "headers could not be processed");
+                        span.SetLabel("CallApi.Method", "GET");
+                        using HttpRequestMessage getRequest =
+                            new HttpRequestMessage(HttpMethod.Get, privilegeUrl);
+                        try
+                        {
+                            foreach (var item in httpContext.Request.Headers)
+                            {
+                                if (CallApiConsts.IgnoreDefaultHeaders.Contains(item.Key) ||
+                                    CallApiConsts.ExcludeHeaders.Contains(item.Key.ToLower()))
+                                {
+                                    continue;
+                                }
+
+                                if (!getRequest.Headers.Contains(item.Key))
+                                {
+                                    getRequest.Headers.TryAddWithoutValidation(item.Key, item.Value.ToString());
+                                }
+                            }
+
+                            span.SetLabel("CallApi.Header",
+                                JsonConvert.SerializeObject(getRequest.Headers.Select(s => new { s.Key, s.Value })));
+                        }
+                        catch (Exception e)
+                        {
+                            span.CaptureException(e);
+                        }
+
+                        response = await apiClient.SendAsync(getRequest);
                     }
 
-                    response = await apiClient.PostAsync(privilegeUrl, httpContent);
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        return Results.Json(new CheckAuthorizeOutput("FAILED"), statusCode: 403);
+                    }
                 }
-                else
+                catch (Exception e)
                 {
-                    using HttpRequestMessage getRequest =
-                        new HttpRequestMessage(HttpMethod.Get, privilegeUrl);
-                    try
-                    {
-                        foreach (var item in httpContext.Request.Headers)
-                        {
-                            if (CallApiConsts.IgnoreDefaultHeaders.Contains(item.Key) ||
-                                CallApiConsts.ExcludeHeaders.Contains(item.Key.ToLower()))
-                            {
-                                continue;
-                            }
-
-                            if (!getRequest.Headers.Contains(item.Key))
-                            {
-                                getRequest.Headers.TryAddWithoutValidation(item.Key, item.Value.ToString());
-                            }
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        Log.Error(e, "headers could not be processed");
-                    }
-
-                    response = await apiClient.SendAsync(getRequest);
+                    span.CaptureException(e);
                 }
-
-                if (!response.IsSuccessStatusCode)
-                    return Results.Unauthorized();
+                finally
+                {
+                    span.End();
+                }
             }
         }
 
-        return Results.Ok();
+        return Results.Ok(new CheckAuthorizeOutput("SUCCESS"));
     }
 }
