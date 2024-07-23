@@ -44,8 +44,34 @@ public class ResourceExceptionHandlerMiddleware : IMiddleware
     private string ReadHeaders(HttpContext context)
     {
         var headerText = new StringBuilder();
-        foreach (var header in context.Request.Headers)
+        var headers = context.Request.Headers;
+        foreach (var header in headers)
         {
+            if (header.Key == "Authorization")
+            {
+                context.Request.Headers.Remove(header);
+            }
+
+            if (header.Key == "Cookie")
+            {
+                context.Request.Headers.Remove(header);
+            }
+
+            if (header.Key == "x-access-token")
+            {
+                context.Request.Headers.Remove(header);
+            }
+
+            if (header.Key == "psu-fraud-check")
+            {
+                context.Request.Headers.Remove(header);
+            }
+
+            if (header.Key == "x-jws-signature" || header.Key == "x-userinfo")
+            {
+                context.Request.Headers.Remove(header);
+            }
+
             headerText.AppendLine($"header.{header.Key}: {header.Value}");
         }
 
@@ -58,7 +84,7 @@ public class ResourceExceptionHandlerMiddleware : IMiddleware
         string body = "";
         if (context.Request.ContentLength is > 0)
         {
-            using (var reader = new StreamReader(context.Request.Body, Encoding.UTF8))
+            using (var reader = new StreamReader(context.Request.Body, Encoding.UTF8, true, 1024, true))
             {
                 body = await reader.ReadToEndAsync();
             }
@@ -68,7 +94,7 @@ public class ResourceExceptionHandlerMiddleware : IMiddleware
 
         var header = ReadHeaders(context);
         _logger.LogInformation($"{nameof(ResourceExceptionHandlerMiddleware)}. \n Body: {body} \n Headers: {header}");
-      
+
         SetTraceIdentifier(context);
 
         await next(context);
