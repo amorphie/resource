@@ -110,7 +110,7 @@ public class CheckAuthorizeByPrivilege : CheckAuthorizeBase, ICheckAuthorize
 
                                 if (!httpContent.Headers.Contains(item.Key))
                                 {
-                                    httpContent.Headers.TryAddWithoutValidation(item.Key, item.Value.ToString());
+                                    httpContent.Headers.TryAddWithoutValidation(item.Key, item.Value.ToString().ToAscii());
                                 }
                             }
 
@@ -141,7 +141,7 @@ public class CheckAuthorizeByPrivilege : CheckAuthorizeBase, ICheckAuthorize
 
                                 if (!getRequest.Headers.Contains(item.Key))
                                 {
-                                    getRequest.Headers.TryAddWithoutValidation(item.Key, item.Value.ToString());
+                                    getRequest.Headers.TryAddWithoutValidation(item.Key, item.Value.ToString().ToAscii());
                                 }
                             }
 
