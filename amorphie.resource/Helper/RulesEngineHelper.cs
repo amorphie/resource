@@ -94,7 +94,7 @@ public static class Utils
         return CallApi(url, null, HttpMethodType.GET, null);
     }
 
-    public static CallApiResponse CallApiGet(string url, dynamic? header = null)
+    public static CallApiResponse CallApiGet(string url, dynamic header)
     {
         return CallApi(url, null, HttpMethodType.GET, header);
     }
@@ -104,7 +104,7 @@ public static class Utils
         return CallApi(url, body, HttpMethodType.POST, null);
     }
 
-    public static CallApiResponse CallApiPost(string url, dynamic body, dynamic? header = null)
+    public static CallApiResponse CallApiPost(string url, dynamic body, dynamic header)
     {
         return CallApi(url, body, HttpMethodType.POST, header);
     }
@@ -163,7 +163,6 @@ public static class Utils
                         }
                         catch (Exception e)
                         {
-                            Log.Error(e, "headers could not be processed");
                             span.CaptureException(e);
                         }
                     }
