@@ -1,4 +1,5 @@
 using System.Dynamic;
+using System.Net;
 using System.Text.RegularExpressions;
 using amorphie.resource.Modules.CheckAuthorize;
 using Newtonsoft.Json;
@@ -7,12 +8,15 @@ using RulesEngine.Models;
 
 public class CheckAuthorizeByRule : CheckAuthorizeBase, ICheckAuthorize
 {
+    private readonly string _environment;
+
     public async ValueTask<IResult> Check(
         CheckAuthorizeRequest request,
         ResourceDBContext context,
         HttpContext httpContext,
         string headerClientId,
         IConfiguration configuration,
+        ILogger logger,
         CancellationToken cancellationToken
     )
     {
@@ -21,7 +25,9 @@ public class CheckAuthorizeByRule : CheckAuthorizeBase, ICheckAuthorize
             var resource = await GetResource(context, request, cancellationToken);
 
             if (resource == null)
-                return Results.Ok();
+            {
+                return Results.Ok(new CheckAuthorizeOutput("Resource not found."));
+            }
 
             string allowEmptyPrivilege = configuration["AllowEmptyPrivilege"];
 
@@ -30,25 +36,34 @@ public class CheckAuthorizeByRule : CheckAuthorizeBase, ICheckAuthorize
             if (resourceRules == null || resourceRules.Count == 0)
             {
                 if (string.IsNullOrEmpty(allowEmptyPrivilege) || allowEmptyPrivilege == "True")
-                    return Results.Ok();
+                {
+                    return Results.Ok(new CheckAuthorizeOutput("Allow empty privilege active."));
+                }
 
-                return Results.Unauthorized();
+                return Results.Json(new CheckAuthorizeOutput("Resource rules not found."), statusCode: 403);
             }
 
             var ruleParams = new List<RuleParameter>();
 
             SetRuleParameterList(ruleParams, httpContext, request, resource.Url);
 
-            var resultList = await ExecuteRules(ruleParams, resourceRules);
+            var resultList = await ExecuteRules(ruleParams, resourceRules, logger);
 
             if (resultList.Any(t => t.IsSuccess == false))
-                return Results.Unauthorized();
-
-            return Results.Ok();
+            {
+                return Results.Json(new CheckAuthorizeOutput("FAILED"), statusCode: 403);
+            }
+            
+            return Results.Ok(new CheckAuthorizeOutput("SUCCESS"));
         }
         catch (Exception ex)
         {
-            return Results.Problem(ex.Message);
+            logger.LogError(ex, $"StatusCode: {HttpStatusCode.BadRequest} Reason: Authorize check endpoint failed.");
+            return Results.Problem(new ProblemDetails()
+            {
+                Title = "Authorize check endpoint failed",
+                Detail = ex.Message
+            });
         }
     }
 
@@ -115,9 +130,9 @@ public class CheckAuthorizeByRule : CheckAuthorizeBase, ICheckAuthorize
 
         ruleParams.Add(ruleParamBody);
     }
-    
+
     private async ValueTask<List<RuleResultTree>> ExecuteRules(List<RuleParameter> ruleParameters,
-        List<ResourceRule> resourceRules)
+        List<ResourceRule> resourceRules, ILogger logger)
     {
         var ruleDefinitions = new List<RuleDefinition>();
 
@@ -128,7 +143,6 @@ public class CheckAuthorizeByRule : CheckAuthorizeBase, ICheckAuthorize
                 RuleName = resourceRule.Rule.Name,
                 Expression = resourceRule.Rule.Expression
             };
-
             ruleDefinitions.Add(ruleDefinition);
         }
 
@@ -142,11 +156,28 @@ public class CheckAuthorizeByRule : CheckAuthorizeBase, ICheckAuthorize
 
         var reSettings = new ReSettings
         {
-            CustomTypes = new Type[] { typeof(Utils) }
+            CustomTypes = new Type[] { typeof(Utils) },
         };
 
         var rulesEngine = new RulesEngine.RulesEngine(workflowRules, reSettings);
 
-        return await rulesEngine.ExecuteAllRulesAsync(workflowRuleDefinition.WorkflowName, ruleParameters.ToArray());
+
+        var response = await rulesEngine.ExecuteAllRulesAsync(workflowRuleDefinition.WorkflowName,
+            ruleParameters.ToArray());
+
+        foreach (var responseItem in response)
+        {
+            if (responseItem.IsSuccess)
+            {
+                logger.LogInformation($"RuleName: {responseItem.Rule.RuleName}. Success: {responseItem.IsSuccess}");
+            }
+            else
+            {
+                logger.LogError(
+                    $"RuleName: {responseItem.Rule.RuleName}. Success: {responseItem.IsSuccess}. ExceptionMessage: {responseItem.ExceptionMessage}");
+            }
+        }
+
+        return response;
     }
 }

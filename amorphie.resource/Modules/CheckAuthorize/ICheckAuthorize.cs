@@ -6,6 +6,7 @@ public interface ICheckAuthorize
                                HttpContext httpContext,
                                string headerClientId,
                                IConfiguration configuration,
+                               ILogger logger,
                                CancellationToken cancellationToken
                         );
 }

@@ -1,4 +1,5 @@
 using amorphie.core.Module.minimal_api;
+using Newtonsoft.Json;
 
 public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, ResourcePrivilege, ResourceDBContext>
 {
@@ -24,20 +25,28 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
          [FromHeader(Name = "clientId")] string headerClientId,
          [FromServices] IConfiguration configuration,
          [FromQuery] string? checkAuthMethod,
+         ILogger<ResourcePrivilegeModule> logger,
          CancellationToken cancellationToken
          )
     {
+        var transaction = Elastic.Apm.Agent.Tracer.CurrentTransaction;
+        transaction.SetLabel("ClientId", headerClientId);
+        transaction.SetLabel("RequestBody.Url", request.Url);
+        transaction.SetLabel("RequestBody.Data", request.Data);
+        
         ICheckAuthorize checkAuthorize;
 
         if (checkAuthMethod == "Rule")
         {
+            logger.LogInformation($"Request.CheckAuthMethod:Rule | ClientId:{headerClientId} | Request.Url:{request.Url} | Request.Data:{request.Data}");
             checkAuthorize = new CheckAuthorizeByRule();
         }
         else
         {
+            logger.LogInformation($"Request.CheckAuthMethod:None | ClientId:{headerClientId} | Request.Url:{request.Url} | Request.Data:{request.Data}");
             checkAuthorize = new CheckAuthorizeByPrivilege();
         }
 
-        return await checkAuthorize.Check(request, context, httpContext, headerClientId, configuration, cancellationToken);
+        return await checkAuthorize.Check(request, context, httpContext, headerClientId, configuration, logger, cancellationToken);
     }
 }
