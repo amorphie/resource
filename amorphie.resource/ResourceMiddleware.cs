@@ -1,20 +1,15 @@
 namespace amorphie.resource;
 
-public class ResourceExceptionHandlerMiddleware : IMiddleware
+public class ResourceMiddleware : IMiddleware
 {
-    private readonly ILogger<ResourceExceptionHandlerMiddleware> _logger;
+    private readonly ILogger<ResourceMiddleware> _logger;
 
-    public ResourceExceptionHandlerMiddleware(ILogger<ResourceExceptionHandlerMiddleware> logger)
+    public ResourceMiddleware(ILogger<ResourceMiddleware> logger)
     {
         _logger = logger;
     }
 
-    private void RequestEnableBuffering(HttpContext context)
-    {
-        context.Request.EnableBuffering();
-    }
-
-    private void SetTraceIdentifier(HttpContext context)
+    private string? SetTraceIdentifier(HttpContext context)
     {
         if (context.Request.Headers.TryGetValue("X-Request-Id", out var appCorrelationId)
             || context.Request.Headers.TryGetValue("xrequestid", out appCorrelationId))
@@ -28,13 +23,13 @@ public class ResourceExceptionHandlerMiddleware : IMiddleware
                 context.TraceIdentifier = Guid.NewGuid().ToString();
             }
         }
+
+        return context.TraceIdentifier;
     }
 
     public async Task InvokeAsync(HttpContext context, RequestDelegate next)
     {
-        RequestEnableBuffering(context);
         SetTraceIdentifier(context);
-
         await next(context);
     }
 }

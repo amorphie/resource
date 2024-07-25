@@ -22,7 +22,15 @@ public static class MapHelper
                     dictionary[property.Name] = ToList((JArray)value);
                     break;
                 default:
-                    dictionary[property.Name] = ((JValue)value).Value;
+                    var jValue = (JValue)value;
+                    if (jValue.Type == JTokenType.Integer || jValue.Type == JTokenType.Float)
+                    {
+                        dictionary[property.Name] = Convert.ToDouble(jValue.Value);
+                    }
+                    else
+                    {
+                        dictionary[property.Name] = jValue.Value;
+                    }
                     break;
             }
         }
