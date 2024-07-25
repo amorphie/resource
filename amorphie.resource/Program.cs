@@ -48,12 +48,12 @@ builder.Services.AddDbContext<ResourceDBContext>
 builder.Services.AddHealthChecks();
 builder.Services.AddExceptionHandler<ResourceExceptionHandler>();
 builder.Services.AddProblemDetails();
-builder.Services.AddTransient<ResourceExceptionHandlerMiddleware>();
+builder.Services.AddTransient<ResourceMiddleware>();
 
 var app = builder.Build();
 app.UseAllElasticApm(app.Configuration);
 
-app.UseMiddleware<ResourceExceptionHandlerMiddleware>();
+app.UseMiddleware<ResourceMiddleware>();
 app.UseHttpLogging();
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
