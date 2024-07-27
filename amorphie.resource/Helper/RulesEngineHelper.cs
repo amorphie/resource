@@ -112,112 +112,29 @@ public static class Utils
     private static CallApiResponse CallApi(string url, dynamic body, HttpMethodType httpMethodType,
         dynamic? header = null)
     {
-        var apiClient = new HttpClient();
-
+        var apiClientService = new HttpClientService();
         var response = new HttpResponseMessage();
         dynamic data = null;
-
+        
+        var transaction = Elastic.Apm.Agent.Tracer.CurrentTransaction ??
+                          Elastic.Apm.Agent.Tracer.StartTransaction("CallApi", ApiConstants.TypeUnknown);
+        var span = transaction.StartSpan($"CallApi-{url}", ApiConstants.TypeUnknown);
+        
         Task.Run(async () =>
         {
-            var transaction = Elastic.Apm.Agent.Tracer.CurrentTransaction ??
-                              Elastic.Apm.Agent.Tracer.StartTransaction("CallApi", ApiConstants.TypeUnknown);
-
-            var span = transaction.StartSpan($"CallApi-{url}", ApiConstants.TypeUnknown);
-            span.SetLabel("CallApi.Url", url);
-
             try
             {
-                if (httpMethodType == HttpMethodType.POST)
-                {
-                    span.SetLabel("CallApi.Method", "POST");
-                    if (body == null)
-                        body = "";
+                if (body == null)
+                    body = "";
 
-                    var jsonBody = JsonConvert.SerializeObject(body);
-                    span.SetLabel("CallApi.RequestBody", jsonBody);
-                    using var httpContent =
-                        new StringContent(Convert.ToString(jsonBody), Encoding.UTF8, "application/json");
-                    if (header != null)
-                    {
-                        try
-                        {
-                            var headerJson = JsonConvert.SerializeObject(header);
-                            Dictionary<string, object> headerDic =
-                                JsonConvert.DeserializeObject<IDictionary<string, object>>(headerJson);
-                            foreach (var item in headerDic)
-                            {
-                                if (CallApiConsts.IgnoreDefaultHeaders.Contains(item.Key) ||
-                                    CallApiConsts.ExcludeHeaders.Contains(item.Key.ToLower()))
-                                {
-                                    continue;
-                                }
-
-                                if (!httpContent.Headers.Contains(item.Key))
-                                {
-                                    httpContent.Headers.TryAddWithoutValidation(item.Key, item.Value.ToString().ToAscii());
-                                }
-                            }
-
-                            span.SetLabel("CallApi.Header",
-                                JsonConvert.SerializeObject(httpContent.Headers.Select(s => new { s.Key, s.Value })));
-                        }
-                        catch (Exception e)
-                        {
-                            span.CaptureException(e);
-                        }
-                    }
-                    else
-                    {
-                        span.SetLabel("CallApi.Header", "none");
-                    }
-
-                    response = await apiClient.PostAsync(url, httpContent);
-                }
-                else
-                {
-                    span.SetLabel("CallApi.Method", "GET");
-                    using HttpRequestMessage request =
-                        new HttpRequestMessage(HttpMethod.Get, url);
-                    if (header != null)
-                    {
-                        try
-                        {
-                            var headerJson = JsonConvert.SerializeObject(header);
-                            Dictionary<string, object> headerDic =
-                                JsonConvert.DeserializeObject<IDictionary<string, object>>(headerJson);
-                            foreach (var item in headerDic)
-                            {
-                                if (CallApiConsts.IgnoreDefaultHeaders.Contains(item.Key) ||
-                                    CallApiConsts.ExcludeHeaders.Contains(item.Key.ToLower()))
-                                {
-                                    continue;
-                                }
-
-                                if (!request.Headers.Contains(item.Key))
-                                {
-                                    request.Headers.TryAddWithoutValidation(item.Key, item.Value.ToString().ToAscii());
-                                }
-                            }
-
-                            span.SetLabel("CallApi.Header",
-                                JsonConvert.SerializeObject(request.Headers.Select(s => new { s.Key, s.Value })));
-                        }
-                        catch (Exception e)
-                        {
-                            Log.Error(e, "headers could not be processed");
-                            span.CaptureException(e);
-                        }
-                    }
-                    else
-                    {
-                        span.SetLabel("CallApi.Header", "none");
-                    }
-
-                    response = await apiClient.SendAsync(request);
-                }
+                response = await apiClientService.SendRequestAsync(
+                    url,
+                    body,
+                    httpMethodType.ToString(),
+                    header,
+                    span);
 
                 span.SetLabel("CallApi.Response.StatusCode", response.StatusCode.ToString());
-                // Check if the response is successful
                 if (response.IsSuccessStatusCode)
                 {
                     // Read the response content as a JSON string
@@ -254,13 +171,13 @@ public static class Utils
         foreach (JsonProperty property in jsonDocument.RootElement.EnumerateObject())
         {
             // Add the property to the dynamic object
-            ((IDictionary<String, Object>)dynamicObject)[property.Name] = GetValue(property.Value);
+            ((IDictionary<string, object?>)dynamicObject)[property.Name] = GetValue(property.Value);
         }
 
         return dynamicObject;
     }
 
-    static object GetValue(JsonElement jsonElement)
+    static object? GetValue(JsonElement jsonElement)
     {
         // Handle different value types
         switch (jsonElement.ValueKind)

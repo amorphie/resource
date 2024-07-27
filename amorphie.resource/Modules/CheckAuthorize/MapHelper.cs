@@ -82,7 +82,7 @@ public static class MapHelper
             }
         }
 
-        return (ExpandoObject)expandoObject;
+        return (ExpandoObject)expandoObject!;
     }
     
     public static List<object> ToExpandoList(List<object> list)
