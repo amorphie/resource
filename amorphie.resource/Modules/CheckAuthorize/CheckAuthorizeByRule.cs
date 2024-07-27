@@ -8,8 +8,6 @@ using RulesEngine.Models;
 
 public class CheckAuthorizeByRule : CheckAuthorizeBase, ICheckAuthorize
 {
-    private readonly string _environment;
-
     public async ValueTask<IResult> Check(
         CheckAuthorizeRequest request,
         ResourceDBContext context,
