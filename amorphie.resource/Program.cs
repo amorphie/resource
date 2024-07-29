@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Text;
 using amorphie.core.Extension;
 using amorphie.core.Identity;
 using amorphie.core.Swagger;
@@ -54,7 +55,6 @@ var app = builder.Build();
 app.UseAllElasticApm(app.Configuration);
 
 app.UseMiddleware<ResourceMiddleware>();
-app.UseHttpLogging();
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
