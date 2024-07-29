@@ -74,14 +74,14 @@ try
     app.Logger.LogInformation("Starting application...");
     app.AddRoutes();
     
-    // app.Use(async (context, next) =>
-    // {
-    //     context.Request.EnableBuffering();
-    //     using var reader = new StreamReader(context.Request.Body, Encoding.UTF8, leaveOpen:true);
-    //     var body = await reader.ReadToEndAsync();
-    //     context.Request.Body.Position = 0;
-    //     await next();
-    // });
+    app.Use(async (context, next) =>
+    {
+        context.Request.EnableBuffering();
+        using var reader = new StreamReader(context.Request.Body, Encoding.UTF8, leaveOpen:true);
+        var body = await reader.ReadToEndAsync();
+        context.Request.Body.Position = 0;
+        await next();
+    });
     
     app.Run();
 }
