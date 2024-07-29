@@ -97,11 +97,11 @@ public class HttpClientService
                         request.Content = new StringContent(string.Empty);
                     }
 
-                    request.Content.Headers.TryAddWithoutValidation(header.Key, header.Value.ToString());
+                    request.Content.Headers.TryAddWithoutValidation(header.Key, header.Value.ToString().ToAscii());
                 }
                 else
                 {
-                    request.Headers.TryAddWithoutValidation(header.Key, header.Value.ToString());
+                    request.Headers.TryAddWithoutValidation(header.Key, header.Value.ToString().ToAscii());
                 }
             }
             catch (Exception ex)
