@@ -2,11 +2,17 @@ namespace amorphie.resource;
 
 public class ResourceMiddleware : IMiddleware
 {
+    private readonly HashSet<string> _bypassHeaders;
     private readonly ILogger<ResourceMiddleware> _logger;
 
     public ResourceMiddleware(ILogger<ResourceMiddleware> logger)
     {
         _logger = logger;
+
+        _bypassHeaders = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "Transfer-Encoding"
+        };
     }
 
     private string? SetTraceIdentifier(HttpContext context)
@@ -21,6 +27,15 @@ public class ResourceMiddleware : IMiddleware
             else
             {
                 context.TraceIdentifier = Guid.NewGuid().ToString();
+            }
+        }
+
+        foreach (var header in context.Request.Headers)
+        {
+            if (_bypassHeaders.Contains(header.Key))
+            {
+                context.Request.Headers.Remove(header.Key);
+                break;
             }
         }
 
