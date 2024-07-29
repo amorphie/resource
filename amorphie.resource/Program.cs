@@ -55,6 +55,7 @@ var app = builder.Build();
 app.UseAllElasticApm(app.Configuration);
 
 app.UseMiddleware<ResourceMiddleware>();
+app.UseHttpLogging();
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
