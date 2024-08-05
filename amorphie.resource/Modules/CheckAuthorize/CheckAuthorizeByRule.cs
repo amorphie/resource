@@ -1,6 +1,8 @@
 using System.Dynamic;
 using System.Net;
+using System.Text;
 using System.Text.RegularExpressions;
+using amorphie.resource.Helper;
 using amorphie.resource.Modules.CheckAuthorize;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -95,7 +97,7 @@ public class CheckAuthorizeByRule : CheckAuthorizeBase, ICheckAuthorize
 
         foreach (var requestHeader in httpContext.Request.Headers)
         {
-            ((IDictionary<string, object>)header).Add(requestHeader.Key, requestHeader.Value.ToString());
+            ((IDictionary<string, object>)header).Add(requestHeader.Key.ToClean(), requestHeader.Value.ToString());
         }
 
         var ruleParamHeader = new RuleParameter("header", header);
@@ -163,18 +165,21 @@ public class CheckAuthorizeByRule : CheckAuthorizeBase, ICheckAuthorize
         var response = await rulesEngine.ExecuteAllRulesAsync(workflowRuleDefinition.WorkflowName,
             ruleParameters.ToArray());
 
+        var logRule = new StringBuilder();
+        logRule.AppendLine("Execution Rules:");
         foreach (var responseItem in response)
         {
             if (responseItem.IsSuccess)
             {
-                logger.LogInformation($"RuleName: {responseItem.Rule.RuleName}. Success: {responseItem.IsSuccess}");
+                logRule.AppendLine($"- RuleName: {responseItem.Rule.RuleName}. Success: {responseItem.IsSuccess}");
             }
             else
             {
-                logger.LogError(
-                    $"RuleName: {responseItem.Rule.RuleName}. Success: {responseItem.IsSuccess}. ExceptionMessage: {responseItem.ExceptionMessage}");
+                logRule.AppendLine($"RuleName: {responseItem.Rule.RuleName}. Success: {responseItem.IsSuccess}. ExceptionMessage: {responseItem.ExceptionMessage}");
             }
         }
+
+        logger.LogInformation(logRule.ToString());
 
         return response;
     }
