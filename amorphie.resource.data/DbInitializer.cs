@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Transactions;
 using amorphie.core.Base;
+using amorphie.resource.core.Enum;
 
 namespace amorphie.resource.data;
 
@@ -245,7 +246,7 @@ public static class DbInitializer
                 ModifiedBy = Guid.NewGuid(),
                 Status = "A",
                 Url = "/fora/DigitalServices/AccountService.svc/hesaplar/([^/]+)",
-                Type = amorphie.core.Enums.HttpMethodType.GET,
+                Type = ResourceType.GET,
                 ModifiedByBehalfOf = null,
                 Tags = tags.ToArray(),
                 Descriptions =  new List<Translation>{translationResourceDescription1}.ToArray(),
@@ -260,7 +261,7 @@ public static class DbInitializer
                 ModifiedBy = Guid.NewGuid(),
                 Status = "A",
                 Url = "/fora/DigitalServices/AccountService.svc/hesaplar/([^/]+)/([^/]+)",
-                Type = amorphie.core.Enums.HttpMethodType.GET,
+                Type = ResourceType.GET,
                 ModifiedByBehalfOf = null,
                 Tags = tags.ToArray(),
                 Descriptions =  new List<Translation>{translationResourceDescription2}.ToArray(),
@@ -275,7 +276,7 @@ public static class DbInitializer
                 ModifiedBy = Guid.NewGuid(),
                 Status = "A",
                 Url = "/fora/DigitalServices/AccountService.svc/hesaplar/([^/]+)/bakiye",
-                Type = amorphie.core.Enums.HttpMethodType.GET,
+                Type = ResourceType.GET,
                 ModifiedByBehalfOf = null,
                 Tags = tags.ToArray(),
                 Descriptions =  new List<Translation>{translationResourceDescription3}.ToArray(),
@@ -290,7 +291,7 @@ public static class DbInitializer
                 ModifiedBy = Guid.NewGuid(),
                 Status = "A",
                 Url = "/fora/DigitalServices/AccountService.svc/hesaplar/([^/]+)/bakiye/([^/]+)",
-                Type = amorphie.core.Enums.HttpMethodType.GET,
+                Type = ResourceType.GET,
                 ModifiedByBehalfOf = null,
                 Tags = tags.ToArray(),
                 Descriptions =  new List<Translation>{translationResourceDescription4}.ToArray(),
@@ -305,7 +306,7 @@ public static class DbInitializer
                 ModifiedBy = Guid.NewGuid(),
                 Status = "A",
                 Url = "/fora/DigitalServices/AccountService.svc/hesaplar/([^/]+)/islemler?hesapIslemBslTrh=([^/]+)&hesapIslemBtsTrh=([^/]+)",
-                Type = amorphie.core.Enums.HttpMethodType.GET,
+                Type = ResourceType.GET,
                 ModifiedByBehalfOf = null,
                 Tags = tags.ToArray(),
                 Descriptions =  new List<Translation>{translationResourceDescription5}.ToArray(),
