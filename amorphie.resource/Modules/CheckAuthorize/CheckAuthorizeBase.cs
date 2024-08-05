@@ -4,13 +4,26 @@ using Newtonsoft.Json.Linq;
 public abstract class CheckAuthorizeBase
 {
     protected async Task<Resource?> GetResource(
-    ResourceDBContext context,
-    CheckAuthorizeRequest request,
-    CancellationToken cancellationToken
+        ResourceDBContext context,
+        CheckAuthorizeRequest request,
+        CancellationToken cancellationToken
     )
     {
+        if (string.IsNullOrEmpty(request.Method))
+        {
+            return await context!.Resources!.AsNoTracking()
+                .FirstOrDefaultAsync(c =>
+                        Regex.IsMatch(request.Url, c.Url)
+                        && c.Status == "A",
+                    cancellationToken);
+        }
+
         return await context!.Resources!.AsNoTracking()
-                                .FirstOrDefaultAsync(c => Regex.IsMatch(request.Url, c.Url) && c.Status == "A", cancellationToken);
+            .FirstOrDefaultAsync(c =>
+                    Regex.IsMatch(request.Url, c.Url)
+                    && c.Type == request.Method.ToResourceType()
+                    && c.Status == "A",
+                cancellationToken);
     }
 
     protected void RecursiveJsonLoop(JObject jsonObject, Dictionary<string, object> keyValuePairs, string currentPath)
