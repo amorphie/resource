@@ -1,8 +1,8 @@
-using System.Linq.Dynamic.Core;
-using System.Linq.Dynamic.Core.Tokenizer;
 using amorphie.core.Enums;
 using amorphie.core.Identity;
 using amorphie.core.Module.minimal_api;
+using amorphie.resource.core.Enum;
+using System.Linq;
 
 public class ResourceRuleModule : BaseBBTRoute<DtoResourceRule, ResourceRule, ResourceDBContext>
 {
@@ -22,11 +22,11 @@ public class ResourceRuleModule : BaseBBTRoute<DtoResourceRule, ResourceRule, Re
     }
 
     public async ValueTask<IResult> Map(
-         [FromBody] DtoResourceRuleMapRequest request,
-         [FromServices] ResourceDBContext context,
-         [FromServices] IBBTIdentity bbtIdentity,
-         CancellationToken cancellationToken
-         )
+        [FromBody] DtoResourceRuleMapRequest request,
+        [FromServices] ResourceDBContext context,
+        [FromServices] IBBTIdentity bbtIdentity,
+        CancellationToken cancellationToken
+    )
     {
         var ruleIdList = await GetRuleIdList(request, context);
         var resourceList = await GetResourceList(request, context, bbtIdentity, cancellationToken);
@@ -37,9 +37,9 @@ public class ResourceRuleModule : BaseBBTRoute<DtoResourceRule, ResourceRule, Re
     }
 
     private async Task<List<Guid>> GetRuleIdList(
-                                    DtoResourceRuleMapRequest request,
-                                    ResourceDBContext context
-                                    )
+        DtoResourceRuleMapRequest request,
+        ResourceDBContext context
+    )
     {
         var ruleNames = request.RuleName.Split(',');
         var ruleIdList = new List<Guid>();
@@ -58,27 +58,33 @@ public class ResourceRuleModule : BaseBBTRoute<DtoResourceRule, ResourceRule, Re
     }
 
     private async Task<List<Resource>> GetResourceList(
-                                    DtoResourceRuleMapRequest request,
-                                    ResourceDBContext context,
-                                    [FromServices] IBBTIdentity bbtIdentity,
-                                    CancellationToken cancellationToken
-                                   )
+        DtoResourceRuleMapRequest request,
+        ResourceDBContext context,
+        [FromServices] IBBTIdentity bbtIdentity,
+        CancellationToken cancellationToken
+    )
     {
         var existResourceList = new List<Resource>();
 
-        var resources = await context!.Resources!.Where(t => t.Url == request.Url && t.Status == "A").ToListAsync(cancellationToken);
-        var methodTypes = request.Method.Split(',');
+        var resources = await context!.Resources!
+            .Where(t => t.Url == request.Url && t.Status == "A")
+            .ToListAsync(cancellationToken);
 
+        var methodTypes = request.Method.Split(',')
+            .Select(s => s.ToLower().ToResourceType())
+            .ToList();
+            
         foreach (Resource resource in resources)
         {
-            if (methodTypes.Contains(resource.Type.ToString()))
+            if (methodTypes.Contains(resource.Type))
             {
                 existResourceList.Add(resource);
             }
             else
             {
                 resource.Status = "P";
-                resource.ModifiedAt = DateTime.UtcNow; ;
+                resource.ModifiedAt = DateTime.UtcNow;
+                
                 resource.ModifiedBy = bbtIdentity.UserId.Value;
                 resource.ModifiedByBehalfOf = bbtIdentity.BehalfOfId.Value;
 
@@ -88,19 +94,20 @@ public class ResourceRuleModule : BaseBBTRoute<DtoResourceRule, ResourceRule, Re
                 foreach (ResourceRule resourceRule1 in resourceRules)
                 {
                     resourceRule1.Status = "P";
-                    resourceRule1.ModifiedAt = DateTime.UtcNow; ;
+                    resourceRule1.ModifiedAt = DateTime.UtcNow;
+                    ;
                     resourceRule1.ModifiedBy = bbtIdentity.UserId.Value;
                     resourceRule1.ModifiedByBehalfOf = bbtIdentity.BehalfOfId.Value;
                 }
             }
         }
 
-        foreach (string method in methodTypes)
+        foreach (var method in methodTypes)
         {
-            var httpMethodType = (HttpMethodType)Enum.Parse(typeof(HttpMethodType), method);
+            var httpMethodType = method;
 
             var resource = existResourceList!
-                        .FirstOrDefault(t => t.Url == request.Url && t.Status == "A" && t.Type == httpMethodType);
+                .FirstOrDefault(t => t.Url == request.Url && t.Status == "A" && t.Type == httpMethodType);
 
             if (resource != null)
                 continue;
@@ -128,20 +135,22 @@ public class ResourceRuleModule : BaseBBTRoute<DtoResourceRule, ResourceRule, Re
 
         return existResourceList;
     }
+
     private async Task AddResourceRules(
-                                        List<Resource> resourceList,
-                                        List<Guid> ruleIdList,
-                                        ResourceDBContext context,
-                                        [FromServices] IBBTIdentity bbtIdentity,
-                                        CancellationToken cancellationToken
-                                      )
+        List<Resource> resourceList,
+        List<Guid> ruleIdList,
+        ResourceDBContext context,
+        [FromServices] IBBTIdentity bbtIdentity,
+        CancellationToken cancellationToken
+    )
     {
         foreach (Resource resource in resourceList)
         {
             for (int i = 0; i < ruleIdList.Count; i++)
             {
                 var resourceRule = await context!.ResourceRules!
-                    .FirstOrDefaultAsync(t => t.RuleId == ruleIdList[i] && t.ResourceId == resource.Id && t.Status == "A");
+                    .FirstOrDefaultAsync(t =>
+                        t.RuleId == ruleIdList[i] && t.ResourceId == resource.Id && t.Status == "A");
 
                 if (resourceRule == null)
                 {
@@ -167,14 +176,15 @@ public class ResourceRuleModule : BaseBBTRoute<DtoResourceRule, ResourceRule, Re
             }
 
             var resourceRules = await context!.ResourceRules!
-                    .Where(t => t.ResourceId == resource.Id && t.Status == "A").ToListAsync(cancellationToken);
+                .Where(t => t.ResourceId == resource.Id && t.Status == "A").ToListAsync(cancellationToken);
 
             foreach (ResourceRule resourceRule1 in resourceRules)
             {
                 if (ruleIdList.Contains(resourceRule1.RuleId) == false)
                 {
                     resourceRule1.Status = "P";
-                    resourceRule1.ModifiedAt = DateTime.UtcNow; ;
+                    resourceRule1.ModifiedAt = DateTime.UtcNow;
+                    ;
                     resourceRule1.ModifiedBy = bbtIdentity.UserId.Value;
                     resourceRule1.ModifiedByBehalfOf = bbtIdentity.BehalfOfId.Value;
                 }
