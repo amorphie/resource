@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using amorphie.resource.core.Enum;
 using Newtonsoft.Json.Linq;
 
 public abstract class CheckAuthorizeBase
@@ -9,19 +10,10 @@ public abstract class CheckAuthorizeBase
         CancellationToken cancellationToken
     )
     {
-        if (string.IsNullOrEmpty(request.Method))
-        {
-            return await context!.Resources!.AsNoTracking()
-                .FirstOrDefaultAsync(c =>
-                        Regex.IsMatch(request.Url, c.Url)
-                        && c.Status == "A",
-                    cancellationToken);
-        }
-
         return await context!.Resources!.AsNoTracking()
             .FirstOrDefaultAsync(c =>
                     Regex.IsMatch(request.Url, c.Url)
-                    && c.Type == request.Method.ToResourceType()
+                    && (c.Type == request.Method.ToResourceType() || c.Type == ResourceType.ALL)
                     && c.Status == "A",
                 cancellationToken);
     }
