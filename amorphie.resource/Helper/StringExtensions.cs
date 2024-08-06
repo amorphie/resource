@@ -55,4 +55,15 @@ public static class StringExtensions
         // Return the ASCII converted string
         return asciiStringBuilder.ToString();
     }
+
+    public static string ToClean(this string value)
+    {
+        return value
+            .Replace("-", "_")
+            .Replace(".", "_")
+            .Replace(";", "_")
+            .Replace(",", "_")
+            .Replace(":", "_")
+            .Replace("*", "_");
+    }
 }

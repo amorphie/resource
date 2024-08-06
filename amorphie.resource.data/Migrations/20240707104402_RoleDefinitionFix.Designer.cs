@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -10,9 +11,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace amorphie.resource.data.Migrations
 {
     [DbContext(typeof(ResourceDBContext))]
-    partial class ResourceDBContextModelSnapshot : ModelSnapshot
+    [Migration("20240707104402_RoleDefinitionFix")]
+    partial class RoleDefinitionFix
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -464,8 +467,9 @@ namespace amorphie.resource.data.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("Key")
-                        .HasColumnType("integer");
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("ModifiedAt")
                         .HasColumnType("timestamp without time zone");
@@ -682,6 +686,9 @@ namespace amorphie.resource.data.Migrations
                     b.Property<Guid?>("ResourceId_DisplayName")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("RoleDefinitionId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid?>("RoleGroupId_Title")
                         .HasColumnType("uuid");
 
@@ -698,6 +705,8 @@ namespace amorphie.resource.data.Migrations
                     b.HasIndex("ResourceId_Description");
 
                     b.HasIndex("ResourceId_DisplayName");
+
+                    b.HasIndex("RoleDefinitionId");
 
                     b.HasIndex("RoleGroupId_Title");
 
@@ -764,6 +773,10 @@ namespace amorphie.resource.data.Migrations
                         .WithMany("DisplayNames")
                         .HasForeignKey("ResourceId_DisplayName");
 
+                    b.HasOne("RoleDefinition", null)
+                        .WithMany("Titles")
+                        .HasForeignKey("RoleDefinitionId");
+
                     b.HasOne("RoleGroup", null)
                         .WithMany("Titles")
                         .HasForeignKey("RoleGroupId_Title");
@@ -795,6 +808,11 @@ namespace amorphie.resource.data.Migrations
                 });
 
             modelBuilder.Entity("Role", b =>
+                {
+                    b.Navigation("Titles");
+                });
+
+            modelBuilder.Entity("RoleDefinition", b =>
                 {
                     b.Navigation("Titles");
                 });

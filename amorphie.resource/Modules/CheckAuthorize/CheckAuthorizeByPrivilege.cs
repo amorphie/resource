@@ -53,7 +53,7 @@ public class CheckAuthorizeByPrivilege : CheckAuthorizeBase, ICheckAuthorize
 
         foreach (var header in httpContext.Request.Headers)
         {
-            parameterList.Add($"{{header.{header.Key}}}", header.Value);
+            parameterList.Add($"{{header.{header.Key.ToClean()}}}", header.Value);
         }
 
         var match = Regex.Match(request.Url, resource.Url);
