@@ -1,4 +1,4 @@
-using Newtonsoft.Json.Linq;
+using amorphie.resource.core.Enum;
 
 public static class Helper
 {
@@ -14,17 +14,19 @@ public static class Helper
         return language;
     }
 
-    public static string GetJsonValue(JObject obj, string path)
+    public static ResourceType ToResourceType(this string value)
     {
-        var retVal = "";
-
-        var token = obj.SelectToken(path);
-
-        if (token != null)
+        return value.ToLower() switch
         {
-            retVal = token.ToString();
-        }
-
-        return retVal;
+            "connect" => ResourceType.CONNECT,
+            "delete" => ResourceType.DELETE,
+            "get" => ResourceType.GET,
+            "head" => ResourceType.HEAD,
+            "options" => ResourceType.OPTIONS,
+            "post" => ResourceType.POST,
+            "put" => ResourceType.PUT,
+            "trace" => ResourceType.TRACE,
+            _ => ResourceType.ALL
+        };
     }
 }

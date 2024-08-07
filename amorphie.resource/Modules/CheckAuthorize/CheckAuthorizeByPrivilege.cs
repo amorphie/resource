@@ -53,7 +53,7 @@ public class CheckAuthorizeByPrivilege : CheckAuthorizeBase, ICheckAuthorize
 
         foreach (var header in httpContext.Request.Headers)
         {
-            parameterList.Add($"{{header.{header.Key}}}", header.Value);
+            parameterList.Add($"{{header.{header.Key.ToClean()}}}", header.Value);
         }
 
         var match = Regex.Match(request.Url, resource.Url);
@@ -84,78 +84,24 @@ public class CheckAuthorizeByPrivilege : CheckAuthorizeBase, ICheckAuthorize
             {
                 foreach (var variable in parameterList)
                     privilegeUrl = privilegeUrl.Replace(variable.Key, variable.Value.ToString());
-
-                var apiClient = new HttpClient();
-                HttpResponseMessage response;
+                
+                var apiClientService = new HttpClientService();
                 var span = transaction.StartSpan($"CallApi-{privilegeUrl}", ApiConstants.TypeUnknown);
-                span.SetLabel("CallApi.Url", privilegeUrl);
-
                 try
                 {
-                    if (resourcePrivilege.Privilege.Type == amorphie.core.Enums.HttpMethodType.POST)
+                    var headers = new Dictionary<string, object>();
+                    foreach (var header in httpContext.Request.Headers)
                     {
-                        span.SetLabel("CallApi.Method", "POST");
-                        var data = string.IsNullOrEmpty(request.Data) ? "" : request.Data;
-                        span.SetLabel("CallApi.RequestBody", data);
-                        using var httpContent = new StringContent(data, Encoding.UTF8, "application/json");
-                        try
-                        {
-                            foreach (var item in httpContext.Request.Headers)
-                            {
-                                if (CallApiConsts.IgnoreDefaultHeaders.Contains(item.Key) ||
-                                    CallApiConsts.ExcludeHeaders.Contains(item.Key.ToLower()))
-                                {
-                                    continue;
-                                }
-
-                                if (!httpContent.Headers.Contains(item.Key))
-                                {
-                                    httpContent.Headers.TryAddWithoutValidation(item.Key, item.Value.ToString().ToAscii());
-                                }
-                            }
-
-                            span.SetLabel("CallApi.Header",
-                                JsonConvert.SerializeObject(httpContent.Headers.Select(s => new { s.Key, s.Value })));
-                        }
-                        catch (Exception e)
-                        {
-                            span.CaptureException(e);
-                        }
-
-                        response = await apiClient.PostAsync(privilegeUrl, httpContent);
+                        headers.Add(header.Key, header.Value.ToString());
                     }
-                    else
-                    {
-                        span.SetLabel("CallApi.Method", "GET");
-                        using HttpRequestMessage getRequest =
-                            new HttpRequestMessage(HttpMethod.Get, privilegeUrl);
-                        try
-                        {
-                            foreach (var item in httpContext.Request.Headers)
-                            {
-                                if (CallApiConsts.IgnoreDefaultHeaders.Contains(item.Key) ||
-                                    CallApiConsts.ExcludeHeaders.Contains(item.Key.ToLower()))
-                                {
-                                    continue;
-                                }
-
-                                if (!getRequest.Headers.Contains(item.Key))
-                                {
-                                    getRequest.Headers.TryAddWithoutValidation(item.Key, item.Value.ToString().ToAscii());
-                                }
-                            }
-
-                            span.SetLabel("CallApi.Header",
-                                JsonConvert.SerializeObject(getRequest.Headers.Select(s => new { s.Key, s.Value })));
-                        }
-                        catch (Exception e)
-                        {
-                            span.CaptureException(e);
-                        }
-
-                        response = await apiClient.SendAsync(getRequest);
-                    }
-
+                
+                    var response = await apiClientService.SendRequestAsync(
+                        privilegeUrl,
+                        string.IsNullOrEmpty(request.Data) ? "" : request.Data,
+                        resourcePrivilege.Privilege.Type.ToString(),
+                        headers,
+                        span);
+                    
                     if (!response.IsSuccessStatusCode)
                     {
                         return Results.Json(new CheckAuthorizeOutput("FAILED"), statusCode: 403);

@@ -14,4 +14,5 @@ public class CheckAuthorizeRequest
 {
     public string? Url { get; set; }
     public string? Data { get; set; }
+    public string? Method { get; set; }
 }

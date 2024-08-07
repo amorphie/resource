@@ -32,6 +32,7 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
         var transaction = Elastic.Apm.Agent.Tracer.CurrentTransaction;
         transaction.SetLabel("ClientId", headerClientId);
         transaction.SetLabel("RequestBody.Url", request.Url);
+        transaction.SetLabel("RequestBody.Method", request.Method);
         transaction.SetLabel("RequestBody.Data", request.Data);
         
         ICheckAuthorize checkAuthorize;
