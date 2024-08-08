@@ -16,6 +16,7 @@ public class ResourceMapper : Profile
         CreateMap<ResourceGroupRole, DtoResourceGroupRole>().ReverseMap();
 
         CreateMap<Role, DtoRole>().ReverseMap();
+        CreateMap<RoleDefinition, DtoRoleDefinition>().ReverseMap();
 
         CreateMap<RoleGroup, DtoRoleGroup>().ReverseMap();
 
