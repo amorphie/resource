@@ -9,7 +9,7 @@ public class Role : EntityBase
     public ICollection<Translation> Titles { get; set; } = default!;
     public string[]? Tags { get; set; }
     public string? Status { get; set; }
-    [ForeignKey("DefinitionId")]
-    public Guid RoleDefinitionId{get;set;}
+    [ForeignKey("Definition")]
+    public Guid DefinitionId{get;set;}
     public RoleDefinition Definition { get; set; } = default!;
 }
