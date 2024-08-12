@@ -1,5 +1,4 @@
 using System.Reflection;
-using System.Text;
 using amorphie.core.Extension;
 using amorphie.core.Identity;
 using amorphie.core.Swagger;
@@ -8,6 +7,7 @@ using FluentValidation;
 using Elastic.Apm.NetCoreAll;
 using amorphie.resource;
 
+ThreadPool.SetMinThreads(50, 50);
 
 var builder = WebApplication.CreateBuilder(args);
 await builder.Configuration.AddVaultSecrets("amorphie-secretstore", new string[] { "amorphie-secretstore" });
