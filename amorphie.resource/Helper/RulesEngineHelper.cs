@@ -115,13 +115,19 @@ public static class Utils
         var apiClientService = new HttpClientService();
         var response = new HttpResponseMessage();
         dynamic data = null;
-        
-        var transaction = Elastic.Apm.Agent.Tracer.CurrentTransaction ??
-                          Elastic.Apm.Agent.Tracer.StartTransaction("CallApi", ApiConstants.TypeUnknown);
-        var span = transaction.StartSpan($"CallApi-{url}", ApiConstants.TypeUnknown);
-        
+
+        var transaction = Elastic.Apm.Agent.Tracer.CurrentTransaction ?? Elastic.Apm.Agent.Tracer.StartTransaction(
+            "CallApi",
+            ApiConstants.TypeExternal);
+
         Task.Run(async () =>
         {
+            var span = transaction.StartSpan(
+                $"CallApi-{url}",
+                ApiConstants.TypeExternal,
+                ApiConstants.SubtypeHttp,
+                ApiConstants.ActionRequest);
+
             try
             {
                 if (body == null)
@@ -135,6 +141,12 @@ public static class Utils
                     span);
 
                 span.SetLabel("CallApi.Response.StatusCode", response.StatusCode.ToString());
+                span.Context.Http = new Http()
+                {
+                    Method = httpMethodType.ToString(),
+                    StatusCode = (int)response.StatusCode,
+                    Url = url
+                };
                 if (response.IsSuccessStatusCode)
                 {
                     // Read the response content as a JSON string

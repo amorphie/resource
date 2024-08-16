@@ -1,4 +1,5 @@
 using amorphie.core.Module.minimal_api;
+using Elastic.Apm.Api;
 using Newtonsoft.Json;
 
 public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, ResourcePrivilege, ResourceDBContext>
@@ -30,10 +31,10 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
     )
     {
         var transaction = Elastic.Apm.Agent.Tracer.CurrentTransaction;
-        transaction.SetLabel("ClientId", headerClientId);
-        transaction.SetLabel("RequestBody.Url", request.Url);
-        transaction.SetLabel("RequestBody.Method", request.Method);
-        transaction.SetLabel("RequestBody.Data", request.Data);
+        transaction?.SetLabel("ClientId", headerClientId);
+        transaction?.SetLabel("RequestBody.Url", request.Url);
+        transaction?.SetLabel("RequestBody.Method", request.Method);
+        transaction?.SetLabel("RequestBody.Data", request.Data);
 
         ICheckAuthorize checkAuthorize;
 
@@ -50,7 +51,9 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
             checkAuthorize = new CheckAuthorizeByPrivilege();
         }
 
-        return await checkAuthorize.Check(request, context, httpContext, headerClientId, configuration, logger,
+        var response =  await checkAuthorize.Check(request, context, httpContext, headerClientId, configuration, logger,
             cancellationToken);
+        transaction?.End();
+        return response;
     }
 }
