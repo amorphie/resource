@@ -100,6 +100,54 @@ services:
     command: ["sh", "-c", "chmod +x /etc/vault/prepopulate_vault.sh && /etc/vault/prepopulate_vault.sh"]
     networks:
       - bbt-development
+        
+  # optional
+  elastic:
+    container_name: bbt-elastic
+    image: elasticsearch:8.8.1
+    environment:
+      - xpack.security.enabled=false
+      - "discovery.type=single-node"
+    ports:
+      - 9200:9200
+    networks:
+      - bbt-development
+
+  apm:
+    container_name: bbt-apm
+    image: docker.elastic.co/apm/apm-server:7.17.23
+    networks:
+      - bbt-development
+    ports:
+      - "5200:8200"
+    command: >
+      apm-server -e
+               -E apm-server.ssl.enabled=false
+               -E apm-server.rum.enabled=true
+               -E apm-server.rum.allow_origins=["*"]
+               -E setup.template.settings.index.number_of_replicas=0
+               -E setup.kibana.host=bbt-kibana:5601
+               -E apm-server.kibana.enabled=true
+               -E apm-server.kibana.host=bbt-kibana:5601
+               -E output.elasticsearch.hosts=["bbt-elastic:9200"]
+    depends_on:
+      - elastic
+      - kibana
+
+  # optional
+  kibana:
+    container_name: bbt-kibana
+    image: kibana:8.8.1
+    environment:
+      - ELASTICSEARCH_URL=http://bbt-elastic:9200
+      - ELASTICSEARCH_HOSTS=http://bbt-elastic:9200
+      - xpack.security.enabled=false
+    networks:
+      - bbt-development
+    depends_on:
+      - elastic
+    ports:
+      - 5601:5601
       
 networks:
   bbt-development:

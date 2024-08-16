@@ -15,16 +15,21 @@ if [ "$SECRET_CHECK" -ne 200 ]; then
     "data": {
               "ElasticApm:Environment": "Dev",
               "ElasticApm:SecretToken": "",
-              "ElasticApm:ServerUrl": "",
+              "ElasticApm:ServerUrl": "http://localhost:5200",
               "ElasticApm:ServiceName": "amorphie-resource",
+              "ElasticApm:SpanFramesMinDuration": "0",
               "ElasticApm:TransactionIgnoreUrls": "/healthz,/swagger/*,/index.html\",/dapr/*",
+              "Logging:LogResponse": "true",
+              "Logging:SanitizeFieldNames": "access_token,refresh_token,client_secret,authorization",
+              "Logging:SanitizeHeaderNames": "authorization,authentication,client_secret,x-userinfo",
               "PostgreSql": "Host=localhost:5432;Database=resources;Username=postgres;Password=postgres",
               "Serilog:MinimumLevel:Default": "Information",
               "Serilog:MinimumLevel:Override:amorphie.resource": "Information",
               "Serilog:WriteTo:0:Args:formatter": "Serilog.Formatting.Compact.CompactJsonFormatter, Serilog.Formatting.Compact",
-              "Serilog:WriteTo:0:Args:path": "/logs/log-amorphie.json",
+              "Serilog:WriteTo:0:Args:path": "logs/log-amorphie-resource.json",
               "Serilog:WriteTo:0:Args:rollingInterval": "Day",
-              "Serilog:WriteTo:0:Name": "File"
+              "Serilog:WriteTo:0:Name": "File",
+              "Serilog:WriteTo:1:Name": "Console"
             }
   }'
 else
