@@ -1,9 +1,11 @@
+using System.Diagnostics;
 using System.Dynamic;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using amorphie.resource.Helper;
 using amorphie.resource.Modules.CheckAuthorize;
+using Elastic.Apm.Api;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RulesEngine.Models;
@@ -45,15 +47,31 @@ public class CheckAuthorizeByRule : CheckAuthorizeBase, ICheckAuthorize
 
             var ruleParams = new List<RuleParameter>();
 
-            SetRuleParameterList(ruleParams, httpContext, request, resource.Url);
+            var transaction = Elastic.Apm.Agent.Tracer.CurrentTransaction ?? Elastic.Apm.Agent.Tracer.StartTransaction(
+                "PopulateParameters",
+                ApiConstants.TypeApp);
 
-            var resultList = await ExecuteRules(ruleParams, resourceRules, logger);
+            transaction.CaptureSpan("PopulateParameters", ApiConstants.TypeApp, (span) =>
+            {
+                SetRuleParameterList(ruleParams, httpContext, request, resource,
+                    resourceRules.Select(s => s.Rule.Expression).ToList());
+            }, ApiConstants.SubTypeInternal, ApiConstants.ActionExec, true);
+
+            var resultList = new List<RuleResultTree>();
+            await transaction.CaptureSpan("ExecutionRules", ApiConstants.TypeApp,
+                async (span) => { resultList = await ExecuteRules(ruleParams, resourceRules, logger); },
+                ApiConstants.SubTypeInternal, ApiConstants.ActionExec, true);
 
             if (resultList.Any(t => t.IsSuccess == false))
             {
-                return Results.Json(new CheckAuthorizeOutput("FAILED"), statusCode: 403);
+                var failedRules = resultList
+                    .Where(s => !s.IsSuccess)
+                    .Select(s => s.Rule.RuleName);
+                return Results.Json(
+                    new CheckAuthorizeOutput($"FAILED. Failed Rule Names: {string.Join(",", failedRules)}"),
+                    statusCode: 403);
             }
-            
+
             return Results.Ok(new CheckAuthorizeOutput("SUCCESS"));
         }
         catch (Exception ex)
@@ -90,45 +108,81 @@ public class CheckAuthorizeByRule : CheckAuthorizeBase, ICheckAuthorize
         List<RuleParameter> ruleParams,
         HttpContext httpContext,
         CheckAuthorizeRequest request,
-        string? resourceUrl
+        Resource resource,
+        List<string> expressions
     )
     {
         dynamic header = new ExpandoObject();
+        dynamic path = new ExpandoObject();
 
-        foreach (var requestHeader in httpContext.Request.Headers)
+        // Extract the required headers, path variables, and body parameters from the rules
+        var requiredHeaders = new HashSet<string>();
+        var requiredPaths = new HashSet<string>();
+        var requiredBodies = new HashSet<string>();
+
+        foreach (var expression in expressions)
         {
-            ((IDictionary<string, object>)header).Add(requestHeader.Key.ToClean(), requestHeader.Value.ToString());
+            // Extract headers, paths, and bodies from the rule expressions
+            ExtractRequiredParameters(expression, "header.", requiredHeaders);
+            ExtractRequiredParameters(expression, "path.", requiredPaths);
+            ExtractRequiredParameters(expression, "body.", requiredBodies);
         }
 
-        var ruleParamHeader = new RuleParameter("header", header);
-        ruleParams.Add(ruleParamHeader);
+        // Bind only required headers
+        foreach (var requestHeader in httpContext.Request.Headers)
+        {
+            if (requiredHeaders.Contains(requestHeader.Key.ToClean()))
+            {
+                ((IDictionary<string, object>)header).Add(requestHeader.Key.ToClean(), requestHeader.Value.ToString());
+            }
+        }
 
-        dynamic path = new ExpandoObject();
-        var match = Regex.Match(request.Url, resourceUrl);
+        if (((IDictionary<string, object>)header).Count > 0)
+        {
+            var ruleParamHeader = new RuleParameter("header", header);
+            ruleParams.Add(ruleParamHeader);
+        }
+
+        // Bind only required path variables
+        var match = Regex.Match(request.Url, resource.Url);
         if (match.Success)
         {
             foreach (Group pathVariable in match.Groups)
             {
-                ((IDictionary<string, object>)path).Add($"var{pathVariable.Name}", pathVariable.Value);
+                var pathKey = $"var{pathVariable.Name}";
+                if (requiredPaths.Contains(pathKey))
+                {
+                    ((IDictionary<string, object>)path).Add(pathKey, pathVariable.Value);
+                }
             }
         }
 
-        var ruleParamPath = new RuleParameter("path", path);
-        ruleParams.Add(ruleParamPath);
-
-        var bodyParamList = new Dictionary<string, object>();
+        if (((IDictionary<string, object>)path).Count > 0)
+        {
+            var ruleParamPath = new RuleParameter("path", path);
+            ruleParams.Add(ruleParamPath);
+        }
 
         if (!string.IsNullOrEmpty(request.Data))
         {
             var jsonObject = JsonConvert.DeserializeObject<JObject>(request.Data);
-            bodyParamList = MapHelper.ToDictionary(jsonObject);
+            Dictionary<string, object> bodyParamList = MapHelper.ToDictionary(jsonObject);
+            dynamic bodyObject = MapHelper.ToExpandoObject(bodyParamList);
+            var ruleParamBody = new RuleParameter("body", bodyObject);
+
+            ruleParams.Add(ruleParamBody);
         }
+    }
 
-        dynamic bodyObject = MapHelper.ToExpandoObject(bodyParamList);
+    private void ExtractRequiredParameters(string rule, string prefix, HashSet<string> targetSet)
+    {
+        var regex = new Regex($@"\b{prefix}([a-zA-Z0-9_\.]+)\b");
+        var matches = regex.Matches(rule);
 
-        var ruleParamBody = new RuleParameter("body", bodyObject);
-
-        ruleParams.Add(ruleParamBody);
+        foreach (Match match in matches)
+        {
+            targetSet.Add(match.Groups[1].Value);
+        }
     }
 
     private async ValueTask<List<RuleResultTree>> ExecuteRules(List<RuleParameter> ruleParameters,
@@ -161,7 +215,6 @@ public class CheckAuthorizeByRule : CheckAuthorizeBase, ICheckAuthorize
 
         var rulesEngine = new RulesEngine.RulesEngine(workflowRules, reSettings);
 
-
         var response = await rulesEngine.ExecuteAllRulesAsync(workflowRuleDefinition.WorkflowName,
             ruleParameters.ToArray());
 
@@ -175,7 +228,8 @@ public class CheckAuthorizeByRule : CheckAuthorizeBase, ICheckAuthorize
             }
             else
             {
-                logRule.AppendLine($"RuleName: {responseItem.Rule.RuleName}. Success: {responseItem.IsSuccess}. ExceptionMessage: {responseItem.ExceptionMessage}");
+                logRule.AppendLine(
+                    $"RuleName: {responseItem.Rule.RuleName}. Success: {responseItem.IsSuccess}. ExceptionMessage: {responseItem.ExceptionMessage}");
             }
         }
 
