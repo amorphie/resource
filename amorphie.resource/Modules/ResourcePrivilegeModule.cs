@@ -1,4 +1,5 @@
 using amorphie.core.Module.minimal_api;
+using Elastic.Apm.Api;
 using Newtonsoft.Json;
 
 public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, ResourcePrivilege, ResourceDBContext>
@@ -19,35 +20,40 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
     }
 
     public async ValueTask<IResult> CheckAuthorize(
-         [FromBody] CheckAuthorizeRequest request,
-         [FromServices] ResourceDBContext context,
-         HttpContext httpContext,
-         [FromHeader(Name = "clientId")] string headerClientId,
-         [FromServices] IConfiguration configuration,
-         [FromQuery] string? checkAuthMethod,
-         ILogger<ResourcePrivilegeModule> logger,
-         CancellationToken cancellationToken
-         )
+        [FromBody] CheckAuthorizeRequest request,
+        [FromServices] ResourceDBContext context,
+        HttpContext httpContext,
+        [FromHeader(Name = "clientId")] string headerClientId,
+        [FromServices] IConfiguration configuration,
+        [FromQuery] string? checkAuthMethod,
+        ILogger<ResourcePrivilegeModule> logger,
+        CancellationToken cancellationToken
+    )
     {
         var transaction = Elastic.Apm.Agent.Tracer.CurrentTransaction;
-        transaction.SetLabel("ClientId", headerClientId);
-        transaction.SetLabel("RequestBody.Url", request.Url);
-        transaction.SetLabel("RequestBody.Method", request.Method);
-        transaction.SetLabel("RequestBody.Data", request.Data);
-        
+        transaction?.SetLabel("ClientId", headerClientId);
+        transaction?.SetLabel("RequestBody.Url", request.Url);
+        transaction?.SetLabel("RequestBody.Method", request.Method);
+        transaction?.SetLabel("RequestBody.Data", request.Data);
+
         ICheckAuthorize checkAuthorize;
 
         if (checkAuthMethod == "Rule")
         {
-            logger.LogInformation($"Request.CheckAuthMethod:Rule | ClientId:{headerClientId} | Request.Url:{request.Url} | Request.Data:{request.Data}");
+            logger.LogInformation(
+                $"Request.CheckAuthMethod:Rule | ClientId:{headerClientId} | Request.Url:{request.Url} | Request.Data:{request.Data} | Request.Method:{request.Method}");
             checkAuthorize = new CheckAuthorizeByRule();
         }
         else
         {
-            logger.LogInformation($"Request.CheckAuthMethod:None | ClientId:{headerClientId} | Request.Url:{request.Url} | Request.Data:{request.Data}");
+            logger.LogInformation(
+                $"Request.CheckAuthMethod:None | ClientId:{headerClientId} | Request.Url:{request.Url} | Request.Data:{request.Data} | Request.Method:{request.Method}");
             checkAuthorize = new CheckAuthorizeByPrivilege();
         }
 
-        return await checkAuthorize.Check(request, context, httpContext, headerClientId, configuration, logger, cancellationToken);
+        var response =  await checkAuthorize.Check(request, context, httpContext, headerClientId, configuration, logger,
+            cancellationToken);
+        transaction?.End();
+        return response;
     }
 }

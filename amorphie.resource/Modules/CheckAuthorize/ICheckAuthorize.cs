@@ -1,3 +1,5 @@
+using Elastic.Apm.Api;
+
 public interface ICheckAuthorize
 {
     ValueTask<IResult> Check(
