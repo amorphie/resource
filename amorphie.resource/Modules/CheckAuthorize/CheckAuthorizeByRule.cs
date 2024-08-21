@@ -133,7 +133,7 @@ public class CheckAuthorizeByRule : CheckAuthorizeBase, ICheckAuthorize
         {
             if (requiredHeaders.Contains(requestHeader.Key.ToClean()))
             {
-                ((IDictionary<string, object>)header).Add(requestHeader.Key.ToClean().ToLower(), requestHeader.Value.ToString());
+                ((IDictionary<string, object>)header).Add(requestHeader.Key.ToClean(), requestHeader.Value.ToString());
             }
         }
 
