@@ -133,7 +133,7 @@ public class CheckAuthorizeByRule : CheckAuthorizeBase, ICheckAuthorize
         {
             if (requiredHeaders.Contains(requestHeader.Key.ToClean()))
             {
-                ((IDictionary<string, object>)header).Add(requestHeader.Key.ToClean(), requestHeader.Value.ToString());
+                ((IDictionary<string, object>)header).Add(requestHeader.Key.ToClean().ToLower(), requestHeader.Value.ToString());
             }
         }
 
@@ -170,7 +170,7 @@ public class CheckAuthorizeByRule : CheckAuthorizeBase, ICheckAuthorize
 
     private void ExtractRequiredParameters(string rule, string prefix, HashSet<string> targetSet)
     {
-        var regex = new Regex($@"\b{prefix}([a-zA-Z0-9_\.]+)\b");
+        var regex = new Regex($@"\b{prefix}([a-zA-Z0-9_\.]+)\b", RegexOptions.IgnoreCase);
         var matches = regex.Matches(rule);
 
         foreach (Match match in matches)
