@@ -23,7 +23,7 @@ public class ResourcePrivilegeModule : BaseBBTRoute<DtoResourcePrivilege, Resour
         [FromBody] CheckAuthorizeRequest request,
         [FromServices] ResourceDBContext context,
         HttpContext httpContext,
-        [FromHeader(Name = "clientId")] string headerClientId,
+        [FromHeader(Name = "clientId")] string? headerClientId,
         [FromServices] IConfiguration configuration,
         [FromQuery] string? checkAuthMethod,
         ILogger<ResourcePrivilegeModule> logger,
