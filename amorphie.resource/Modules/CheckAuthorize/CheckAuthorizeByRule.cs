@@ -118,20 +118,18 @@ public class CheckAuthorizeByRule : CheckAuthorizeBase, ICheckAuthorize
         // Extract the required headers, path variables, and body parameters from the rules
         var requiredHeaders = new HashSet<string>();
         var requiredPaths = new HashSet<string>();
-        var requiredBodies = new HashSet<string>();
 
         foreach (var expression in expressions)
         {
             // Extract headers, paths, and bodies from the rule expressions
             ExtractRequiredParameters(expression, "header.", requiredHeaders);
             ExtractRequiredParameters(expression, "path.", requiredPaths);
-            ExtractRequiredParameters(expression, "body.", requiredBodies);
         }
 
         // Bind only required headers
         foreach (var requestHeader in httpContext.Request.Headers)
         {
-            if (requiredHeaders.Contains(requestHeader.Key.ToClean()))
+            if (requiredHeaders.Contains(requestHeader.Key.ToClean().ToLower()))
             {
                 ((IDictionary<string, object>)header).Add(requestHeader.Key.ToClean(), requestHeader.Value.ToString());
             }
@@ -175,7 +173,7 @@ public class CheckAuthorizeByRule : CheckAuthorizeBase, ICheckAuthorize
 
         foreach (Match match in matches)
         {
-            targetSet.Add(match.Groups[1].Value);
+            targetSet.Add(match.Groups[1].Value.ToLower());
         }
     }
 
