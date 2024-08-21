@@ -137,11 +137,8 @@ public class CheckAuthorizeByRule : CheckAuthorizeBase, ICheckAuthorize
             }
         }
 
-        if (((IDictionary<string, object>)header).Count > 0)
-        {
-            var ruleParamHeader = new RuleParameter("header", header);
-            ruleParams.Add(ruleParamHeader);
-        }
+        var ruleParamHeader = new RuleParameter("header", header);
+        ruleParams.Add(ruleParamHeader);
 
         // Bind only required path variables
         var match = Regex.Match(request.Url, resource.Url);
@@ -157,11 +154,8 @@ public class CheckAuthorizeByRule : CheckAuthorizeBase, ICheckAuthorize
             }
         }
 
-        if (((IDictionary<string, object>)path).Count > 0)
-        {
-            var ruleParamPath = new RuleParameter("path", path);
-            ruleParams.Add(ruleParamPath);
-        }
+        var ruleParamPath = new RuleParameter("path", path);
+        ruleParams.Add(ruleParamPath);
 
         if (!string.IsNullOrEmpty(request.Data))
         {
