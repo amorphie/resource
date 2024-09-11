@@ -20,6 +20,30 @@ public class ScopeModule : BaseBBTRoute<DtoScope, Scope, ResourceDBContext>
     }
 
     [AddSwaggerParameter("Language", ParameterLocation.Header, false)]
+    protected async ValueTask<IResult> CheckScope(
+      [FromServices] ResourceDBContext context,
+      [FromServices] IMapper mapper,
+      [FromRoute(Name = "reference")] string reference,
+      [FromRoute(Name = "tag")] string tag,
+      HttpContext httpContext,
+      CancellationToken token
+      )
+    {
+        var scope = await context.Scopes!.AsNoTracking()
+         .Include(t => t.Titles.Where(t => t.Language == httpContext.GetHeaderLanguage()))
+         .FirstOrDefaultAsync(t => t.Reference!.Equals(reference) && t.Tags!.Contains(tag) && t.Status!.Equals("active"), token);
+
+        if (scope is Scope)
+        {
+            return TypedResults.Ok(ObjectMapper.Mapper.Map<DtoScope>(scope));
+        }
+        else
+        {
+            return Results.NotFound("Scope Not Found");
+        }
+    }
+
+    [AddSwaggerParameter("Language", ParameterLocation.Header, false)]
     protected override async ValueTask<IResult> GetMethod(
       [FromServices] ResourceDBContext context,
       [FromServices] IMapper mapper,
@@ -38,7 +62,7 @@ public class ScopeModule : BaseBBTRoute<DtoScope, Scope, ResourceDBContext>
         }
         else
         {
-            return Results.Problem(detail: "Scope Not Found", title: "Flow Exception", statusCode: 460);
+            return Results.NotFound("Scope Not Found");
         }
     }
 
